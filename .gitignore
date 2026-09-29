@@ -1,0 +1,10 @@
+# Eval workspace (generated run outputs, transcripts, grading results)
+evals/workspace/
+
+# Eval harness dependencies (installed by `npm i` in evals/)
+evals/node_modules/
+evals/__pycache__/
+
+# Pinned upstream checkout fetched by evals/fetch-upstream.sh — not vendored,
+# re-fetched on demand.
+evals/.upstream/

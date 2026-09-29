@@ -1,0 +1,27 @@
+[
+  {"query": "add a 'forgot password' link and a small reset form under the login button in src/components/LoginForm.tsx — email input + submit, show an error if the email isn't in our system", "should_trigger": true},
+  {"query": "the dropdown menu in our header (components/UserMenu.vue) traps focus weirdly when I tab through it. can you fix it", "should_trigger": true},
+  {"query": "can you review src/components/CheckoutModal.jsx before I merge — mostly the markup and the JS that opens/closes it", "should_trigger": true},
+  {"query": "build me a sortable table for the invoices page, columns: invoice #, customer, amount, status. plain html/css/js is fine", "should_trigger": true},
+  {"query": "we're rebranding — swap the primary button color from #2b6cb0 to our new teal #38b2ac across tokens.css and the Button component", "should_trigger": true},
+  {"query": "write the feature spec for our multi-step checkout (cart → shipping → payment → review). we keep specs in docs/specs/ using the template there", "should_trigger": true},
+  {"query": "draft acceptance criteria for the notification settings page — toggles for email, sms, push and a save button", "should_trigger": true},
+  {"query": "i need a plan for building an autocomplete search box with recent searches. don't write code yet, just the approach and steps", "should_trigger": true},
+  {"query": "make the product image carousel on the homepage auto-advance every 5 seconds and add prev/next arrows", "should_trigger": true},
+  {"query": "create an FAQ accordion component in React, 6 items, first one open by default", "should_trigger": true},
+  {"query": "turn this into a signup form: name, email, password with a strength meter, and a terms checkbox. vanilla js please", "should_trigger": true},
+  {"query": "add a toast that pops up after a file finishes uploading in the dashboard, and goes away after a few seconds", "should_trigger": true},
+
+  {"query": "add exponential backoff retry logic to src/api/client.ts — it's the fetch wrapper our React app uses for every request", "should_trigger": false},
+  {"query": "rename formatDate to formatDisplayDate everywhere in the frontend and update the imports", "should_trigger": false},
+  {"query": "write jest tests for calculateShipping() in lib/pricing.ts, cover free-shipping thresholds and international rates", "should_trigger": false},
+  {"query": "write a postgres migration that adds a nullable deleted_at timestamp column to the orders table and an index on it", "should_trigger": false},
+  {"query": "our GitHub Actions build fails on node 20 with ERR_OSSL_EVP_UNSUPPORTED, help me fix the workflow file", "should_trigger": false},
+  {"query": "bump react and react-dom to 18.3 in package.json and tell me what might break", "should_trigger": false},
+  {"query": "refactor the cart reducer in store/cart.ts to use immer instead of the manual object spreads", "should_trigger": false},
+  {"query": "there's a typo in the error string 'Pasword is required' in src/i18n/en.json, can you fix it", "should_trigger": false},
+  {"query": "explain how the JWT refresh flow in auth/middleware.py works, I'm new to this codebase", "should_trigger": false},
+  {"query": "write a python script that reads orders.csv and prints monthly revenue by region", "should_trigger": false},
+  {"query": "set up eslint and prettier for this repo using the airbnb config, and add a pre-commit hook", "should_trigger": false},
+  {"query": "this SQL query is taking 8s on the reports dashboard, can you optimize it? it joins orders, customers and line_items", "should_trigger": false}
+]

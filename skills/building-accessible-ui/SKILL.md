@@ -1,61 +1,33 @@
 ---
 name: building-accessible-ui
-description: MUST BE USED for any UI work. Invoke this skill before generating, modifying, or reviewing any code that renders, styles, or wires up a user-facing interface — including markup, components, templates, styles, and the JavaScript/TypeScript that drives them. This skill encodes the accessibility (WCAG 2.2 AA) requirements every UI change must satisfy; skipping it produces inaccessible output. Applies across web, mobile, and desktop. If the task touches the UI layer in any way, use this skill first.
+description: MUST BE USED for UI work: creating or changing anything users see or operate (pages, forms, dialogs, menus, tables, color and style changes), reviewing UI code, and writing specs, plans, or acceptance criteria for UI features. Invoke this skill first, before writing code or planning the work. It encodes the accessibility (WCAG 2.2 AA) requirements every UI change must satisfy. Do not use for backend, data, build/CI, non-UI tests, or frontend logic that doesn't change what users see or operate.
 ---
 
 # building-accessible-ui
 
 Checklist for producing and reviewing accessible UIs. Each rule leads with the platform-agnostic principle and, where relevant, the Web (HTML + ARIA + CSS) implementation. Apply the web guidance only when the output is web.
 
-Detailed rationale lives in `references/`; widget-specific guidance in `components/`. **Open a file only when it's relevant to the current task.** Do not preload. Every file opened and every line a tool prints stays in context — don't re-read.
+Detailed rationale lives in `references/`; widget-specific guidance in `components/`. Every file opened and every line a tool prints stays in context, so don't preload or re-read.
 
 ## Accessibility constitution
 
-Ground rules. Use them to resolve conflicts and decide how much custom work is justified. The checklist below is their mechanical application.
+Ground rules for resolving conflicts and deciding how much custom work is justified.
 
-### 1. Accessibility is a core outcome
-
-A UI inaccessible to realistic users is not "done". Treat accessibility as a first-class criterion alongside correctness, performance, and security — not a finishing step. When scope must be cut, record the gap explicitly. Never claim output is "fully accessible"; state what was addressed and known limitations.
-
-### 2. Build for real people
-
-Evaluate designs against these personas; if a decision breaks one, justify it and offer an alternative:
-
-- **Screen reader** — landmarks, headings, accessible name/role/state, reading order.
-- **Keyboard-only** — Tab/arrows/Enter/Space/Escape, visible focus, no traps.
-- **Low-vision** — zoom, reflow, contrast, Forced Colors.
-- **Cognitive** — plain language, clear labels, actionable errors, forgiving interactions.
-- **Deaf / hard of hearing** — captions/transcripts; no sound-only cues.
-- **Motor / voice / switch** — large hit targets, named controls, no precise/timed gestures.
-- **Situational** — sunlight, one-handed, noisy, flaky network.
-
-### 3. Implementation priority
-
-Use the highest option that fits:
-
-1. Existing accessible component in this codebase / design system.
-2. A component library.
-3. Native platform semantics (`<button>`, `<a href>`, `<input>`, `<label>`, `<fieldset>`/`<legend>`, `<dialog>`, `<details>`, `<nav>`, `<main>`, headings).
-4. Native element + minimum necessary ARIA (`aria-describedby`, `aria-expanded`, `aria-current`, etc.).
-5. Fully custom ARIA widget — only when nothing above fits, and only if you implement the APG keyboard, focus, and state behavior end-to-end.
-
-No ARIA is better than bad ARIA. Don't duplicate native semantics (no `role="button"` on `<button>`). Don't use `role="menu"` for site navigation. Don't invent new patterns when a standard one exists.
-
-### 4. Balance, don't trade away
-
-Accessibility, performance, security/privacy, and visual design are joint constraints — not dials to trade off. If an optimization removes a label, breaks focus, or hides content from AT, redesign the optimization. Accessible names must not leak secrets, but security is not a reason to ship an unlabeled control — find a labeling approach that doesn't leak data. Visual polish doesn't justify removing focus indicators or semantic structure. Under schedule pressure, prefer cutting scope over shipping an inaccessible feature. When constraints genuinely conflict, surface it explicitly.
-
-### 5. Respect existing code
-
-Don't rewrite an existing component or shared utility just because it could be more accessible — other code depends on it. When you see issues outside the current task's scope: note them (issue, affected persona, suggested fix) and ask before changing. Fix in place only when the change is required by the task, localized, and low-risk. Inside scope, fix real issues; never silently remove existing affordances (labels, landmarks, focus management, live regions) without an equal-or-better replacement.
+- **Core outcome.** A UI inaccessible to realistic users isn't done; treat accessibility like correctness, performance, and security. If scope must be cut, record the gap. Never claim "fully accessible": state what was addressed and known limitations.
+- **Design for real users:** screen reader, keyboard-only, low-vision, cognitive, deaf/hard of hearing, motor/voice/switch, situational. If a decision breaks one, justify it and offer an alternative.
+- **Implementation priority** (highest that fits): 1) existing accessible component in the codebase/design system, 2) component library, 3) native semantics, 4) native element + minimum ARIA, 5) custom ARIA widget only with full APG keyboard, focus, and state behavior. No ARIA beats bad ARIA. Don't duplicate native semantics, use `role="menu"` for site navigation, or invent a pattern when a standard one exists.
+- **No trade-offs against accessibility.** Performance, security/privacy, and visual polish don't justify removing labels, focus, or semantic structure: redesign the optimization. Names must not leak secrets, so find a labeling approach that doesn't. Surface genuine conflicts.
+- **Respect existing code.** Don't rewrite existing components or shared utilities just to improve them. Note out-of-scope issues (issue, affected users, fix) and ask before changing. Fix in place only when the task requires it and the change is localized and low-risk. Never silently remove existing affordances (labels, landmarks, focus management, live regions) without an equal-or-better replacement.
 
 ## How to use this checklist
 
-Identify which components the request involves (form, checkbox group, radio group, disclosure, modal, full view, etc.) and open the matching `components/<name>.md` once. Then work the checklist below. Open a `references/*.md` only when an item is unclear or you need the concrete fix pattern.
+First, what does the task produce?
 
-Do not claim the output is "fully accessible". State what was addressed and known limitations.
+- **UI code (new or changed):** work the checklist below.
+- **A review of existing UI:** report issues (issue, affected users, suggested fix); don't rewrite. "Respect existing code" applies.
+- **A plan or spec (no code yet):** write the accessibility contract into the spec or plan, in the project's existing format → `references/specs-documentation.md`. Don't write the implementation or run tests. Make each item concrete and verifiable, name the testing strategy, and list known limitations.
 
-**Do NOT use this skill for:** backend-only changes, data migrations, build/CI configuration, non-UI tests, or tasks that do not touch the UI layer.
+For code, open `components/<name>.md` once for each widget the output contains (form, checkbox group, radio group, disclosure, modal, full view). Open a `references/` file only for the checklist item you're implementing.
 
 ## Checklist
 
@@ -69,7 +41,7 @@ Do not claim the output is "fully accessible". State what was addressed and know
 - **Bypass blocks on web pages.** Provide a mechanism to skip repeated navigation when delivering traditional web pages. (Not required for Electron or non-web surfaces.) → `references/keyboard-focus.md`.
   - **Web:** A "Skip to main content" link as the first focusable element
 - **Name / role / value.** Every interactive element exposes an accurate accessible name; role matches purpose; dynamic states (pressed, expanded, selected, checked, disabled, invalid) stay in sync with visuals.
-  - **Web:** Prefer native attributes over ARIA. If necessary, use the minimum ARIA needed and update state attributes alongside DOM/visual changes.
+  - **Web:** Prefer native attributes over ARIA. If necessary, use the minimum ARIA needed and update state attributes alongside DOM/visual changes. `aria-label`/`aria-labelledby` only on elements that can take a name (controls, landmarks, `role="img"`), never on a plain `<div>`, `<span>`, or `<p>`.
 - **Name-label match.** The accessible name of each interactive element contains the visible label text.
   - **Web:** If `aria-label` is used, include the visible label text. For multiple controls that share a label (e.g., "Remove"), add context ("Remove item: Socks").
 - **Labels and help text.** Every form control has a programmatic label describing its purpose; help/error text is programmatically associated with its control. → `components/forms.md`.
@@ -82,10 +54,10 @@ Do not claim the output is "fully accessible". State what was addressed and know
   - **Web:** Do not remove focus outlines without equal-or-better replacement. Use `tabindex="-1"` only for elements that need programmatic (not sequential) focus. → `references/keyboard-focus.md`.
 - **Focus management.** Focus is always visible. Overlays/dialogs/disclosures move focus appropriately and restore it on close; no focus traps outside modals.
 - **Hidden content.** Content hidden from assistive technology is not focusable and is hidden consistently across visual, semantic, and focus layers.
-  - **Web:** `hidden` / `display: none` / `aria-hidden="true"` used consistently.
+  - **Web:** `hidden` / `display: none` / `aria-hidden="true"` used consistently. Nothing focusable inside `aria-hidden`.
 - **Graphics.** Informative graphics have meaningful text alternatives; decorative graphics are hidden from AT. → `references/images-graphics.md`.
   - **Web:** `<img>` informative → `alt`; decorative → `alt=""`. Informative `<svg>` → `role="img"` + accessible name. Other decorative → `aria-hidden="true"`. 
-- **Contrast.** Text ≥ 4.5:1 (3:1 large); focus indicators and key boundaries ≥ 3:1. Never color-only cues. → `references/contrast-forced-colors.md`.
+- **Contrast.** Text ≥ 4.5:1 (3:1 large); focus indicators and key boundaries ≥ 3:1. Never color-only cues. Before finishing, list every text/background pair you used and compute its ratio (formula and vetted pairs in the reference); don't judge by eye. → `references/contrast-forced-colors.md`.
 - **Respect OS accessibility settings.** Never override OS high contrast, reduced-motion, or color-scheme preferences; adapt to forced-colors / high-contrast. → `references/contrast-forced-colors.md`.
 - **Reflow.** Content adapts to narrow viewports (target 320 CSS px) without two-dimensional scrolling for multi-line text; controls remain operable. → `references/reflow.md`.
 - **Navigation.** Uses semantic navigation grouping with state-exposing toggles for expandable menus. → `references/navigation.md`.

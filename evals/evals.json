@@ -1,0 +1,149 @@
+{
+  "skill_name": "building-accessible-ui",
+  "evals": [
+    {
+      "id": 1,
+      "name": "contact-form",
+      "prompt": "Build a contact form for a support page with text inputs for full name, email address, and phone number. Keep full name and email address required. Keep phone number optional. Wrap each field in a div with class \"form-field\". The phone number field MUST have helper text that describes the expected format. Include inline validation messages for required or incorrectly formatted fields. Include a submit button. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML contact form where every input has a real label, the phone hint and any error text are programmatically linked to their field (not just visually nearby), required fields are marked both visually and programmatically, and appropriate autocomplete attributes are set.",
+      "files": [],
+      "expectations": [
+        "Every text input (name, email, phone) has a <label for> or wrapping <label> — not a placeholder used as the only label",
+        "The phone number field's helper text is linked to the input via aria-describedby",
+        "Required fields (name, email) are marked both visually (e.g. an asterisk) and programmatically (required or aria-required=\"true\")",
+        "The name, email, and phone inputs have appropriate autocomplete values (e.g. name, email, tel)",
+        "Inline error messages, where present, are linked to their field via aria-describedby or aria-errormessage",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "consent-checkbox",
+      "prompt": "Build a small form with a single consent checkbox for agreeing to terms of use and include a submit button. Wrap the checkbox field in a div with class \"form-field\". Include concise helper text for the checkbox. Make the checkbox required. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML form with one native checkbox that has a real label, linked helper text, and required marked both visually and programmatically.",
+      "files": [],
+      "expectations": [
+        "The checkbox is a native <input type=\"checkbox\"> (or, if custom, exposes role=\"checkbox\" and full keyboard support) with a real <label>",
+        "The helper text is linked to the checkbox via aria-describedby",
+        "The required state is marked both visually (e.g. an asterisk) and programmatically (required or aria-required=\"true\")",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "quiz-checkbox-groups",
+      "prompt": "Build a 3 question quiz about computer languages. Each question should have 4 answer choices, and users should be able to select multiple answers for each question. Wrap each question in a div with class \"form-field\". The first question should have help text. Include a submit button. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML quiz where each question is a fieldset/legend group of checkboxes, with the first question's help text linked to the group (not individual checkboxes), and no checkbox marked required just to express 'select at least one'.",
+      "files": [],
+      "expectations": [
+        "Each question is grouped with <fieldset> and <legend> so the question text is the group's accessible name",
+        "The first question's help text is linked via aria-describedby on the <fieldset> itself, not on individual checkboxes or an extra wrapper div",
+        "Checkboxes are not all marked required as a way to express 'select at least one answer'",
+        "Each checkbox within a group has its own visible, associated label (its answer text)",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "notification-radio-group",
+      "prompt": "Build a page with a form section with one radio-button question where a user must choose a single answer. That question is: \"How do you prefer to receive notifications?\" with answer choices of \"Email\", \"SMS\", and \"Push Notifications\". Wrap the question in a div with class \"form-field\". Include a submit button. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page with a native radio group (fieldset/legend, shared name attribute) where each option has its own label.",
+      "files": [],
+      "expectations": [
+        "The question is grouped with <fieldset> and <legend> so the question text is the group's accessible name",
+        "The three options are native <input type=\"radio\"> elements sharing the same name attribute",
+        "Each radio option has its own visible, associated label (Email / SMS / Push Notifications)",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "faq-disclosure",
+      "prompt": "Build an FAQ page about cats with at least 4 questions. Questions are collapsed by default and can be expanded to reveal the answer. Wrap each question/answer section in a div with class \"example\". Give the container for the controlled content a class of \"details\". Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML FAQ page where each disclosure is either a native <details>/<summary> or a button with aria-expanded kept in sync, and collapsed answers are actually hidden from assistive technology (not just visually hidden).",
+      "files": [],
+      "expectations": [
+        "Each question's trigger is either a native <details>/<summary> or a <button> with aria-expanded that toggles between \"false\" and \"true\"",
+        "Collapsed answer content is hidden using hidden, display:none, or the closed <details> semantics — not solely via opacity, height:0, or off-screen positioning, which leaves it exposed to assistive technology and focusable",
+        "Expanded answer content becomes visible and is no longer hidden from assistive technology",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "delete-confirm-dialog",
+      "prompt": "Build a modal dialog for an image preview page. The dialog will display when the user clicks the delete button under the image, asking them to confirm that they want to delete the image from their library. The dialog MUST be closed by default. The control that opens the dialog MUST have a class of \"trigger\". Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page where the dialog is a native <dialog> (showModal) or a role=dialog + aria-modal=true element, has an accessible name, closes on Escape, moves focus in on open and returns focus to the trigger on close, and hides the rest of the page from assistive technology while open.",
+      "files": [],
+      "expectations": [
+        "The dialog is implemented with native <dialog>.showModal() or with role=\"dialog\" (or role=\"alertdialog\") and aria-modal=\"true\"",
+        "The dialog has an accessible name (aria-labelledby pointing at a visible heading, or aria-label)",
+        "Pressing Escape while the dialog is open closes it",
+        "Focus moves into the dialog when it opens and returns to the trigger button when it closes",
+        "The dialog is closed by default on page load",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "shop-home-page",
+      "prompt": "Build an ecommerce home page for a retail brand with sections for featured products, deals, and editorial content. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page with a skip link, exactly one main landmark and one h1, a logical heading outline, semantic nav (not role=menu), and correct alt text on images.",
+      "files": [],
+      "expectations": [
+        "A \"Skip to main content\" (or equivalent) link is the first focusable element on the page and targets the main content",
+        "There is exactly one <main> element and exactly one <h1>",
+        "Heading levels do not skip (e.g. no jump from h2 directly to h4)",
+        "Site navigation uses <nav>, not role=\"menu\"",
+        "Informative images have descriptive alt text; purely decorative images use alt=\"\"",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 8,
+      "name": "existing-page-save-feature",
+      "prompt": "Here's our account settings page (evals/files/account-settings.html). Add a Save button at the bottom of the form that, when clicked, shows a \"Settings saved\" confirmation message on the page (no page reload, no alert() popup).",
+      "expected_output": "The Save button is a native button, the confirmation appears in a live region that already exists in the DOM before being updated, the pre-existing accessibility issues in the page are called out (not silently fixed or left uncommented), and markup outside the new feature is left substantially unchanged.",
+      "files": ["evals/files/account-settings.html"],
+      "expectations": [
+        "The Save control is a native <button> (not a div/span with a click handler) with an accessible name of 'Save' or similar",
+        "The confirmation message appears inside an element with role=\"status\"/role=\"alert\" or aria-live, and that element exists in the DOM (even if empty) before the click, rather than being inserted fresh on click",
+        "The response calls out at least one of the pre-existing issues in account-settings.html (the div-based nav, the <img> missing alt text, the placeholder-only footer input, or outline:none) rather than silently rewriting them or ignoring them",
+        "Pre-existing landmarks, labels, and structure outside the new Save feature are left substantially unchanged — this is not a full rewrite of the page",
+        "No WCAG (non-best-practice) axe violations introduced by the new Save button/confirmation feature specifically",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 9,
+      "name": "order-history-table",
+      "prompt": "Build an order history page showing a table of 8 past orders with columns for order number, date, status, and total. Add a status filter (a dropdown to filter by order status) above the table, and a message below the filter showing how many orders are currently displayed (e.g. \"8 orders shown\"). Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page with a real <table> (header cells scoped to their columns, an accessible name/caption), a labeled filter control, and a live region that announces the updated count when the filter changes.",
+      "files": [],
+      "expectations": [
+        "Order data is marked up as a <table> with <th scope=\"col\"> header cells for each column",
+        "The table has an accessible name via <caption> or aria-label/aria-labelledby",
+        "The status filter control has a programmatically associated label",
+        "The \"N orders shown\" message is in an element with aria-live (or role=\"status\") so it's announced when the filter changes",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Account Settings</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 0; color: #1a1a1a; }
+  /* Pre-existing issue: focus outlines suppressed site-wide. */
+  *:focus { outline: none; }
+  header { background: #0b3d91; color: #fff; padding: 1rem 1.5rem; }
+  /* Pre-existing issue: nav is a div, not a <nav>, and its links a plain div-based menu. */
+  .site-nav { display: flex; gap: 1.5rem; padding: 0.75rem 1.5rem; background: #f2f4f7; }
+  .site-nav div { cursor: pointer; color: #0b3d91; }
+  main { max-width: 40rem; margin: 2rem auto; padding: 0 1.5rem; }
+  .form-field { margin-bottom: 1.25rem; }
+  label { display: block; font-weight: 600; margin-bottom: 0.25rem; }
+  input[type="text"], input[type="email"] { width: 100%; padding: 0.5rem; box-sizing: border-box; }
+  footer { margin-top: 3rem; padding: 1.5rem; background: #f2f4f7; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Account Settings</h1>
+</header>
+
+<!-- Pre-existing issue: site navigation built from divs instead of <nav>/<a>. -->
+<div class="site-nav">
+  <div>Profile</div>
+  <div>Billing</div>
+  <div>Notifications</div>
+  <div>Security</div>
+</div>
+
+<main>
+  <!-- Pre-existing issue: informative image with no alt text. -->
+  <img src="avatar-placeholder.png" width="80" height="80">
+
+  <form>
+    <div class="form-field">
+      <label for="display-name">Display name</label>
+      <input type="text" id="display-name" name="display-name" value="Jordan Rivera">
+    </div>
+
+    <div class="form-field">
+      <label for="email">Email address</label>
+      <input type="email" id="email" name="email" value="jordan.rivera@example.com">
+    </div>
+  </form>
+</main>
+
+<footer>
+  <!-- Pre-existing issue: placeholder used as the only label. -->
+  <input type="text" placeholder="Search help articles...">
+</footer>
+</body>
+</html>

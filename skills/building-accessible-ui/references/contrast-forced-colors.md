@@ -11,6 +11,25 @@ Thresholds, tokenization, and adapting to OS-enforced color schemes. Text ≥ 4.
 - Only assign UI colors via these tokens.
 - Avoid alpha (`opacity`, `rgba`, `hsla`) for text and primary UI boundaries if possible.
 
+### Computing contrast
+
+Don't judge contrast by eye. For every text/background pair, and for focus rings and control borders against their neighbor:
+
+1. Per sRGB channel, `c = value / 255`, then `c ≤ 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4`.
+2. `L = 0.2126·R + 0.7152·G + 0.0722·B`.
+3. Ratio = `(L_lighter + 0.05) / (L_darker + 0.05)`.
+
+Or use a pair below (ratios computed with this formula). Muted text stays ≥ 4.5:1 on surfaces up to `#f2f4f7`.
+
+| Use | Light | Dark |
+|---|---|---|
+| Body text | `#1a1a1a` on `#ffffff` (17.4) | `#f2f2f2` on `#121212` (16.7) |
+| Muted text | `#595959` on `#ffffff` (7.0) | `#b3b3b3` on `#121212` (8.9) |
+| Link | `#0b57b0` on `#ffffff` (7.0) | `#8ab4f8` on `#121212` (8.9) |
+| Error text | `#b3261e` on `#ffffff` (6.5) | `#f2b8b5` on `#121212` (11.0) |
+| Border / focus ring / icon (≥ 3:1) | `#767676` on `#ffffff` (4.5) | `#8a8a8a` on `#121212` (5.4) |
+| Text on filled button | `#ffffff` on `#0b57b0` (7.0) | `#121212` on `#8ab4f8` (8.9) |
+
 ### Forced Colors mode
 
 Use `@media (forced-colors: active)` only when the default adaptation is insufficient. Inside, use CSS system color keywords — not fixed hex/RGB:
@@ -48,6 +67,7 @@ Avoid embedding fixed fills inside the SVG source.
 
 ## Quick checks
 
+- [ ] Every text/background pair, focus ring, and control border was computed or taken from the table above, not judged by eye.
 - [ ] Body text meets 4.5:1 against its background; large text (≥ 24 px regular or ≥ 18.66 px bold) meets 3:1.
 - [ ] Focus indicators and meaningful parts of non-text controls (icons, toggles, borders) meet 3:1 against adjacent colors.
 - [ ] Hover, active, focus, visited, and disabled states all still meet their required contrast.
