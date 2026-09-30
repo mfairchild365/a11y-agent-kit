@@ -19,7 +19,7 @@ references/<topic>.md      # Opened on demand when a checklist item is unclear.
 ### Naming
 
 - Component filenames match the pattern name a model would reach for (`modal-dialog`, `checkbox-group`, not `dialog` or `checkboxes`).
-- Reference filenames are the topic (`contrast-forced-colors`, `keyboard-focus`).
+- Reference filenames are the topic (`contrast`, `keyboard-focus`).
 
 ## Token minimization rules
 
@@ -33,7 +33,7 @@ Apply these when adding or editing any file in the skill:
 6. **Cut hedges.** "Read this when reviewing", "This pattern is primarily a", "Note that" add tokens without changing output. Leading with the topic title is enough.
 7. **Cut obvious pitfalls.** A Pitfall that just negates a Principle from the same file ("No label on the field") is wasted. Keep pitfalls that are counterintuitive or commonly seen in model output (e.g., "Marking every checkbox `required` to express 'at least one'").
 8. **No decorative code comments.** `<!-- Populate when state changes. Empty is fine. -->` adds tokens for minimal value. Let the surrounding prose explain the code.
-9. **Don't duplicate SKILL.md rules in components.** Components should say what is *widget-specific* (focus trap in dialogs, roving tabindex in radios). Contrast, reflow, and forced-colors rules live in their reference files.
+9. **Don't duplicate SKILL.md rules in components.** Components should say what is *widget-specific* (focus trap in dialogs, roving tabindex in radios). Contrast and reflow rules live in their reference files.
 
 ## When adding a new component or reference file
 

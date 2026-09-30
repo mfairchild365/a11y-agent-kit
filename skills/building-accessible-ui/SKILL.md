@@ -57,8 +57,8 @@ For code, open `components/<name>.md` once for each widget the output contains (
   - **Web:** `hidden` / `display: none` / `aria-hidden="true"` used consistently. Nothing focusable inside `aria-hidden`.
 - **Graphics.** Informative graphics have meaningful text alternatives; decorative graphics are hidden from AT. → `references/images-graphics.md`.
   - **Web:** `<img>` informative → `alt`; decorative → `alt=""`. Informative `<svg>` → `role="img"` + accessible name. Other decorative → `aria-hidden="true"`. 
-- **Contrast.** Text ≥ 4.5:1 (3:1 large); focus indicators and key boundaries ≥ 3:1. Never color-only cues. Before finishing, list every text/background pair you used and compute its ratio (formula and vetted pairs in the reference); don't judge by eye. → `references/contrast-forced-colors.md`.
-- **Respect OS accessibility settings.** Never override OS high contrast, reduced-motion, or color-scheme preferences; adapt to forced-colors / high-contrast. → `references/contrast-forced-colors.md`.
+- **Contrast.** Text ≥ 4.5:1 (3:1 large); focus indicators and non-text cues needed to identify controls or state ≥ 3:1 (a border only when it's the sole cue). Never color-only cues. Before finishing, list every text/background pair you used and compute its ratio (formula and vetted pairs in the reference); don't judge by eye. → `references/contrast.md`.
+- **Respect OS accessibility settings.** Never override OS high-contrast, reduced-motion, or color-scheme preferences.
 - **Reflow.** Content adapts to narrow viewports (target 320 CSS px) without two-dimensional scrolling for multi-line text; controls remain operable. → `references/reflow.md`.
 - **Navigation.** Uses semantic navigation grouping with state-exposing toggles for expandable menus. → `references/navigation.md`.
   - **Web:** `<nav>`, not `role="menu"`; `aria-expanded` on triggers.
