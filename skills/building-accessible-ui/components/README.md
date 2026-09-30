@@ -7,6 +7,7 @@ Open relevant files when the change contains (or needs to contain) the matching 
 - `single-checkbox.md` — standalone consent / toggle checkbox.
 - `forms.md` — forms (inputs/fields).
 - `disclosure-widget.md` — button + hidden panel (FAQs, "show more").
+- `tooltip.md` — hover/focus tooltips on controls; toggletips for standalone info buttons.
 - `modal-dialog.md` — blocking overlay with focus trap.
 - `page-layout.md` — full views (primarily web): landmarks, skip link, navigation, cards, promos.
 
