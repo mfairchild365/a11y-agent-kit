@@ -8,3 +8,6 @@ evals/__pycache__/
 # Pinned upstream checkout fetched by evals/fetch-upstream.sh — not vendored,
 # re-fetched on demand.
 evals/.upstream/
+
+# Local Claude Code settings
+.claude/
