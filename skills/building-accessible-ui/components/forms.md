@@ -12,6 +12,7 @@ Forms contain inputs/fields that can be submitted.
 - On submit with invalid input, focus the first invalid field.
 - Do not disable the submit button solely to prevent submission.
 - Placeholder text is not a label.
+- The current character count and limit are announced with the field's description on focus, then only near and at the limit — not on every keystroke (strong best practice, not a WCAG failure).
 - Personal-data fields — fields that collect information *about a person* — must use the appropriate `autocomplete` token. Common personal-data fields: name, email, phone, street address, city, postal code, country, date of birth, credit-card number. Context determines whether a field is personal data: "Name" in a shipping/profile form is personal (`autocomplete="name"`); "Name" in a "create a new file" or "name your project" form is not.
 
 ## Web implementation
@@ -24,6 +25,17 @@ Forms contain inputs/fields that can be submitted.
 - Help text: own element, linked via `aria-describedby` on the control.
 - Error text: own element, linked via `aria-describedby` (or `aria-errormessage`) with `aria-invalid="true"` on the invalid control. Clear both when the field becomes valid.
 - Submit control: `<button type="submit">` with a verb-based label ("Send message", not "Submit").
+- Character count / limit (textarea, etc.):
+  - Link a screen-reader description with the current count and limit ("120 of 500 characters used") via `aria-describedby`, so it's heard on first focus.
+  - Refresh that description at render and on `blur`, never on `input` — it's current on the next focus without announcing per keystroke.
+  - Keep the live visible counter out of the description and out of any `aria-live` region (`aria-hidden="true"` on it).
+  - Announce via the page announcer (`references/status-messages.md`) only at thresholds: once politely when near the limit ("20 characters left"), once when the limit is reached.
+
+```html
+<textarea id="bio" aria-describedby="bio-limit"></textarea>
+<p id="bio-limit" class="sr-only">0 of 500 characters used.</p>
+<p aria-hidden="true"><span id="bio-count">0</span>/500</p>
+```
 
 ### Minimal pattern
 
@@ -78,3 +90,4 @@ Forms contain inputs/fields that can be submitted.
 - Disabling submit to "prevent" submission while errors exist — users can't surface the errors.
 - `autocomplete="off"` on personal-data fields without reason.
 - Missing `<label>` on a field styled to look labeled (e.g., floating placeholder).
+- Live character counter in the `aria-describedby` target or an `aria-live` region — announced on every keystroke, and twice when both, since some screen readers announce description changes automatically.

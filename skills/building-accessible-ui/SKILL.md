@@ -27,7 +27,7 @@ First, what does the task produce?
 - **A review of existing UI:** report issues (issue, affected users, suggested fix); don't rewrite. "Respect existing code" applies.
 - **A plan or spec (no code yet):** write the accessibility contract into the spec or plan, in the project's existing format → `references/specs-documentation.md`. Don't write the implementation or run tests. Make each item concrete and verifiable, name the testing strategy, and list known limitations.
 
-For code, open `components/<name>.md` once for each widget the output contains (form, checkbox group, radio group, disclosure, modal, full view). Open a `references/` file only for the checklist item you're implementing.
+For code, open `components/<name>.md` once for each widget the output contains (form, checkbox group, radio group, disclosure, tooltip/toggletip, modal, full view). Open a `references/` file only for the checklist item you're implementing.
 
 ## Checklist
 
@@ -64,7 +64,7 @@ For code, open `components/<name>.md` once for each widget the output contains (
   - **Web:** `<nav>`, not `role="menu"`; `aria-expanded` on triggers.
 - **Tables / grids.** Static tabular data uses table semantics with header/cell associations; interactive grids only when truly warranted. → `references/tables-grids.md`.
 - **Status messages.** Provide status messages for dynamic content updates that are relevant to the user (loading indicators, form submission results, etc.). → `references/status-messages.md`
-  - **Web:** Use `aria-live="polite"` or `aria-live="assertive"`.
+  - **Web:** Prefer one page-level announcer (polite/assertive) over many `aria-live` regions; announce loading and its completion even when brief.
 - **Testing.** Add and run automated accessibility tests unless the project explicitly opts out. Writing or configuring a test is not enough — execution, fixes, and a result report are part of the deliverable. **The final automated test run must be on the exact artifact you submit: any edit after a passing test invalidates that test, so re-run before submitting.** **Open `references/testing.md` before writing any test code** for the opt-out signals, strategy precedence, runtime probe order, and reporting rules.
   - **Web:** Prefer `@axe-core/*` bindings that match the existing test runner; render the component/page fully so interactive state, focus, and live regions are evaluated.
   - **Other platforms:** Use the platform's native audit (Android `AccessibilityChecks`, iOS `XCUIAccessibilityAudit`, .NET `AccessibilityInsights`) under the same precedence.
