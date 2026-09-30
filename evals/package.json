@@ -1,0 +1,10 @@
+{
+  "name": "building-accessible-ui-evals",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Eval harness assets for the building-accessible-ui skill (not part of the skill itself).",
+  "devDependencies": {
+    "axe-core": "^4.13.0",
+    "playwright": "1.56.0"
+  }
+}

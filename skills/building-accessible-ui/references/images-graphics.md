@@ -29,7 +29,7 @@ If an icon sits next to a visible label that already names the action, hide the 
 
 ### Color inheritance
 
-Icons should use `currentColor` so they inherit text color and adapt to High Contrast / Forced Colors mode. See `contrast-forced-colors.md`.
+Icons should use `currentColor` so they inherit text color.
 
 ## Quick checks
 
@@ -41,6 +41,6 @@ Icons should use `currentColor` so they inherit text color and adapt to High Con
 - [ ] Alt text describes the information, not the asset (no "image of", "picture of").
 - [ ] Complex graphics (charts, diagrams) have a longer description available nearby or via a link / `<figure>` + `<figcaption>`.
 - [ ] Text inside images is avoided; when unavoidable, the same text exists as real text or alt.
-- [ ] Icons use `currentColor` so they adapt to text color and Forced Colors mode.
+- [ ] Icons use `currentColor` so they inherit text color.
 - [ ] CSS background images are not used to carry meaningful content.
 - [ ] Turning off CSS still leaves informative images understandable through their text alternatives.
