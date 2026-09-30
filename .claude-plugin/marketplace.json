@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "a11y-agent-kit",
+  "description": "Accessibility (WCAG 2.2 AA) skill and review agent for coding agents.",
+  "owner": {
+    "name": "Michael Fairchild"
+  },
+  "plugins": [
+    {
+      "name": "a11y-agent-kit",
+      "source": ".",
+      "description": "Build and review accessible UI: a WCAG 2.2 AA skill for writing UI code and specs, plus a review agent that audits code, runs axe, and reports findings by severity.",
+      "category": "accessibility"
+    }
+  ]
+}

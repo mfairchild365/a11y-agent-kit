@@ -1,0 +1,5 @@
+{
+  "name": "a11y-agent-kit",
+  "version": "1.0.0",
+  "description": "Build and review accessible UI: a WCAG 2.2 AA skill for writing UI code and specs, plus a review agent that audits code, runs axe, and reports findings by severity."
+}
