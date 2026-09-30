@@ -43,7 +43,12 @@ def find_output_html(run_dir: Path) -> Path | None:
     return html_files[0] if html_files else None
 
 
+RUNNER_FAILED_TEXT = "[upstream] Upstream checks ran against the delivered file"
+
+
 def run_upstream_checks(html_path: Path, test_js: Path, out_json: Path) -> dict | None:
+    # Remove any previous run's output so a crash can't be read as fresh results.
+    out_json.unlink(missing_ok=True)
     proc = subprocess.run(
         ["node", str(RUNNER), str(html_path), str(test_js), str(out_json)],
         capture_output=True,
@@ -56,7 +61,20 @@ def run_upstream_checks(html_path: Path, test_js: Path, out_json: Path) -> dict 
         return json.load(f)
 
 
-def merge_upstream_expectations(grading_path: Path, assertions: list[dict]) -> None:
+def to_expectations(assertions: list[dict]) -> list[dict]:
+    return [
+        {
+            "text": f"[upstream] {a['name']}",
+            "passed": a.get("status") == "pass",
+            "evidence": a.get("message") or "(no message)",
+        }
+        for a in assertions
+        # requirement-type only; best-practice and not-applicable items aren't counted
+        if a.get("type") == "R" and a.get("status") != "na"
+    ]
+
+
+def merge_upstream_expectations(grading_path: Path, new: list[dict]) -> None:
     if grading_path.exists():
         with open(grading_path) as f:
             grading = json.load(f)
@@ -66,16 +84,7 @@ def merge_upstream_expectations(grading_path: Path, assertions: list[dict]) -> N
     # Drop any prior [upstream] entries (re-runnable), keep everything else.
     expectations = [e for e in grading.get("expectations", []) if not e.get("text", "").startswith("[upstream] ")]
 
-    for a in assertions:
-        if a.get("type") != "R":
-            continue  # requirement-type only; best-practice items aren't counted here
-        if a.get("status") == "na":
-            continue
-        expectations.append({
-            "text": f"[upstream] {a['name']}",
-            "passed": a.get("status") == "pass",
-            "evidence": a.get("message") or "(no message)",
-        })
+    expectations.extend(new)
 
     grading["expectations"] = expectations
     total = len(expectations)
@@ -126,15 +135,22 @@ def main() -> int:
         for run_dir in sorted(eval_dir.glob("*/run-*")):
             html_path = find_output_html(run_dir)
             grading_path = run_dir / "grading.json"
+            # A run that can't be checked fails (and drops stale [upstream] entries)
+            # rather than being skipped, so strict scoring can't count it as clean.
             if html_path is None:
-                print(f"[skip: no html] {run_dir}")
+                merge_upstream_expectations(grading_path, [
+                    {"text": RUNNER_FAILED_TEXT, "passed": False, "evidence": "No outputs/*.html file found for this run."}])
+                print(f"[FAIL: no html] {run_dir}")
                 continue
             out_json = run_dir / "upstream-checks.json"
             result = run_upstream_checks(html_path, test_js, out_json)
             if result is None:
+                merge_upstream_expectations(grading_path, [
+                    {"text": RUNNER_FAILED_TEXT, "passed": False, "evidence": "Upstream runner produced no output."}])
+                print(f"[FAIL: runner error] {run_dir}")
                 continue
             assertions = result.get("testFunctionResult", {}).get("assertions", [])
-            merge_upstream_expectations(grading_path, assertions)
+            merge_upstream_expectations(grading_path, to_expectations(assertions))
             n_pass = sum(1 for a in assertions if a.get("type") == "R" and a.get("status") == "pass")
             n_total = sum(1 for a in assertions if a.get("type") == "R")
             print(f"[{n_pass}/{n_total}] {run_dir} ({scenario})")

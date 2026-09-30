@@ -15,7 +15,7 @@ skill-creator and the grading scripts expect.
 
 Usage (from the repo root):
     python3 evals/run_cli_eval.py --model claude-sonnet-4-6 \
-        --workspace evals/workspace/sonnet46 --scratch /private/tmp/claude-501/s46
+        --workspace evals/workspace/sonnet46 --scratch "$TMPDIR/s46"
 """
 import argparse
 import json

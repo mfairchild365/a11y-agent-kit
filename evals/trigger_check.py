@@ -25,7 +25,8 @@ import re
 import shutil
 import subprocess
 import sys
-import time
+import tempfile
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -64,13 +65,19 @@ def run_one(job):
            "--output-format", "stream-json", "--verbose", query]
     proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)
     triggered, calls, first_tools = False, 0, []
-    ended = "timeout"  # overwritten below unless the loop runs out the clock
-    start = time.time()
+    ended = "no_result"  # stream closed without a result event (crash or kill)
+    # Kill from a timer thread: a check inside the read loop never fires if the
+    # process stalls without printing anything.
+    timed_out = threading.Event()
+
+    def on_timeout():
+        timed_out.set()
+        proc.kill()
+
+    watchdog = threading.Timer(timeout, on_timeout)
+    watchdog.start()
     try:
         for line in proc.stdout:
-            if time.time() - start > timeout:
-                ended = "timeout"
-                break
             try:
                 ev = json.loads(line)
             except json.JSONDecodeError:
@@ -95,6 +102,9 @@ def run_one(job):
                 ended = "text"
                 break
     finally:
+        watchdog.cancel()
+        if timed_out.is_set() and ended == "no_result":
+            ended = "timeout"
         if proc.poll() is None:
             proc.kill()
             proc.wait()
@@ -109,7 +119,7 @@ def main():
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--workers", type=int, default=8)
     ap.add_argument("--timeout", type=int, default=150)
-    ap.add_argument("--scratch", type=Path, default=Path("/private/tmp/claude-501/trigger"))
+    ap.add_argument("--scratch", type=Path, default=Path(tempfile.gettempdir()) / "bau-trigger")
     ap.add_argument("--only", type=int, action="append", help="run only these query indexes")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()

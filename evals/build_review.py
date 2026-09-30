@@ -14,14 +14,20 @@ Usage (from the repo root):
 The viewer is written to <workspace>/review.html (static mode).
 """
 import json
+import os
 import runpy
 import sys
 from pathlib import Path
 
-SC = Path.home() / ".claude/plugins/cache/claude-plugins-official/skill-creator"
-generators = sorted(SC.glob("*/skills/skill-creator/eval-viewer/generate_review.py"))
-if not generators:
-    sys.exit(f"generate_review.py not found under {SC}")
+# SKILL_CREATOR_DIR (the skill-creator skill's own directory) overrides the
+# default lookup in the Claude Code plugin cache.
+if os.environ.get("SKILL_CREATOR_DIR"):
+    generators = [Path(os.environ["SKILL_CREATOR_DIR"]) / "eval-viewer" / "generate_review.py"]
+else:
+    SC = Path.home() / ".claude/plugins/cache/claude-plugins-official/skill-creator"
+    generators = sorted(SC.glob("*/skills/skill-creator/eval-viewer/generate_review.py"))
+if not generators or not generators[-1].exists():
+    sys.exit("generate_review.py not found; install skill-creator or set SKILL_CREATOR_DIR")
 generator = generators[-1]
 
 if len(sys.argv) < 2:

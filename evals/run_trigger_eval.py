@@ -10,20 +10,26 @@ Usage (run from a neutral project dir that has a .claude/ folder, because
 run_eval writes its temporary command files into the project root it finds
 from the current directory):
 
-    cd /private/tmp/claude-501/trig
+    mkdir -p "$TMPDIR/trig/.claude" && cd "$TMPDIR/trig"
     python3 /path/to/evals/run_trigger_eval.py --eval-set ... --skill-path ... \
         --description "..." --model claude-sonnet-4-6 --runs-per-query 3
 """
 import concurrent.futures as cf
+import os
 import runpy
 import sys
 from pathlib import Path
 
 cf.ProcessPoolExecutor = cf.ThreadPoolExecutor
 
-SC = Path.home() / ".claude/plugins/cache/claude-plugins-official/skill-creator"
-roots = sorted(SC.glob("*/skills/skill-creator"))
-if not roots:
-    sys.exit(f"skill-creator not found under {SC}")
+# SKILL_CREATOR_DIR (the skill-creator skill's own directory) overrides the
+# default lookup in the Claude Code plugin cache.
+if os.environ.get("SKILL_CREATOR_DIR"):
+    roots = [Path(os.environ["SKILL_CREATOR_DIR"])]
+else:
+    SC = Path.home() / ".claude/plugins/cache/claude-plugins-official/skill-creator"
+    roots = sorted(SC.glob("*/skills/skill-creator"))
+if not roots or not (roots[-1] / "scripts" / "run_eval.py").exists():
+    sys.exit("skill-creator not found; install the plugin or set SKILL_CREATOR_DIR")
 sys.path.insert(0, str(roots[-1]))
 runpy.run_module("scripts.run_eval", run_name="__main__")
