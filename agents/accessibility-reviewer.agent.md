@@ -22,6 +22,8 @@ The skill's checklist is the review standard. Apply its "review of existing UI" 
 
 Read the in-scope code against every checklist item that applies. Trace state changes, focus movement, and keyboard handlers through the code rather than judging from markup alone.
 
+Before reporting a missing status announcement, check whether focus moves to a control whose name conveys the result (e.g. "Expand all" moves focus to "Collapse all"). That focus move is the announcement; don't flag it. Do flag it when focus stays put and only the control's inner text changes, since that is not reliably announced. Recommend removing the text change in favor of the focus-move pattern, not adding an announcer, which can double-announce.
+
 ## 4. Automated checks
 
 Open the skill's `references/testing.md` before running anything, and follow its §2–3 strategy and runtime probe order. Run the project's existing accessibility tests if it has any; otherwise render the UI in a real browser and run axe-core. JSDOM is the last resort: use it only after the browser probes fail, and report why they failed.

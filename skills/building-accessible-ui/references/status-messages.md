@@ -7,6 +7,8 @@ Announcing dynamic content changes (toasts, inline validation summaries, loading
 - **Removal can be the status message.** A spinner disappearing means "loaded"; an error clearing means "the field/form is now valid". Announce it ("Results loaded", "Email is valid") — a vanished element announces nothing on its own.
 - **Brief loading still counts.** An unannounced spinner technically fails 4.1.3 even if it usually shows for a moment (low real-world impact when it truly is brief). Load time depends on server load, client load, and network, so never assume it's short — announce loading and its completion.
 
+- **A focus move to a control that conveys the result is not a missing status message.** When activating a control moves focus to another control whose name/state announces the outcome (e.g. "Expand all" moves focus to "Collapse all", which implies everything is now expanded), the focus change itself is the announcement. Don't add a live region on top (see "do not announce *and* move focus"). In contrast, if focus stays on the control and only its inner text/label changes (e.g. the button text swaps "Expand all" → "Collapse all"), many screen readers don't reliably announce that change. Avoid inner text changes altogether and use the focus move above instead; don't patch it with the announcer, which can double-announce in screen readers that do support the text change.
+
 ## Web implementation
 
 - Choose politeness by urgency:
@@ -72,6 +74,7 @@ When many regions load at once (micro-frontends, dashboards of widgets), don't a
 - [ ] Is the message concise, specific, and not duplicated (no identical repeat renders, no `role="alert"` + `aria-live="assertive"`)?
 - [ ] Is loading announced regardless of expected duration, and is completion announced (not just the spinner disappearing)?
 - [ ] When a removal conveys status (spinner gone, error cleared), is it announced?
+- [ ] If a control's result is conveyed by moving focus to a counterpart control (Expand all → Collapse all), no extra announcement is needed; if only the same control's text changes while focus stays, replace that with the focus-move pattern (no announcer, to avoid duplicates)?
 - [ ] Do announcements go through one shared announcer unless a separate region is justified?
 - [ ] With many concurrent loaders, are announcements aggregated into a few milestones?
 - [ ] Does submitting a form with validation errors either (a) move focus to the summary/first invalid field, or (b) announce the error count via `role="alert"` — but not both?
