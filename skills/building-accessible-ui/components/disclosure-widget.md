@@ -58,6 +58,7 @@ A trigger that shows or hides a panel of content (FAQ answer, settings section, 
 - Focus stays on the trigger when opening; users Tab into the panel themselves.
 - If a group of disclosures, each has its own independent state — they don't behave like an accordion unless specified.
 - Focus indicator is clearly visible on the trigger.
+- For "Expand all" / "Collapse all" controls: use two separate buttons and, on activation, move focus to the counterpart button (disabling or hiding the activated one). The newly focused button's name announces the new state, so no live region is needed — don't flag this as a missing status message. Avoid a single button that swaps its text while keeping focus: screen readers don't reliably announce inner text changes, and adding the announcer as a patch can double-announce where they do. Use the two-button focus pattern instead.
 
 ### Pitfalls
 
