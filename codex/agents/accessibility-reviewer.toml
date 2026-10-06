@@ -49,7 +49,7 @@ Use these results as the evidence for each finding's repro steps, **Observed** s
 
 ## 5. Report
 
-Open the skill's `references/audit-report.template.md` and produce the report in exactly that format: a summary of the whole audit first, then one numbered entry per finding, most severe first. Use the template's severity and confidence definitions. Severity is your judgement of user impact, with the reason stated. Axe's `impact` is one input, not the answer.
+Open the skill's `references/audit-report.template.md` and produce the report in exactly that format: a summary of the whole audit first, then the findings grouped by offending element and, within each element, by WCAG success criterion, most severe first. Each issue maps to one SC, and many instances of the same element and failure are one issue, not many. Use the template's severity and confidence definitions. Severity is your judgement of user impact, with the reason stated. Axe's `impact` is one input, not the answer.
 
 Every finding has all of: title, summary, severity and why, repro steps, observed, expected, suggested fix, relevant elements, and confidence and why. Also give new / pre-existing, the WCAG 2.2 criterion, and the source (static review, browser check, or axe rule id with its `impact`). Don't drop a field because it's awkward. If a field truly can't be filled, say why.
 
