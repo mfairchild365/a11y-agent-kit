@@ -24,7 +24,7 @@ Ground rules for resolving conflicts and deciding how much custom work is justif
 First, what does the task produce?
 
 - **UI code (new or changed):** work the checklist below.
-- **A review of existing UI:** report issues (issue, affected users, suggested fix); don't rewrite. "Respect existing code" applies.
+- **A review of existing UI:** report issues; don't rewrite. "Respect existing code" applies. Report in the format in `references/audit-report.template.md`. If a subagent produced the report, give the user its full report unaltered; don't replace it with your own summary.
 - **A plan or spec (no code yet):** write the accessibility contract into the spec or plan, in the project's existing format → `references/specs-documentation.md`. Don't write the implementation or run tests. Make each item concrete and verifiable, name the testing strategy, and list known limitations.
 
 For code, open `components/<name>.md` once for each widget the output contains (form, checkbox group, radio group, disclosure, tooltip/toggletip, modal, full view). Open a `references/` file only for the checklist item you're implementing.
