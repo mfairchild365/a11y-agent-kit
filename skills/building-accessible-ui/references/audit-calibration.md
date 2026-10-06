@@ -1,0 +1,32 @@
+# Audit calibration
+
+Rules that decide how a finding is rated and logged. Apply them to every audit and every review of existing UI, on top of `audit-report.template.md`. They exist because the same defect was rated and logged differently from one review to the next.
+
+## A. Severity anchors
+
+Severity comes from what the user can't do, not from which success criterion failed. Anchors are floors: go higher with a stated reason, and never lower without one. When an anchor sets the severity, say so in **Why this severity**.
+
+| Failure | Severity |
+|---|---|
+| Content or a function can't be reached or operated by keyboard (2.1.1), or traps focus (2.1.2) | **Critical at minimum.** Blocker if the page has no other way to get the information or finish the task. |
+| Information or a function is available only on hover or by pointer | Same as above. It is the same barrier. |
+| Text or non-text contrast failure (1.4.3, 1.4.11), in any state, including hover and focus | **Critical** |
+| An interactive control with no accessible name that receives focus, or is the only way to a function | **Critical** |
+| Reflow failure at 320 CSS px (1.4.10) | **Moderate** |
+| Label in Name mismatch (2.5.3) | **Moderate** |
+| A small inconvenience that still fails a WCAG success criterion, with little user impact | **Minor** |
+
+**Best practice is a label, not a severity.** A best practice is a gap with no WCAG success criterion behind it. Label it "Best practice". Never rate it Minor, Moderate, Critical or Blocker, never count it in the severity totals, and never give it a card. If the gap does fail a success criterion, it is not a best practice: rate it with the table above.
+
+## B. Where to log
+
+- **One success criterion per issue.** Always.
+- **One defect that fails two criteria is two issues when the barriers differ** (different users, different impact, or a different fix). File each under its own criterion, rate each on its own barrier, and cross-reference them ("see also #N") in each Summary.
+- Keep it as **one issue** only when it is the same barrier with the same fix. File it under the criterion that describes the barrier most directly.
+- Example: a hover-only tooltip on elements that can't take focus is two issues. 2.1.1 (not reachable by keyboard, Critical) and 1.4.13 (not dismissible, hoverable or persistent, Moderate).
+
+## C. Don't log
+
+Things that are not issues, or that are reported elsewhere. Add an entry here when told not to log something, with the reason.
+
+_None yet._
