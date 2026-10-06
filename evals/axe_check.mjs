@@ -21,7 +21,8 @@ if (!htmlPath) {
   process.exit(2);
 }
 
-const browser = await chromium.launch();
+// Set PW_CHANNEL (e.g. msedge, chrome) to use an installed browser instead of Playwright's Chromium.
+const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 try {
   const page = await browser.newPage();
   await page.goto(pathToFileURL(path.resolve(htmlPath)).href, { waitUntil: "load" });

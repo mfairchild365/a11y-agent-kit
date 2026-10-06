@@ -20,6 +20,9 @@ skill, not part of the skill itself — nothing here ships when the skill is use
   matching the a11y-llm-eval report metric.
 - `build_review.py` — builds skill-creator's review viewer, escaping `</script>` in the
   embedded HTML outputs so the viewer doesn't break.
+- `audit_fixture/` + `check_audit_report.mjs` + `run_audit_eval.mjs` — a seeded sample page with an
+  answer key, and a checker and runner for the `accessibility-reviewer` agent's reports (see
+  [Audit agent check](#audit-agent-check)).
 - `trigger_eval.json` + `trigger_check.py` + `trigger_fixture/` — checks whether the skill's
   description makes it fire on the right requests (see [Trigger checks](#trigger-checks)).
 - `run_trigger_eval.py` — runs skill-creator's own trigger eval inside the Claude Code sandbox.
@@ -124,6 +127,57 @@ calls, or hits `--timeout`. It prints fire rates per group and lists every shoul
 miss. Use it rather than skill-creator's `run_eval.py`, which only counts the skill if it's
 the first tool call and badly under-reports triggering for this skill. `run_trigger_eval.py`
 is kept for comparison with skill-creator's numbers.
+
+## Audit agent check
+
+`audit_fixture/index.html` is a small class roster with 8 seeded defects and 2 decoys that look
+suspicious but are correct. `audit_fixture/expected.json` is the answer key: for each seed, its
+WCAG SC, the allowed severity range, the report tier it belongs in (card, Minor row, or Needs
+verification) and the expected instance count. The seeds are chosen to exercise the report
+template: the hover-only tooltip appears on 3 bubbles and must come back as **one** issue with
+3 instances, the contrast failure only shows in the hover and open state, the reflow failure
+only shows at 320px, and the live-region seed can't be confirmed without a screen reader, so
+it belongs under Needs verification. Don't fix the seeds. Keep the HTML and the key in sync.
+
+`check_audit_report.mjs` scores a report folder (`report.md`, `report.html`, screenshots)
+deterministically, with no LLM grading:
+
+- **Content:** each seed found, in the right tier and severity range, merged into one issue;
+  decoys not reported. Extra issues not in the key print as warnings, not failures, since the
+  agent may find real defects that weren't seeded.
+- **Structure:** Fix first list of 3 or fewer, headline format, one SC per card, screenshots
+  embedded and present, no Minor or Low-confidence cards, severity ordering, no "fully
+  accessible" claim, and a `report.html` with `<details>`, inlined images and no axe violations.
+
+```bash
+npm i --prefix evals                                  # once
+node evals/check_audit_report.mjs path/to/audit-out   # score a saved report
+node evals/check_audit_report.mjs path/to/audit-out --skip-axe --json
+```
+
+Corrections the maintainer gives (`docs/audit-corrections.md`) are tested here when they can be: the
+seeds tagged `correction` in `expected.json` check that the agent applies them. To add one, add or
+adjust a seed and its key entry, then regenerate the sample reports.
+
+`sample/good` and `sample/broken` are hand-built reports that test the checker itself (see
+`audit_fixture/sample/README.md`).
+
+`run_audit_eval.mjs` runs the agent headlessly against the fixture and scores it. It loads this
+repo as the plugin (`--plugin-dir`), pins the model, and starts each run in an empty directory:
+
+```bash
+node evals/run_audit_eval.mjs --model claude-sonnet-5-5 --runs 3 --via direct
+node evals/run_audit_eval.mjs --model claude-sonnet-5-5 --runs 1 --via subagent
+```
+
+`--via direct` runs the session as the agent (`claude --agent`) and tests the audit and report
+format. `--via subagent` has a main agent delegate to it, which also tests whether the report
+survives the hand-off (the final message must contain the report, not a summary). Output goes to
+`evals/workspace/audit/run-N/`. Agent output varies, so use `--runs 3` or more, and read the
+list of checks that didn't pass in every run.
+
+If Playwright's own Chromium isn't installed, set `PW_CHANNEL=msedge` (or `chrome`) for
+`axe_check.mjs` and the checker. The runner passes the same hint to the agent.
 
 ## Environment notes
 

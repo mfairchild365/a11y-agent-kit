@@ -1,0 +1,112 @@
+{
+  "_comment": "Answer key for audit_fixture/index.html. Keep in sync with the SEED and DECOY comments in that file. 'match' is matched case-insensitively against the issue's headline and element heading. Severity is a list of allowed values (null for a best practice, which has none). The severities follow skills/building-accessible-ui/references/audit-calibration.md; each seed that came from a user correction names it in 'correction' (docs/audit-corrections.md).",
+  "seeds": [
+    {
+      "id": "tooltip-keyboard",
+      "element": ["tooltip", "bubble"],
+      "match": ["keyboard", "focus", "bubble", "tooltip", "name"],
+      "sc": "2.1.1",
+      "severity": ["Critical", "Blocker"],
+      "tier": "card",
+      "instances": 3,
+      "correction": "C-001, C-002",
+      "found_by": "browser: Tab never reaches the initials bubbles"
+    },
+    {
+      "id": "tooltip-hover",
+      "element": ["tooltip", "bubble"],
+      "match": ["tooltip", "hover", "dismiss"],
+      "sc": "1.4.13",
+      "severity": ["Moderate"],
+      "tier": "card",
+      "instances": 3,
+      "correction": "C-002",
+      "found_by": "browser: hover, then Escape, then move the pointer onto the tip"
+    },
+    {
+      "id": "label-in-name",
+      "element": ["jd", "john doe", "clickable"],
+      "match": ["john doe", "jd", "label in name"],
+      "sc": "2.5.3",
+      "severity": ["Moderate"],
+      "tier": "card",
+      "instances": 1,
+      "found_by": "accessibility tree"
+    },
+    {
+      "id": "more-contrast",
+      "element": ["+5", "+n", "more"],
+      "match": ["contrast"],
+      "sc": "1.4.3",
+      "severity": ["Critical", "Blocker"],
+      "tier": "card",
+      "instances": 1,
+      "correction": "C-003",
+      "found_by": "contrast calculation of the hover and open state (3.83:1)"
+    },
+    {
+      "id": "close-no-name",
+      "element": ["close"],
+      "match": ["close", "name", "icon"],
+      "sc": "4.1.2",
+      "severity": ["Critical"],
+      "tier": "card",
+      "instances": 1,
+      "correction": "C-005",
+      "found_by": "axe button-name, after opening the dropdown"
+    },
+    {
+      "id": "dropdown-reflow",
+      "element": ["dropdown"],
+      "match": ["reflow", "320", "overflow", "scroll"],
+      "sc": "1.4.10",
+      "severity": ["Moderate"],
+      "tier": "card",
+      "instances": 1,
+      "found_by": "browser at 320 CSS px with the dropdown open"
+    },
+    {
+      "id": "list-semantics",
+      "element": ["list", "ul"],
+      "match": ["list"],
+      "sc": "1.3.1",
+      "severity": ["Minor"],
+      "tier": "minor",
+      "instances": 2,
+      "found_by": "static review"
+    },
+    {
+      "id": "reduced-motion",
+      "element": ["bubble", "motion", "roster"],
+      "match": ["motion"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "correction": "C-004",
+      "found_by": "static review"
+    },
+    {
+      "id": "live-region-timing",
+      "element": ["status", "live"],
+      "match": ["live region", "announce", "status"],
+      "sc": "4.1.3",
+      "severity": ["Minor", "Moderate"],
+      "tier": "verify",
+      "instances": 1,
+      "found_by": "needs a screen reader"
+    }
+  ],
+  "decoys": [
+    {
+      "id": "decorative-icon",
+      "match": ["decorative", "header icon", "aria-hidden"],
+      "why": "Header icon is aria-hidden and decorative. Correct."
+    },
+    {
+      "id": "add-student-button",
+      "match": ["add student"],
+      "why": "Native button whose accessible name matches its visible label. Correct."
+    }
+  ]
+}
