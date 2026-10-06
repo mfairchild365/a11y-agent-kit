@@ -21,38 +21,35 @@ The skill's checklist is the review standard. Apply its "review of existing UI" 
 
 Read the in-scope code against every checklist item that applies. Trace state changes, focus movement, and keyboard handlers through the code rather than judging from markup alone.
 
-## 4. Automated checks
+Before reporting a missing status announcement, check whether focus moves to a control whose name conveys the result (e.g. "Expand all" moves focus to "Collapse all"). That focus move is the announcement; don't flag it. Do flag it when focus stays put and only the control's inner text changes, since that is not reliably announced. Recommend removing the text change in favor of the focus-move pattern, not adding an announcer, which can double-announce.
 
-Open the skill's `references/testing.md` before running anything, and follow its §2–3 strategy and runtime probe order. Run the project's existing accessibility tests if it has any; otherwise render the UI in a real browser and run axe-core. JSDOM is the last resort: use it only after the browser probes fail, and report why they failed.
+## 4. Runtime checks
+
+A static read is never a complete audit. **Always run the UI in a real browser when one can be reached**, and always run axe-core. Skipping them is a last resort that you must justify in the report, not a default. Don't skip because the component lacks a demo page: build a scratch page in the system temp directory that imports it, or serve the project's dev or Storybook server.
+
+Open the skill's `references/testing.md` before running anything, and follow its §2–3 strategy and runtime probe order. Run the project's existing accessibility tests if it has any, and also run axe-core in a real browser against the rendered UI. JSDOM is the last resort: use it only after the browser probes fail, and report why they failed.
+
+Beyond axe, drive the rendered UI in the browser and check what axe can't:
+
+- **Keyboard:** Tab order, visible focus, Enter/Space/Escape/arrow behavior, no traps.
+- **Hover and focus content:** tooltips and popovers appear on focus as well as hover, are dismissible with Escape, and stay visible while hovered.
+- **Names:** read the accessibility tree for each control. Compare the accessible name with the visible label (2.5.3).
+- **Reflow and zoom:** 320 CSS px wide and 200% zoom, with long text and many items. No clipping or two-dimensional scroll.
+- **Media features:** `prefers-reduced-motion: reduce` and `forced-colors: active`.
+- **States:** exercise each state the component has (open, disabled, error, loading, empty, overflow).
+
+Use these results as the evidence for each finding's repro steps, **Observed** section, and confidence. A finding you reproduced in the browser is stronger than one you read in code.
 
 - **Never add tests to the project or edit project files.** Put any scratch scripts and rendered output in the system temp directory.
-- If styles are in scope, compute contrast ratios for the text/background pairs as the skill's `references/contrast.md` describes. Don't leave contrast to manual testing.
+- If styles are in scope, compute contrast ratios for the text/background pairs as the skill's `references/contrast.md` describes, including hover, focus, active, and open states. Don't leave contrast to manual testing.
 - testing.md §4 says to fix violations and re-run. As a reviewer, report them instead.
-- If no runtime works, say which command you ran, its exact error, and what would unblock it. Don't skip the section.
+- If no browser or axe runtime works, say which command you ran, its exact error, and what would unblock it. Don't skip the section. Cap the confidence of any finding that depends on the missing check at Medium.
 
 ## 5. Report
 
-Group findings by severity, most severe first. Severity is your judgement of user impact. Axe's `impact` is one input, not the answer.
+Open the skill's `references/audit-report.template.md` and produce the report in exactly that format: a summary of the whole audit first, then one numbered entry per finding, most severe first. Use the template's severity and confidence definitions. Severity is your judgement of user impact, with the reason stated. Axe's `impact` is one input, not the answer.
 
-- **Blocker:** a user group cannot complete a task or reach a function at all (keyboard trap, controls that aren't keyboard-operable, unlabeled submit button, dialog that can't be dismissed).
-- **Critical:** a severe barrier; any workaround is hard or unreliable.
-- **Moderate:** a real barrier with a reasonable workaround, or limited to part of the flow.
-- **Minor:** friction or a best-practice gap with little functional impact.
-
-For each finding give:
-
-- **Severity** and **new / pre-existing**
-- **Location**: `file:line`, or the selector for rendered-only issues
-- **Issue**, with the WCAG 2.2 success criterion
-- **Affected users** (screen reader, keyboard-only, low vision, cognitive, etc.)
-- **Suggested fix**, concrete and minimal
-- **Source**: static review, or the axe rule id with its `impact`
-
-Then close with:
-
-- **Automated checks:** strategy and runtime used, pass/fail, and violation count.
-- **Needs manual testing:** what automated checks and code reading can't confirm (screen reader announcements, real focus order, zoom and reflow, and so on).
-- **Out of scope:** anything you didn't review.
+Every finding has all of: title, summary, severity and why, repro steps, observed, expected, suggested fix, relevant elements, and confidence and why. Also give new / pre-existing, the WCAG 2.2 criterion, and the source (static review, browser check, or axe rule id with its `impact`). Don't drop a field because it's awkward. If a field truly can't be filled, say why.
 
 Never call the UI "fully accessible". State what was checked and what remains.
 '''

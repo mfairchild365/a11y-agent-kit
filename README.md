@@ -3,7 +3,7 @@
 Accessibility tooling for coding agents. It is one plugin with two parts:
 
 - **`building-accessible-ui` skill.** It encodes WCAG 2.2 AA requirements for building UI, reviewing UI, and writing UI specs. The agent loads it on its own whenever it works on something users see or operate. See [`skills/building-accessible-ui/SKILL.md`](skills/building-accessible-ui/SKILL.md).
-- **`accessibility-reviewer` agent.** A read-only auditor. It reviews UI code, a diff, or a page against the skill's checklist. It also runs the project's accessibility tests, or axe-core if there are none. It reports findings grouped by severity (blocker, critical, moderate, minor), each with the WCAG criterion, the affected users, and a suggested fix. It never edits your code. See [`agents/accessibility-reviewer.agent.md`](agents/accessibility-reviewer.agent.md).
+- **`accessibility-reviewer` agent.** A read-only auditor. It reviews UI code, a diff, or a page against the skill's checklist. It also runs the project's accessibility tests, or axe-core if there are none. It always checks the rendered UI in a real browser when one is available. It reports an audit summary, then findings by severity (blocker, critical, moderate, minor) using [`audit-report.template.md`](skills/building-accessible-ui/references/audit-report.template.md): each finding has a summary, severity and why, repro steps, observed vs. expected, a suggested fix, the relevant elements, and a confidence level. It never edits your code. See [`agents/accessibility-reviewer.agent.md`](agents/accessibility-reviewer.agent.md).
 
 The skill was extracted, with its full commit history, from
 [microsoft/a11y-llm-eval](https://github.com/microsoft/a11y-llm-eval/tree/main/config/skills/building-accessible-ui).
