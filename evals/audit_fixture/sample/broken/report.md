@@ -4,14 +4,8 @@
 
 - **Scope:** `index.html` and its dropdown. Out of scope: nothing else.
 - **Verdict:** No Blockers. Keyboard users can't reach the student bubbles, and a contrast failure and an unnamed button make the overflow dropdown hard to use.
-- **Findings:** Blocker 0, Critical 3, Moderate 3, Minor 2. 1 best practice. 1 more needs verification.
+- **Findings:** Blocker 0, Critical 4, Moderate 3, Minor 2. 2 best practices. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
-
-| # | Offending element | WCAG SC | Severity |
-|---|---|---|---|
-| 1 | Tooltip | 1.4.13 | Moderate |
-
-Fix first: do the first thing.
 
 ## Findings
 
@@ -62,9 +56,51 @@ The "+5" overflow button. 1 instance.
   - **Confidence:** High. Computed from the rendered colors and confirmed by axe.
   - **Source:** axe `color-contrast` (serious), contrast calculation
 
+### Element: Filter students text input
+
+The text input above the roster. 1 instance.
+
+#### 4. Critical · 1.4.11 · 1 instances · High confidence · Input's only visual boundary is a 1.7:1 border
+
+- **Summary:** The input has no fill, label background or icon: its 1px #c8c8c8 border is the only thing showing where it is, and it is 1.67:1 on white (needs 3:1).
+- **Why this severity:** The border is the only cue that identifies the control, so a non-text contrast failure is Critical (calibration A). Low-vision users can't see where to type.
+- **Screenshot:** ![Finding 4: the outlined "Filter students" input, its pale border barely visible against the white page](screenshots/finding-04-input-boundary.png)
+  Text evidence: border #c8c8c8 on #ffffff = 1.67:1, computed from the rendered colors.
+- **Suggested fix:** Darken the border to at least 3:1, for example `#767676` (4.5:1).
+- **Evidence:**
+  - **WCAG SC:** 1.4.11 Non-text Contrast
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Open `index.html`.
+    2. Read the computed border color and the background of `#filter`.
+    3. Compute the contrast ratio.
+  - **Observed:** Border rgb(200,200,200) on rgb(255,255,255): 1.67:1. There is no other visual cue for the input.
+  - **Expected:** At least 3:1 for the visual information required to identify a control (1.4.11).
+  - **Relevant elements:** `#filter` (`.field`)
+  - **Confidence:** High. Computed numeric failure. The input has nothing else that identifies it.
+  - **Source:** contrast calculation
+
 ### Element: Header decorative icon
 
 #### 11. Minor · 1.1.1 · 1 instances · Medium confidence · Decorative icon is announced
+
+- **Summary:** x
+
+### Element: Export list button
+
+#### 13. Critical · 1.4.11 · 1 instances · High confidence · Export list button border fails contrast
+
+- **Summary:** x
+
+### Element: Marking period line
+
+#### 14. Moderate · 1.4.10 · 1 instances · High confidence · Marking period line overflows at 320px
+
+- **Summary:** x
+
+### Element: Announcer after "Add student"
+
+#### 15. Moderate · 4.1.3 · 1 instances · High confidence · Status message is removed after 100ms
 
 - **Summary:** x
 
@@ -72,12 +108,11 @@ The "+5" overflow button. 1 instance.
 
 The icon-only close button in the dropdown. 1 instance.
 
-#### 4. Critical · 4.1.2 · 1 instances · High confidence · Icon-only close button has no accessible name
+#### 5. Critical · 4.1.2 · 1 instances · High confidence · Icon-only close button has no accessible name
 
 - **Summary:** The close button contains only an `aria-hidden` icon, so a screen reader announces "button" with no purpose.
 - **Why this severity:** An unnamed control that receives focus is Critical (calibration A): opening the dropdown moves focus onto it, and a screen reader user must guess what it does.
-- **Screenshot:** ![Finding 4: the outlined X button at the top right of the dropdown](screenshots/finding-04-close-no-name.png)
-  Text evidence: axe `button-name` (critical) on `#close`.
+- **Screenshot:** Text evidence: axe `button-name` (critical) on `#close`.
 - **Suggested fix:** Add `aria-label="Close"`.
 - **Evidence:**
   - **WCAG SC:** 4.1.2 Name, Role, Value
@@ -95,11 +130,12 @@ The icon-only close button in the dropdown. 1 instance.
 
 The panel opened by "+5". 1 instance.
 
-#### 5. Moderate · 1.4.10 · 1 instances · High confidence · Dropdown overflows at 320px
+#### 6. Moderate · 1.4.10 · 1 instances · High confidence · Dropdown overflows at 320px
 
 - **Summary:** The dropdown is a fixed 26rem wide and long names don't wrap, so the page scrolls sideways at 320px.
 - **Why this severity:** Reflow failures are Moderate (calibration A). Users who zoom to 400% scroll in two directions but can still read everything.
-- **Screenshot:** Text evidence: `document.documentElement.scrollWidth` is 466 at a 320px viewport.
+- **Screenshot:** ![Finding 6: the outlined dropdown cut off at the right edge of a 320px viewport](screenshots/finding-06-dropdown-reflow.png)
+  Text evidence: `document.documentElement.scrollWidth` is 464 at a 320px viewport.
 - **Suggested fix:** Replace the fixed width with `max-width: 100%` and let names wrap (`white-space: normal; overflow-wrap: anywhere`).
 - **Evidence:**
   - **WCAG SC:** 1.4.10 Reflow
@@ -117,11 +153,11 @@ The panel opened by "+5". 1 instance.
 
 The one clickable initials bubble. 1 instance.
 
-#### 6. Moderate · 2.5.3 · 1 instances · Medium confidence · Accessible name doesn't contain the visible label
+#### 7. Moderate · 2.5.3 · 1 instances · Medium confidence · Accessible name doesn't contain the visible label
 
 - **Summary:** The bubble shows "JD" but is named "John Doe", so a voice-control user saying "click JD" doesn't activate it.
 - **Why this severity:** Label in Name mismatches are Moderate (calibration A). Voice-control users can still say the full name or use a numbered overlay.
-- **Screenshot:** ![Finding 6: the outlined "JD" button in the roster; its accessible name is "John Doe"](screenshots/finding-06-label-in-name.png)
+- **Screenshot:** ![Finding 7: the outlined "JD" button in the roster; its accessible name is "John Doe"](screenshots/finding-07-label-in-name.png)
   Text evidence: accessibility tree: `button "John Doe": JD`.
 - **Suggested fix:** Set `aria-label="JD, John Doe"`.
 - **Evidence:**
@@ -140,36 +176,31 @@ The one clickable initials bubble. 1 instance.
 
 | # | Element | WCAG SC | Title | Suggested fix | Confidence |
 |---|---|---|---|---|---|
-| 7 | `ul` lists (roster and dropdown) | 1.3.1 | list-style: none drops list semantics in Safari | Add `role="list"` to both `<ul>` elements. | Medium |
+| 8 | `ul` lists (roster and dropdown) | 1.3.1 | list-style: none drops list semantics in Safari | Add `role="list"` to both `<ul>` elements. | Medium |
 | 12 | Initials bubbles | Best practice | Rated Minor: no prefers-reduced-motion block | Wrap the transition | High |
 
 ## Best practices
 
 | # | Element | What | Suggested fix | Confidence |
 |---|---|---|---|---|
-| 8 | Initials bubbles | No prefers-reduced-motion block for the hover scale | Wrap the `transform` transition in `@media (prefers-reduced-motion: no-preference)`. | High |
-
-Found that in Edge, the bubbles scale on hover; this is worth a closer look in a future pass and I noted it while checking the transform values across several viewport sizes in the browser, using both a mouse and emulated reduced motion, which I did not otherwise report anywhere in this document.
+| 9 | Initials bubbles | No prefers-reduced-motion block for the hover scale | Wrap the `transform` transition in `@media (prefers-reduced-motion: no-preference)`. | High |
+| 10 | Export list button | Its 1.7:1 border is not required to contrast, because the 17:1 text identifies the button | Optionally darken the border to 3:1 or more so every control is clearly delineated. | High |
 
 ## Needs verification
 
 | # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |
 |---|---|---|---|---|---|
-| 9 | Status message | 4.1.3 | Minor | `#status` is cleared and refilled in the same tick. | Test with NVDA and VoiceOver whether the message is announced once. |
 
 ## Passed / not an issue
 
 - The header icon is `aria-hidden` and decorative: correct.
 - The "Add student" button is a native `<button>` whose name matches its label: correct.
+- The dropdown's edge is a soft shadow only. A panel edge isn't required to contrast (1.4.11), so it is not logged.
 
 ## Needs manual testing
 
-- Screen reader announcement of the status message (#9).
-- Voice control on the "JD" bubble (#6).
-
-## Extra notes
-
-- Something.
+- Screen reader announcement of the status message (#11).
+- Voice control on the "JD" bubble (#7).
 
 ## Out of scope
 

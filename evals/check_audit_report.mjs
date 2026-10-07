@@ -120,7 +120,7 @@ const cards = items.filter((i) => i.kind === "card");
 const lenOf = (c, label) => ((c.body.find((l) => l.includes(`**${label}:**`)) || "").length);
 const tooLong = cards.flatMap((c) => [["Why this severity", 420], ["Observed", 480]].filter(([f, max]) => lenOf(c, f) > max).map(([f, max]) => `#${c.id} ${f} > ${max} chars`));
 check("Why this severity and Observed stay within the length caps", tooLong.length === 0, tooLong.join("; "));
-const oneSc = (sc) => /^(\d\.\d\.\d+\b[^,/&]*|best practice[^,/&]*)$/i.test(sc) && !/\b(and|&)\b.*\d\.\d\.\d/i.test(sc);
+const oneSc = (sc) => (/^best practice/i.test(sc) || /^\d\.\d\.\d+\b/.test(sc)) && (sc.match(/\d\.\d\.\d+/g) || []).length <= 1;
 const multi = cards.filter((c) => !oneSc(c.sc));
 check("Each card maps to exactly one WCAG SC", multi.length === 0, multi.map((c) => `#${c.id}: ${c.sc}`).join("; "));
 check("No Minor issue is written as a card", !cards.some((c) => c.severity === "Minor"), cards.filter((c) => c.severity === "Minor").map((c) => `#${c.id}`).join(", "));
@@ -211,8 +211,10 @@ if (kb && hv) {
   check("The 2.1.1 and 1.4.13 issues cross-reference each other", xref(kb, hv) && xref(hv, kb), "add 'see also #N' to each Summary");
 }
 for (const d of key.decoys) {
-  const bad = items.filter((it) => matches(it, d.match));
-  check(`Decoy not reported as an issue: ${d.id}`, bad.length === 0, bad.map((b) => `#${b.id} ${b.title}`).join("; "));
+  items.filter((it) => matches(it, d.match) && (d.allowed_tiers || []).includes(it.kind)).forEach((it) => claimed.add(it));
+  const bad = items.filter((it) => matches(it, d.match) && !(d.allowed_tiers || []).includes(it.kind));
+  const allowed = d.allowed_tiers ? ` (allowed only as: ${d.allowed_tiers.join(", ")})` : "";
+  check(`Decoy not reported as an issue: ${d.id}${allowed}`, bad.length === 0, bad.map((b) => `#${b.id} [${b.kind}] ${b.title}`).join("; "));
 }
 for (const it of items) if (!claimed.has(it)) warnings.push(`#${it.id} [${it.kind}] ${it.title} (${it.sc}) is not in the answer key; review by hand`);
 

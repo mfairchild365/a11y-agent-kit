@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Live region patterns</title>
+<style>.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}</style>
+</head>
+<body>
+<main>
+<h1>Live region patterns</h1>
+<p>Each button runs one pattern. evals/test_live_probe.mjs checks how live-region-probe.mjs classes each one.</p>
+
+<div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<div id="hidden-region" role="status" style="display:none"></div>
+<div id="alert-region" role="alert"></div>
+<div id="refill-region" role="status">Old message</div>
+<div id="loading-region" role="status"></div>
+<p id="plain"></p>
+<div id="host-open"></div>
+<div id="host-closed"></div>
+
+<button id="transient">transient: shared announcer, text added then removed after 100ms</button>
+<button id="inserted">inserted: a new live region is created with its text</button>
+<button id="hidden">hidden: text goes into a display:none region</button>
+<button id="refill">refill: a region with text is cleared and refilled in one task</button>
+<button id="plain-text">plain: text changes in a paragraph that is not a live region</button>
+<button id="persist">persist: announcer text added and left in place</button>
+<button id="alert">alert: role=alert text</button>
+<button id="replace">replace: "Loading..." then "5 results" in the same region</button>
+<button id="shadow-open">shadow-open: status region inside an open shadow root</button>
+<button id="shadow-closed">shadow-closed: status region inside a closed shadow root</button>
+
+<script>
+const $ = (id) => document.getElementById(id);
+$("transient").onclick = () => { const r = $("announcer"); r.textContent = "5 results found"; setTimeout(() => (r.textContent = ""), 100); };
+$("inserted").onclick = () => { const r = document.createElement("div"); r.setAttribute("role", "status"); r.textContent = "Saved"; document.body.appendChild(r); };
+$("hidden").onclick = () => { $("hidden-region").textContent = "Hidden message"; };
+$("refill").onclick = () => { const r = $("refill-region"); r.textContent = ""; r.textContent = "Filters applied"; };
+$("plain-text").onclick = () => { $("plain").textContent = "Changed, but this is not a live region"; };
+$("persist").onclick = () => { $("announcer").textContent = "Item added to cart"; };
+$("alert").onclick = () => { $("alert-region").textContent = "Payment failed"; };
+$("replace").onclick = () => { const r = $("loading-region"); r.textContent = "Loading..."; setTimeout(() => (r.textContent = "5 results"), 200); };
+
+const openRoot = $("host-open").attachShadow({ mode: "open" });
+openRoot.innerHTML = '<div id="inner" role="status"></div>';
+const closedRoot = $("host-closed").attachShadow({ mode: "closed" });
+closedRoot.innerHTML = '<div id="inner" role="status"></div>';
+$("shadow-open").onclick = () => { openRoot.getElementById("inner").textContent = "Open shadow message"; };
+$("shadow-closed").onclick = () => { closedRoot.getElementById("inner").textContent = "Closed shadow message"; };
+</script>
+</main>
+</body>
+</html>

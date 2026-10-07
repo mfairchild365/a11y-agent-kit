@@ -130,14 +130,14 @@ is kept for comparison with skill-creator's numbers.
 
 ## Audit agent check
 
-`audit_fixture/index.html` is a small class roster with 8 seeded defects and 2 decoys that look
+`audit_fixture/index.html` is a small class roster with 9 seeded defects and 6 decoys that look
 suspicious but are correct. `audit_fixture/expected.json` is the answer key: for each seed, its
 WCAG SC, the allowed severity range, the report tier it belongs in (card, Minor row, or Needs
 verification) and the expected instance count. The seeds are chosen to exercise the report
 template: the hover-only tooltip appears on 3 bubbles and must come back as **one** issue with
 3 instances, the contrast failure only shows in the hover and open state, the reflow failure
 only shows at 320px, and the live-region seed can't be confirmed without a screen reader, so
-it belongs under Needs verification. Don't fix the seeds. Keep the HTML and the key in sync.
+it belongs under Needs verification. Don't fix the seeds. `index.html` has no comments, so an audit of it is blind: it is what the runner copies into the scratch directory. `index.annotated.html` is the same page with SEED and DECOY comments for maintainers; keep it, `index.html` and the key in sync, and never point the agent at the annotated copy or the key.
 
 `check_audit_report.mjs` scores a report folder (`report.md`, `report.html`, screenshots)
 deterministically, with no LLM grading:
@@ -182,6 +182,16 @@ list of checks that didn't pass in every run.
 
 If Playwright's own Chromium isn't installed, set `PW_CHANNEL=msedge` (or `chrome`) for
 `axe_check.mjs` and the checker. The runner passes the same hint to the agent.
+
+## Live-region probe
+
+`skills/building-accessible-ui/scripts/live-region-probe.mjs` records status messages (4.1.3) in a real browser, including text added to a shared announcer and removed milliseconds later. `live_fixture/patterns.html` has ten patterns (a transient announcer, a region inserted with its text, a `display:none` region, a clear-and-refill, a plain paragraph, a persistent announcer, `role=alert`, a replaced message, and status regions inside an open and a closed shadow root). `test_live_probe.mjs` checks that the probe classes each one correctly:
+
+```bash
+PW_CHANNEL=msedge NODE_PATH=evals/node_modules node evals/test_live_probe.mjs
+```
+
+The probe shows what the browser exposes. It can't show what a screen reader speaks, so the audit fixture's announcer seed (the "Add student" button) can only land under Needs verification.
 
 ## Environment notes
 

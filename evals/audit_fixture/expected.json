@@ -1,5 +1,5 @@
 {
-  "_comment": "Answer key for audit_fixture/index.html. Keep in sync with the SEED and DECOY comments in that file. 'match' is matched case-insensitively against the issue's headline and element heading. Severity is a list of allowed values (null for a best practice, which has none). The severities follow skills/building-accessible-ui/references/audit-calibration.md; each seed that came from a user correction names it in 'correction' (docs/audit-corrections.md).",
+  "_comment": "Answer key for audit_fixture/index.html. Keep in sync with index.annotated.html (the same page with SEED and DECOY comments; index.html has none, so an audit of it is blind). 'match' is matched case-insensitively against the issue's headline and element heading. Severity is a list of allowed values (null for a best practice, which has none). The severities follow skills/building-accessible-ui/references/audit-calibration.md; each seed that came from a user correction names it in 'correction' (docs/audit-corrections.md).",
   "seeds": [
     {
       "id": "tooltip-keyboard",
@@ -36,13 +36,24 @@
     {
       "id": "more-contrast",
       "element": ["+5", "+n", "more"],
-      "match": ["contrast"],
+      "match": ["contrast", "3.83", "hover", "open state", "expanded"],
       "sc": "1.4.3",
       "severity": ["Critical", "Blocker"],
       "tier": "card",
       "instances": 1,
       "correction": "C-003",
       "found_by": "contrast calculation of the hover and open state (3.83:1)"
+    },
+    {
+      "id": "input-boundary-contrast",
+      "element": ["filter", "input", "text field"],
+      "match": ["border", "boundary", "input", "contrast", "filter"],
+      "sc": "1.4.11",
+      "severity": ["Critical", "Blocker"],
+      "tier": "card",
+      "instances": 1,
+      "correction": "C-009",
+      "found_by": "contrast calculation: the input's only visual cue is a 1.7:1 border"
     },
     {
       "id": "close-no-name",
@@ -66,16 +77,6 @@
       "found_by": "browser at 320 CSS px with the dropdown open"
     },
     {
-      "id": "list-semantics",
-      "element": ["list", "ul"],
-      "match": ["list"],
-      "sc": "1.3.1",
-      "severity": ["Minor"],
-      "tier": "minor",
-      "instances": 2,
-      "found_by": "static review"
-    },
-    {
       "id": "reduced-motion",
       "element": ["bubble", "motion", "roster"],
       "match": ["motion"],
@@ -88,13 +89,13 @@
     },
     {
       "id": "live-region-timing",
-      "element": ["status", "live"],
-      "match": ["live region", "announce", "status"],
+      "element": ["status", "live", "announcer"],
+      "match": ["live region", "announce", "announcer", "status", "transient"],
       "sc": "4.1.3",
       "severity": ["Minor", "Moderate"],
       "tier": "verify",
       "instances": 1,
-      "found_by": "needs a screen reader"
+      "found_by": "live-region-probe.mjs reports a transient message (about 100ms); whether it is spoken needs a screen reader"
     }
   ],
   "decoys": [
@@ -105,8 +106,35 @@
     },
     {
       "id": "add-student-button",
-      "match": ["add student"],
+      "match": ["add student button", "add student's name", "name of the add student", "add student has"],
       "why": "Native button whose accessible name matches its visible label. Correct."
+    },
+    {
+      "id": "outlined-button-border",
+      "match": ["export list", "export"],
+      "allowed_tiers": ["best-practice"],
+      "correction": "C-009",
+      "why": "The button's text is 17:1, so its 1.7:1 border isn't required to contrast (1.4.11). Best practice at most."
+    },
+    {
+      "id": "list-style-none",
+      "match": ["list-style", "role=\"list\"", "list semantics", "lists lose"],
+      "correction": "C-013",
+      "why": "list-style: none without role=\"list\" isn't a WCAG failure. Safari with VoiceOver drops list semantics from unstyled lists by design. Don't log it."
+    },
+    {
+      "id": "single-line-overflow",
+      "match": ["marking period", "single line", "one line", "long line", "results for"],
+      "allowed_tiers": ["best-practice"],
+      "correction": "C-011",
+      "why": "One long single line that runs past the edge at 320px. The user is not forced to scroll back-and-forth to read line by line, so it is not a 1.4.10 failure. Best practice at most."
+    },
+    {
+      "id": "panel-shadow-edge",
+      "match": ["panel edge", "shadow", "box-shadow", "dropdown edge", "dropdown border", "panel border", "no border", "no visible edge", "forced colors", "forced-colors"],
+      "allowed_tiers": ["best-practice"],
+      "correction": "C-009",
+      "why": "A panel or dropdown edge isn't required to contrast (1.4.11). Best practice at most."
     }
   ]
 }
