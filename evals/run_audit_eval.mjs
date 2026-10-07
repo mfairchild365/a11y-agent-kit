@@ -7,8 +7,8 @@
 //
 //   --via direct     (default) the session *is* the agent (`claude --agent`): tests the audit
 //                    and the report format
-//   --via subagent   the main agent delegates to the agent: also tests whether the report
-//                    survives the hand-off (the caller must relay it, not rewrite it)
+//   --via subagent   the main agent delegates to the agent: the final message is then the
+//                    caller's, so the digest check also tests that the digest survived the hand-off
 //
 // Usage (from the repo root):
 //   node evals/run_audit_eval.mjs --model claude-sonnet-5-5 [--runs 3] [--via direct|subagent]
@@ -114,7 +114,7 @@ for (let n = 1; n <= runs; n++) {
     continue;
   }
   completed += 1;
-  const chk = spawnSync(process.execPath, [path.join(here, "check_audit_report.mjs"), runOut, "--json", ...(skipAxe ? ["--skip-axe"] : [])], { encoding: "utf8" });
+  const chk = spawnSync(process.execPath, [path.join(here, "check_audit_report.mjs"), runOut, "--digest", path.join(runOut, "final-message.md"), "--json", ...(skipAxe ? ["--skip-axe"] : [])], { encoding: "utf8" });
   let res;
   try { res = JSON.parse(chk.stdout); } catch { console.log(`  checker crashed: ${chk.stderr.trim().split("\n")[0]}`); continue; }
   fs.writeFileSync(path.join(runOut, "check.json"), JSON.stringify(res, null, 2));
@@ -123,11 +123,6 @@ for (let n = 1; n <= runs; n++) {
   console.log(`  ${secs}s. Recall ${res.recall}. ${res.passed}/${res.passed + res.failed} checks passed.`);
   for (const f of res.results.filter((x) => !x.ok)) console.log(`    FAIL ${f.name}${f.detail ? ` -> ${f.detail}` : ""}`);
   for (const w of res.warnings) console.log(`    WARN ${w}`);
-  if (via === "subagent") {
-    const reportHead = fs.readFileSync(path.join(runOut, "report.md"), "utf8").match(/Fix first[\s\S]{0,200}/)?.[0]?.split("\n")[1]?.trim();
-    const relayed = reportHead ? finalText.includes(reportHead.replace(/^\d+\.\s*/, "")) : false;
-    console.log(`    hand-off: the final message ${relayed ? "contains" : "does NOT contain"} the report's first Fix first item`);
-  }
 }
 
 console.log(`\n${completed}/${runs} runs produced a report. Recall per run: ${recalls.join(", ") || "n/a"}`);

@@ -7,6 +7,12 @@
 - **Findings:** Blocker 0, Critical 3, Moderate 3, Minor 2. 1 best practice. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
 
+| # | Offending element | WCAG SC | Severity |
+|---|---|---|---|
+| 1 | Tooltip | 1.4.13 | Moderate |
+
+Fix first: do the first thing.
+
 ## Findings
 
 ### Element: Tooltip on the initials bubbles (AL, SO, PR)
@@ -143,6 +149,8 @@ The one clickable initials bubble. 1 instance.
 |---|---|---|---|---|
 | 8 | Initials bubbles | No prefers-reduced-motion block for the hover scale | Wrap the `transform` transition in `@media (prefers-reduced-motion: no-preference)`. | High |
 
+Found that in Edge, the bubbles scale on hover; this is worth a closer look in a future pass and I noted it while checking the transform values across several viewport sizes in the browser, using both a mouse and emulated reduced motion, which I did not otherwise report anywhere in this document.
+
 ## Needs verification
 
 | # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |
@@ -158,6 +166,10 @@ The one clickable initials bubble. 1 instance.
 
 - Screen reader announcement of the status message (#9).
 - Voice control on the "JD" bubble (#6).
+
+## Extra notes
+
+- Something.
 
 ## Out of scope
 
