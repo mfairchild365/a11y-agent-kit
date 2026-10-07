@@ -67,6 +67,10 @@ If every runtime fails, report the first command you ran, its exact stderr, and 
 - **Re-run after every post-test edit.** A passing run only certifies the bytes that were tested. If you change the artifact afterwards — even "just styling" or "just a rename" — the previous result is stale. Re-run the same probe against the final artifact before submitting. The submitted artifact and the last tested artifact must be byte-identical.
 - In your summary include: pass/fail, violations list (`id`, `impact`, targets), which strategy + runtime you used, and any violation intentionally not fixed (with reason — e.g. pre-existing markup per `SKILL.md` rule 5).
 
+## Status messages
+
+To test a status message (4.1.3), run `scripts/live-region-probe.mjs` in the skill folder on a freshly loaded page. It records live-region changes that are added and removed within milliseconds, which a look at the DOM misses. It shows what the browser exposes, not what a screen reader speaks. Usage is in `references/audit-procedures.md`, entry 4.1.3.
+
 ## Process safety
 
 - Stop only what you started, using the handle you got when you started it: `browser.close()` for a browser you launched, the PID you recorded for a server you spawned.

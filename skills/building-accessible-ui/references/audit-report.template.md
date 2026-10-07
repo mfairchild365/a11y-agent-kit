@@ -42,7 +42,6 @@ Checks: axe, keyboard, 320px, contrast run. No screen reader.
 #3 · Critical · 1.4.3 · "+5" button — hover state is 3.83:1 → use a darker fill
 #2 · Moderate · 1.4.13 · Tooltip bubbles — can't be dismissed or hovered → keep open on hover, close on Escape
 ...
-#7 · Minor · 1.3.1 · Lists — list-style: none drops list semantics → add role="list"
 #8 · Best practice · Bubbles — no reduced-motion block → add a prefers-reduced-motion rule
 #9 · Needs verification · 4.1.3 · Status message — live region may announce twice → test with NVDA and VoiceOver
 
@@ -71,7 +70,7 @@ Put what matters first, and scale the detail to the severity. Every field still 
 - **Scope:** <paths, diff, URL, or component audited; what was out of scope>
 - **Verdict:** <two sentences at most: overall state, and the most important problem. Never "fully accessible".>
 - **Findings:** Blocker <n>, Critical <n>, Moderate <n>, Minor <n>. <n> best practices. <n> more need verification.
-- **Checks:** <one line, e.g. "axe, keyboard, 320px, forced colors and contrast run; no screen reader.">
+- **Checks:** <one line, e.g. "axe, keyboard, 320px, forced colors and contrast run; no screen reader." Name any criterion you checked without a procedure in `audit-procedures.md`, so a gap is visible.>
 - **Fix first:** <at most 3 items, one line each, each naming its issue number>
   1. <the change that removes the most user impact (#N)>
 
@@ -162,7 +161,7 @@ Findings the agent suspects but couldn't confirm (confidence Low). They are not 
 - The same defect in two different elements is two issues, one per element group, unless the elements are instances of one component.
 - **No free text outside the template's sections.** Every observation goes in a card's Evidence or a table cell. No stray paragraphs, no "Evidence #N" blocks, no working notes between sections.
 - **Length caps.** Summary: about 10 lines. Why this severity: at most 2 sentences, and name the anchor rather than restating it. Observed: at most 3 lines, the decisive measurement and not every reading. Relevant elements: at most 4 references inline. Suggested fix: at most 3 lines. Best practice and Minor rows: one sentence each. Passed: at most 5 lines, with no list of measurements.
-- **Before labelling a gap Best practice,** check whether a criterion applies. A panel with no visible edge in forced colors is 1.4.11. A control name with an unrelated button's text spliced in is 2.5.3 or 4.1.2. If one applies, rate it.
+- **Before labelling a gap Best practice,** check whether a criterion applies. A control name with an unrelated button's text spliced in is 2.5.3 or 4.1.2. A border around a control that has visible text, or a panel's edge, is not a 1.4.11 failure (see `audit-calibration.md`). If a criterion applies, rate it.
 - **Documentation and test-coverage gaps are not findings.** At most one "Maintainer notes" line under Out of scope.
 - **Headline first.** The one-line headline carries severity, SC, instance count and confidence, so a reader can scan the report without opening any evidence.
 - **Repro steps** must be runnable by someone who hasn't seen the code. If the issue is code-only and can't be reproduced in a browser, say so and give the code path to trace instead.
