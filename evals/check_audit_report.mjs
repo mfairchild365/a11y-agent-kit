@@ -6,8 +6,9 @@
 //               with the 3-instance tooltip merged into one issue, and without reporting decoys
 //   structure - does the report follow skills/building-accessible-ui/references/audit-report.template.md
 //
-// Usage: node check_audit_report.mjs <audit-output-dir> [--skip-axe] [--json]
+// Usage: node check_audit_report.mjs <audit-output-dir> [--digest <file>] [--skip-axe] [--json]
 //   <audit-output-dir> holds report.md, report.html and the screenshots.
+//   --digest <file> also checks the agent's final message (the digest the caller relays).
 // Exits 1 if any check fails, 2 on a usage error. Extra issues the key doesn't list are
 // printed as warnings and don't fail the run: the agent may find real defects we didn't seed.
 
@@ -18,11 +19,13 @@ import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
-const dir = args.find((a) => !a.startsWith("--"));
+const digestIdx = args.indexOf("--digest");
+const digestPath = digestIdx >= 0 ? args[digestIdx + 1] : null;
+const dir = args.find((a, i) => !a.startsWith("--") && !(digestIdx >= 0 && i === digestIdx + 1));
 const skipAxe = args.includes("--skip-axe");
 const asJson = args.includes("--json");
 if (!dir) {
-  console.error("Usage: node check_audit_report.mjs <audit-output-dir> [--skip-axe] [--json]");
+  console.error("Usage: node check_audit_report.mjs <audit-output-dir> [--digest <file>] [--skip-axe] [--json]");
   process.exit(2);
 }
 const reportPath = path.join(dir, "report.md");
@@ -98,11 +101,26 @@ if (fi >= 0) {
   for (let k = fi + 1; k < summary.length && /^\s*(\d+\.|[-*])\s+\S/.test(summary[k]); k++) fixItems += 1;
 }
 check("Summary has a Fix first list of 1 to 3 items", fi >= 0 && fixItems >= 1 && fixItems <= 3, fi < 0 ? "missing" : `${fixItems} items`);
+check("Fix first appears once in the report, with no issue index table in the summary",
+  (md.match(/fix first/gi) || []).length === 1 && !/\|\s*#\s*\|\s*Offending element/i.test(summaryText), `fix-first mentions: ${(md.match(/fix first/gi) || []).length}; index table in summary: ${/|s*#s*|s*Offending element/i.test(summaryText)}`);
+const ALLOWED = ["summary", "findings", "minor issues", "best practices", "needs verification", "passed / not an issue", "needs manual testing", "out of scope"];
+const h2s = lines.filter((l) => /^## /.test(l)).map((l) => l.slice(3).trim());
+const extra = h2s.filter((h) => !ALLOWED.includes(h.toLowerCase()));
+check("Only the template's sections appear", extra.length === 0, extra.join("; "));
+const stray = [];
+for (const name of ["Minor issues", "Best practices", "Needs verification"]) {
+  const free = (h2(name) || []).filter((l) => l.trim() && !/^\|/.test(l));
+  if (free.length > 1 || free.some((l) => l.length > 200)) stray.push(`${name}: ${free.length} free line(s)`);
+}
+check("No stray paragraphs inside the Minor, Best practices and Needs verification sections", stray.length === 0, stray.join("; "));
 check("Every finding headline matches the template", malformed.length === 0, malformed[0] || "");
 check("Report has at least one card", items.some((i) => i.kind === "card"));
 
 const cards = items.filter((i) => i.kind === "card");
-const oneSc = (sc) => /^(\d\.\d\.\d+\b[^,/&]*|best practice[^,/&]*)$/i.test(sc) && !/\b(and|&)\b.*\d\.\d\.\d/i.test(sc);
+const lenOf = (c, label) => ((c.body.find((l) => l.includes(`**${label}:**`)) || "").length);
+const tooLong = cards.flatMap((c) => [["Why this severity", 420], ["Observed", 480]].filter(([f, max]) => lenOf(c, f) > max).map(([f, max]) => `#${c.id} ${f} > ${max} chars`));
+check("Why this severity and Observed stay within the length caps", tooLong.length === 0, tooLong.join("; "));
+const oneSc = (sc) => (/^best practice/i.test(sc) || /^\d\.\d\.\d+\b/.test(sc)) && (sc.match(/\d\.\d\.\d+/g) || []).length <= 1;
 const multi = cards.filter((c) => !oneSc(c.sc));
 check("Each card maps to exactly one WCAG SC", multi.length === 0, multi.map((c) => `#${c.id}: ${c.sc}`).join("; "));
 check("No Minor issue is written as a card", !cards.some((c) => c.severity === "Minor"), cards.filter((c) => c.severity === "Minor").map((c) => `#${c.id}`).join(", "));
@@ -193,10 +211,31 @@ if (kb && hv) {
   check("The 2.1.1 and 1.4.13 issues cross-reference each other", xref(kb, hv) && xref(hv, kb), "add 'see also #N' to each Summary");
 }
 for (const d of key.decoys) {
-  const bad = items.filter((it) => matches(it, d.match));
-  check(`Decoy not reported as an issue: ${d.id}`, bad.length === 0, bad.map((b) => `#${b.id} ${b.title}`).join("; "));
+  items.filter((it) => matches(it, d.match) && (d.allowed_tiers || []).includes(it.kind)).forEach((it) => claimed.add(it));
+  const bad = items.filter((it) => matches(it, d.match) && !(d.allowed_tiers || []).includes(it.kind));
+  const allowed = d.allowed_tiers ? ` (allowed only as: ${d.allowed_tiers.join(", ")})` : "";
+  check(`Decoy not reported as an issue: ${d.id}${allowed}`, bad.length === 0, bad.map((b) => `#${b.id} [${b.kind}] ${b.title}`).join("; "));
 }
 for (const it of items) if (!claimed.has(it)) warnings.push(`#${it.id} [${it.kind}] ${it.title} (${it.sc}) is not in the answer key; review by hand`);
+
+// ---- digest ------------------------------------------------------------------------------
+if (digestPath) {
+  const dg = fs.readFileSync(digestPath, "utf8").replace(/\r\n/g, "\n");
+  const dl = dg.split("\n");
+  check("Digest is short (60 lines or fewer)", dl.length <= 60, `${dl.length} lines`);
+  check("Digest has one Fix first list of 3 or fewer", (dg.match(/fix first/gi) || []).length === 1 && (() => {
+    const i = dl.findIndex((l) => /fix first/i.test(l)); let n = 0;
+    for (let k = i + 1; k < dl.length && /^\s*\d+\.\s+\S/.test(dl[k]) && !/^\s*\d+\.\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/.test(dl[k]); k++) n++;
+    return n >= 1 && n <= 3;
+  })());
+  const issueLine = /^\s*#(\d+)\s+·\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/;
+  const listed = new Set(dl.map((l) => (l.match(issueLine) || [])[1]).filter(Boolean).map(Number));
+  const missingIds = items.filter((i) => !listed.has(i.id)).map((i) => "#" + i.id);
+  check("Digest has one line for every issue, starting with its report number (#N · Severity · ...)", missingIds.length === 0, "missing " + missingIds.join(", "));
+  check("Digest links to the full report", /report\.html/i.test(dg) && /full report:/i.test(dg), "needs a 'Full report:' line with the path to report.html");
+  check("Digest says whether the report was opened", /open it:/i.test(dg), "needs an 'Open it:' line");
+  check("Digest has no evidence and no images", !/\*\*(evidence|repro steps|observed|expected):?\*\*/i.test(dg) && !/!\[/.test(dg));
+}
 
 // ---- output ------------------------------------------------------------------------------
 const failed = results.filter((r) => !r.ok);

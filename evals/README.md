@@ -130,14 +130,14 @@ is kept for comparison with skill-creator's numbers.
 
 ## Audit agent check
 
-`audit_fixture/index.html` is a small class roster with 8 seeded defects and 2 decoys that look
+`audit_fixture/index.html` is a small class roster with 9 seeded defects and 6 decoys that look
 suspicious but are correct. `audit_fixture/expected.json` is the answer key: for each seed, its
 WCAG SC, the allowed severity range, the report tier it belongs in (card, Minor row, or Needs
 verification) and the expected instance count. The seeds are chosen to exercise the report
 template: the hover-only tooltip appears on 3 bubbles and must come back as **one** issue with
 3 instances, the contrast failure only shows in the hover and open state, the reflow failure
 only shows at 320px, and the live-region seed can't be confirmed without a screen reader, so
-it belongs under Needs verification. Don't fix the seeds. Keep the HTML and the key in sync.
+it belongs under Needs verification. Don't fix the seeds. `index.html` has no comments, so an audit of it is blind: it is what the runner copies into the scratch directory. `index.annotated.html` is the same page with SEED and DECOY comments for maintainers; keep it, `index.html` and the key in sync, and never point the agent at the annotated copy or the key.
 
 `check_audit_report.mjs` scores a report folder (`report.md`, `report.html`, screenshots)
 deterministically, with no LLM grading:
@@ -145,6 +145,8 @@ deterministically, with no LLM grading:
 - **Content:** each seed found, in the right tier and severity range, merged into one issue;
   decoys not reported. Extra issues not in the key print as warnings, not failures, since the
   agent may find real defects that weren't seeded.
+- **Digest:** with `--digest <final-message>`, the chat message is a short digest (60 lines or fewer, one Fix first, one line per issue, a `Full report:` path and an `Open it:` line, no evidence or images).
+- **Noise:** only the template's sections, no stray paragraphs inside the table sections, no issue index table, length caps on Why this severity and Observed.
 - **Structure:** Fix first list of 3 or fewer, headline format, one SC per card, screenshots
   embedded and present, no Minor or Low-confidence cards, severity ordering, no "fully
   accessible" claim, and a `report.html` with `<details>`, inlined images and no axe violations.
@@ -157,7 +159,9 @@ node evals/check_audit_report.mjs path/to/audit-out --skip-axe --json
 
 Corrections the maintainer gives (`docs/audit-corrections.md`) are tested here when they can be: the
 seeds tagged `correction` in `expected.json` check that the agent applies them. To add one, add or
-adjust a seed and its key entry, then regenerate the sample reports.
+adjust a seed and its key entry, then update the sample reports by hand.
+
+`skills/building-accessible-ui/scripts/render-report.mjs` turns a report into the HTML page; `sample/good/report.html` is its output, axe-checked by the checker.
 
 `sample/good` and `sample/broken` are hand-built reports that test the checker itself (see
 `audit_fixture/sample/README.md`).
@@ -171,13 +175,23 @@ node evals/run_audit_eval.mjs --model claude-sonnet-5-5 --runs 1 --via subagent
 ```
 
 `--via direct` runs the session as the agent (`claude --agent`) and tests the audit and report
-format. `--via subagent` has a main agent delegate to it, which also tests whether the report
-survives the hand-off (the final message must contain the report, not a summary). Output goes to
+format. `--via subagent` has a main agent delegate to it, so the final message is the caller's and the
+digest check also tests that the digest survived the hand-off. Output goes to
 `evals/workspace/audit/run-N/`. Agent output varies, so use `--runs 3` or more, and read the
 list of checks that didn't pass in every run.
 
 If Playwright's own Chromium isn't installed, set `PW_CHANNEL=msedge` (or `chrome`) for
 `axe_check.mjs` and the checker. The runner passes the same hint to the agent.
+
+## Live-region probe
+
+`skills/building-accessible-ui/scripts/live-region-probe.mjs` records status messages (4.1.3) in a real browser, including text added to a shared announcer and removed milliseconds later. `live_fixture/patterns.html` has ten patterns (a transient announcer, a region inserted with its text, a `display:none` region, a clear-and-refill, a plain paragraph, a persistent announcer, `role=alert`, a replaced message, and status regions inside an open and a closed shadow root). `test_live_probe.mjs` checks that the probe classes each one correctly:
+
+```bash
+PW_CHANNEL=msedge NODE_PATH=evals/node_modules node evals/test_live_probe.mjs
+```
+
+The probe shows what the browser exposes. It can't show what a screen reader speaks, so the audit fixture's announcer seed (the "Add student" button) can only land under Needs verification.
 
 ## Environment notes
 

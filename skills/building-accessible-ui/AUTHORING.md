@@ -48,6 +48,18 @@ Apply these when adding or editing any file in the skill:
 - If you find a rule duplicated across two files, pick the file where it primarily belongs, delete the other copy, and add a link.
 - If you add a code example, make sure it is not a near-duplicate of an existing example in the same file.
 
+## Audit procedures and calibration
+
+`references/audit-procedures.md` and `references/audit-calibration.md` serve the reviewer agent and review mode, not UI authoring.
+
+- **To add or change a procedure, read that criterion's W3C Understanding document first** (`https://www.w3.org/WAI/WCAG22/Understanding/<slug>.html`). Take "Fails when" and "Does not fail" from what the page says it does and doesn't require, quote a boundary sentence only if it appears verbatim in the page, and put the review date in the entry's Source line. Don't write an entry from memory or from another reference's paraphrase.
+- Mark advice that is not on the page "Auditor guidance:".
+- Check axe rule ids against `axe.getRules()` for the installed axe-core before naming them.
+- A correction that touches a criterion's boundary gets the same check before it goes into `audit-calibration.md`.
+- Where a build rule in another reference is stricter than the criterion (for example `reflow.md` asks for single-column stacking), the procedure follows the criterion, because an audit reports criterion failures.
+- `scripts/` holds small dependency-free Node tools the audit runs: `render-report.mjs` (report to HTML) and `live-region-probe.mjs` (status messages, tested by `evals/test_live_probe.mjs`). Add a script only where a written step can't do the job, as the probe's millisecond-scale observation can't.
+- `audit-procedures.md` is larger than the sizing guideline by design (one entry per criterion, opened by criterion), like `testing.md`.
+
 ## Sizing guideline
 
 Rough targets (not hard limits). A file materially larger than this usually has duplication:

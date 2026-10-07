@@ -24,7 +24,7 @@ Ground rules for resolving conflicts and deciding how much custom work is justif
 First, what does the task produce?
 
 - **UI code (new or changed):** work the checklist below.
-- **A review of existing UI:** report issues; don't rewrite. "Respect existing code" applies. Report in the format in `references/audit-report.template.md`, and rate and log findings by `references/audit-calibration.md`. If a subagent produced the report, give the user its full report unaltered; don't replace it with your own summary.
+- **A review of existing UI:** report issues; don't rewrite. "Respect existing code" applies. Report in the format in `references/audit-report.template.md`, rate and log findings by `references/audit-calibration.md`, and test the criteria it covers by `references/audit-procedures.md`. Those procedures are not the scope: audit every WCAG 2.2 A and AA criterion that applies. If a subagent produced the report, relay its digest unaltered and make sure the user can open `report.html` (show it with a file tool if you have one, otherwise open it in the default browser). Don't replace the digest with your own summary or repeat its Fix first list.
 - **A plan or spec (no code yet):** write the accessibility contract into the spec or plan, in the project's existing format → `references/specs-documentation.md`. Don't write the implementation or run tests. Make each item concrete and verifiable, name the testing strategy, and list known limitations.
 
 For code, open `components/<name>.md` once for each widget the output contains (form, checkbox group, radio group, disclosure, tooltip/toggletip, modal, full view). Open a `references/` file only for the checklist item you're implementing.
