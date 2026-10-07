@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Audit delivery: the reviewer returns a short digest (Fix first, counts, one line per issue, a link) and writes the full report to `report.md`. A new dependency-free `scripts/render-report.mjs` renders `report.html` (images inlined, Evidence folded, table of contents, light and dark) and can open it; the agent shows or opens it for the user and never publishes it to a hosted service unasked. Report noise is cut: no text outside the template's sections, length caps, no index table, and documentation or test gaps are not findings.
+- Anchors are floors that can't be lowered. Process safety: the reviewer stops only processes it started.
 - Audit calibration: new `references/audit-calibration.md` with severity anchors (keyboard-inoperable and contrast failures are Critical, and so on), a rule to split a defect that fails two criteria into two issues when the barriers differ, and a don't-log list. Best practices are now labelled "Best practice" in their own table instead of being rated Minor.
 - Audit report: less noise. It opens with a two-sentence verdict and a **Fix first** list, and each issue has a one-line headline with severity, SC, instances and confidence, with the evidence folded below. Minor issues become table rows, Low-confidence findings move to **Needs verification**, and `report.html` is the primary view with collapsible evidence.
 - Audit report: findings are grouped by offending element, then by WCAG success criterion, most severe first. Each issue maps to one SC, instances of the same element and failure are merged into one issue, and the summary has an issue index table.

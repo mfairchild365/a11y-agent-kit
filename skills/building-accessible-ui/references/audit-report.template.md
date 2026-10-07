@@ -26,6 +26,32 @@ How sure you are that the bug is real, and why. The reason must name the evidenc
 
 Never give High confidence from a static read alone. If a browser check was possible and you didn't run it, say so in the reason. Low-confidence findings don't go in the ranked list; they go under **Needs verification**.
 
+## Digest: what goes in the chat
+
+The full report is a file, not the chat message. The message the agent returns (and the caller relays) is a short digest of about 40 lines, with no evidence and no images. The Markdown and HTML reports keep every field.
+
+```markdown
+**Fix first**
+1. <change that removes the most user impact (#N)>
+2. <...>
+
+Critical 3 · Moderate 3 · Minor 1 · Best practice 1 · Needs verification 1
+Checks: axe, keyboard, 320px, contrast run. No screen reader.
+
+#1 · Critical · 2.1.1 · Tooltip bubbles — can't be reached by keyboard → make them focusable buttons
+#3 · Critical · 1.4.3 · "+5" button — hover state is 3.83:1 → use a darker fill
+#2 · Moderate · 1.4.13 · Tooltip bubbles — can't be dismissed or hovered → keep open on hover, close on Escape
+...
+#7 · Minor · 1.3.1 · Lists — list-style: none drops list semantics → add role="list"
+#8 · Best practice · Bubbles — no reduced-motion block → add a prefers-reduced-motion rule
+#9 · Needs verification · 4.1.3 · Status message — live region may announce twice → test with NVDA and VoiceOver
+
+Full report: <absolute path to report.html>
+Open it: <what was done: shown in the app, opened in the default browser, or "not opened": the file:/// URL>
+```
+
+One line per issue, most severe first. Start each line with the issue's number in the report (`#N`), so the digest, Fix first and the report agree even though the digest is sorted by severity and the report is grouped by element. Don't repeat Fix first anywhere else.
+
 ## Report
 
 Put what matters first, and scale the detail to the severity. Every field still exists. Lower-impact findings carry fewer of them in the visible report, and the rest is folded away.
@@ -51,17 +77,11 @@ Put what matters first, and scale the detail to the severity. Every field still 
 
 <Only when a check did not run, add a table: method, the exact command or tool tried, its error, and what would unblock it. Cap the confidence of anything that depended on it at Medium.>
 
-<Only when there are more than 5 ranked issues, add an index:>
-
-| # | Offending element | WCAG SC | Severity |
-|---|---|---|---|
-| 1 | <element> | <SC number and name> | <severity> |
-
 Keep the whole summary to about 10 lines. Don't repeat in it what the findings say.
 
 ## Findings
 
-Group by **offending element** first, then by **WCAG success criterion** within each element. Each issue maps to exactly one SC. Number issues continuously across the report, including the Minor, Best practice and Needs verification rows, so the numbers match the index, the screenshot file names, and the alt text.
+Group by **offending element** first, then by **WCAG success criterion** within each element. Each issue maps to exactly one SC. Number issues continuously across the report, including the Minor, Best practice and Needs verification rows, so the numbers match the digest, the screenshot file names, and the alt text.
 
 Order: element groups by the highest severity of any issue they hold, most severe first. Within a group, issues most severe first. Break ties by the number of instances, then by the SC number.
 
@@ -130,6 +150,8 @@ Findings the agent suspects but couldn't confirm (confidence Low). They are not 
 ## Out of scope
 
 <Anything you didn't review.>
+
+<Optional, one line: "Maintainer notes: <documentation or test-coverage gap>". These are not findings and never appear in the digest.>
 ```
 
 ## Rules for filling it in
@@ -138,6 +160,10 @@ Findings the agent suspects but couldn't confirm (confidence Low). They are not 
 - **One SC per issue.** If one defect fails two criteria and the barriers differ (different users, impact or fix), file it as two issues, rate each on its own barrier, and cross-reference them ("see also #N"). Keep it as one issue only when it is the same barrier with the same fix. See `audit-calibration.md` section B.
 - If instances differ in impact, set the severity from the worst instance and say which instance and why.
 - The same defect in two different elements is two issues, one per element group, unless the elements are instances of one component.
+- **No free text outside the template's sections.** Every observation goes in a card's Evidence or a table cell. No stray paragraphs, no "Evidence #N" blocks, no working notes between sections.
+- **Length caps.** Summary: about 10 lines. Why this severity: at most 2 sentences, and name the anchor rather than restating it. Observed: at most 3 lines, the decisive measurement and not every reading. Relevant elements: at most 4 references inline. Suggested fix: at most 3 lines. Best practice and Minor rows: one sentence each. Passed: at most 5 lines, with no list of measurements.
+- **Before labelling a gap Best practice,** check whether a criterion applies. A panel with no visible edge in forced colors is 1.4.11. A control name with an unrelated button's text spliced in is 2.5.3 or 4.1.2. If one applies, rate it.
+- **Documentation and test-coverage gaps are not findings.** At most one "Maintainer notes" line under Out of scope.
 - **Headline first.** The one-line headline carries severity, SC, instance count and confidence, so a reader can scan the report without opening any evidence.
 - **Repro steps** must be runnable by someone who hasn't seen the code. If the issue is code-only and can't be reproduced in a browser, say so and give the code path to trace instead.
 - **Observed** and **Expected** are different things. Don't restate the fix as "expected".

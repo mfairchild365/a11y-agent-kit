@@ -4,7 +4,7 @@ Rules that decide how a finding is rated and logged. Apply them to every audit a
 
 ## A. Severity anchors
 
-Severity comes from what the user can't do, not from which success criterion failed. Anchors are floors: go higher with a stated reason, and never lower without one. When an anchor sets the severity, say so in **Why this severity**.
+Severity comes from what the user can't do, not from which success criterion failed. Anchors are floors. Go higher with a stated reason. Never go lower: when the impact is uncertain (for example "only Safari, untested"), keep the severity and lower the confidence, or move the finding to Needs verification. When an anchor sets the severity, say so in **Why this severity**, in a few words.
 
 | Failure | Severity |
 |---|---|
@@ -29,4 +29,4 @@ Severity comes from what the user can't do, not from which success criterion fai
 
 Things that are not issues, or that are reported elsewhere. Add an entry here when told not to log something, with the reason.
 
-_None yet._
+- **Documentation and test-coverage gaps** (a README table out of date, missing unit tests). They are not user-facing accessibility findings. At most one "Maintainer notes" line under Out of scope, never in the digest. Exception: documentation that makes a false accessibility claim users would rely on is a real finding.
