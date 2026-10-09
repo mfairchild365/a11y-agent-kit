@@ -41,6 +41,11 @@
 
   .hint { white-space: nowrap; margin: 0 0 1rem; }
   .outlined { padding: .4rem .9rem; border: 1px solid #c8c8c8; background: #fff; color: #1a1a1a; font: inherit; cursor: pointer; margin-left: .5rem; }
+  .snackbars { margin-top: 1rem; max-width: 24rem; }
+  .snackbar { display: flex; align-items: center; gap: .75rem; background: #2b2b2b; color: #fff; padding: .75rem 1rem; border-radius: 4px; margin-top: .5rem; }
+  .snackbar svg { flex: none; }
+  .snackbar .snack-text { flex: 1; margin: 0; }
+  .snackbar button { background: none; border: 1px solid transparent; color: #8ab4f8; font: inherit; padding: .4rem .6rem; min-height: 2rem; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -67,9 +72,9 @@
     </li>
   </ul>
 
-  <div class="dropdown" id="dd" hidden>
+  <section class="dropdown" id="dd" aria-labelledby="dd-h" hidden>
     <div class="top">
-      <h3>More students</h3>
+      <h3 id="dd-h">More students</h3>
       <button type="button" class="close" id="close">
         <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke="#1a1a1a" stroke-width="2"/></svg>
       </button>
@@ -81,11 +86,18 @@
       <li>Dmitri Shostakovich-Rimsky-Korsakov</li>
       <li>Eleanor Fitzgerald-Montmorency</li>
     </ul>
-  </div>
+  </section>
 
   <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
   <button type="button" class="add">Add student</button>
+  <div class="snackbars" id="snackbars" role="status"></div>
+
+  <button type="button" class="add" id="archive">Archive Priya</button>
+
+  <button type="button" class="add" id="save">Save roster</button>
+
+  <button type="button" class="add" id="mute">Mute alerts</button>
 </main>
 
 <script>
@@ -101,7 +113,25 @@
   }
   document.querySelector('.add').addEventListener('click', () => announce('Student added to the roster'));
   more.addEventListener('click', () => setOpen(dd.hidden));
+  const mute = document.getElementById('mute');
+  mute.addEventListener('click', () => { mute.textContent = mute.textContent === 'Mute alerts' ? 'Unmute alerts' : 'Mute alerts'; });
   document.getElementById('close').addEventListener('click', () => setOpen(false));
+  const snackbars = document.getElementById('snackbars');
+  function snackbar(iconPath, iconColor, text, actionLabel, autoDismiss) {
+    const el = document.createElement('div');
+    el.className = 'snackbar';
+    el.innerHTML = '<svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="' + iconPath + '" fill="' + iconColor + '"/></svg><p class="snack-text"></p>';
+    el.querySelector('.snack-text').textContent = text;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = actionLabel;
+    btn.addEventListener('click', () => el.remove());
+    el.appendChild(btn);
+    snackbars.appendChild(el);
+    if (autoDismiss) setTimeout(() => el.remove(), 5000);
+  }
+  document.getElementById('archive').addEventListener('click', () => snackbar('M10 1l9 17H1z', '#6b6b6b', 'Priya Rao was moved to the archive.', 'Undo', true));
+  document.getElementById('save').addEventListener('click', () => snackbar('M3 10l5 5 9-10-2-1-7 8-3-3z', '#7ddc9a', 'Success: roster saved.', 'Dismiss notification', false));
 </script>
 </body>
 </html>

@@ -144,6 +144,23 @@
         "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
         "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
       ]
+    },
+    {
+      "id": 10,
+      "name": "toast-archive-undo",
+      "prompt": "Build a short student roster with an Archive button on each row. After a student is archived, give the user feedback that it happened, with a way to undo it. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page where archiving shows a status message in a live region that exists before the text is inserted, the message states its type in text, the Undo is outside the live region (inline on the row or in a history), nothing the user needs disappears on a timer without an alternative, and focus lands somewhere logical after Undo.",
+      "files": [],
+      "expectations": [
+        "The status message is added to a role=\"status\" (or role=\"log\") element that is in the DOM, empty and not hidden, before the message is inserted",
+        "The message states its type in text (for example \"Success:\"), or any status icon has a text alternative; an icon beside text that states the type is aria-hidden",
+        "The Undo control is not inside the live region: it is inline on the affected row or in a persistent history list, and it is a native button reachable by keyboard",
+        "The user can recover the message or the action after any timeout: a history list or an inline state, not only a timed toast",
+        "Focus is not moved to the message, and after Undo it lands on a logical control, not <body>",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
     }
   ]
 }

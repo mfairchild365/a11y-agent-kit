@@ -47,7 +47,7 @@
     {
       "id": "input-boundary-contrast",
       "element": ["filter", "input", "text field"],
-      "match": ["border", "boundary", "input", "contrast", "filter"],
+      "match": ["border", "boundary", "input", "filter"],
       "sc": "1.4.11",
       "severity": ["Critical", "Blocker"],
       "tier": "card",
@@ -96,6 +96,61 @@
       "tier": "verify",
       "instances": 1,
       "found_by": "live-region-probe.mjs reports a transient message (about 100ms); whether it is spoken needs a screen reader"
+    },
+    {
+      "id": "named-section-with-heading",
+      "element": ["dropdown", "more students", "section", "panel"],
+      "match": ["named section", "labelled section", "labeled section", "section with a heading", "redundant name", "redundant landmark"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "correction": "C-020",
+      "found_by": "static review: the section has aria-labelledby and a visible h3"
+    },
+    {
+      "id": "button-text-state-change",
+      "element": ["mute", "alerts", "button"],
+      "match": ["inner text", "button text", "mute alerts", "unmute", "text change", "label change", "changes its text"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "correction": "C-021",
+      "found_by": "static review: the click handler rewrites the button's textContent"
+    },
+    {
+      "id": "snackbar-timeout",
+      "element": ["snackbar", "archive", "undo", "notification"],
+      "match": ["auto-dismiss", "dismiss", "timer", "time limit", "5 seconds", "disappear", "snackbar", "timing"],
+      "sc": "2.2.1",
+      "severity": ["Minor", "Moderate", "Critical", "Blocker"],
+      "tier": "card",
+      "instances": 1,
+      "correction": "C-017",
+      "found_by": "live-region-probe.mjs dwell (about 5s) and setTimeout in the script. The suggested fix must say actionable or important messages shouldn't auto-dismiss and dismissed messages should be re-openable, not only pause on hover or focus."
+    },
+    {
+      "id": "snackbar-icon-alt",
+      "element": ["snackbar", "archive", "warning icon", "status icon", "triangle"],
+      "match": ["snackbar", "warning", "status icon", "triangle", "aria-hidden"],
+      "sc": "1.1.1",
+      "severity": ["Moderate", "Critical", "Blocker"],
+      "tier": "card",
+      "instances": 1,
+      "correction": "C-018",
+      "found_by": "accessibility tree: the triangle is hidden and the text 'Priya Rao was moved to the archive.' doesn't say it is a warning"
+    },
+    {
+      "id": "snackbar-icon-contrast",
+      "element": ["snackbar", "archive", "warning icon", "status icon", "triangle"],
+      "match": ["snackbar", "warning icon", "status icon", "triangle", "2.66"],
+      "sc": "1.4.11",
+      "severity": ["Moderate", "Critical", "Blocker"],
+      "tier": "card",
+      "instances": 1,
+      "correction": "C-016",
+      "found_by": "contrast calculation: #6b6b6b on #2b2b2b is 2.66:1"
     }
   ],
   "decoys": [
@@ -135,6 +190,24 @@
       "allowed_tiers": ["best-practice"],
       "correction": "C-009",
       "why": "A panel or dropdown edge isn't required to contrast (1.4.11). Best practice at most."
+    },
+    {
+      "id": "snackbar-undo-in-live-region",
+      "match": ["undo button", "undo inside", "interactive control", "action in the live region", "control inside the live region", "action inside"],
+      "allowed_tiers": ["best-practice"],
+      "correction": "C-019",
+      "why": "An Undo button inside a role=status toast. Best practice only: the live region doesn't announce the control's role. The timeout is a separate 2.2.1 issue."
+    },
+    {
+      "id": "snackbar-live-region",
+      "match": ["snackbar live region", "role=\"status\"", "snackbars region", "snackbar region", "status region"],
+      "allowed_tiers": ["best-practice"],
+      "why": "The snackbars are added to a role=status region that exists from page load. A message in a live region is correct for 4.1.3. Don't log it."
+    },
+    {
+      "id": "snackbar-icon-with-type-text",
+      "match": ["save roster", "success:", "success snackbar", "success message", "dismiss notification"],
+      "why": "The 'Success: roster saved.' snackbar has no timer, states its type in text, so its aria-hidden check icon is decorative, and its Dismiss button is named. Correct. Don't log it (C-018)."
     }
   ]
 }

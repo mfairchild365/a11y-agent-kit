@@ -54,6 +54,12 @@
      back-and-forth to read line by line, so it isn't a Reflow failure. Best practice at most (wrap it). */
   .hint { white-space: nowrap; margin: 0 0 1rem; }
   .outlined { padding: .4rem .9rem; border: 1px solid #c8c8c8; background: #fff; color: #1a1a1a; font: inherit; cursor: pointer; margin-left: .5rem; }
+  /* SEED (1.4.11, Moderate at minimum): the warning icon is #6b6b6b on the #2b2b2b snackbar, 2.66:1 (needs 3:1). It carries the message type, so it is a required cue. */
+  .snackbars { margin-top: 1rem; max-width: 24rem; }
+  .snackbar { display: flex; align-items: center; gap: .75rem; background: #2b2b2b; color: #fff; padding: .75rem 1rem; border-radius: 4px; margin-top: .5rem; }
+  .snackbar svg { flex: none; }
+  .snackbar .snack-text { flex: 1; margin: 0; }
+  .snackbar button { background: none; border: 1px solid transparent; color: #8ab4f8; font: inherit; padding: .4rem .6rem; min-height: 2rem; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -86,9 +92,10 @@
     </li>
   </ul>
 
-  <div class="dropdown" id="dd" hidden>
+  <!-- SEED (best practice): the panel is a section named with aria-labelledby, and it has a visible heading. Redundant name, announced twice. -->
+  <section class="dropdown" id="dd" aria-labelledby="dd-h" hidden>
     <div class="top">
-      <h3>More students</h3>
+      <h3 id="dd-h">More students</h3>
       <!-- SEED (4.1.2): icon-only button with no accessible name. axe: button-name. -->
       <button type="button" class="close" id="close">
         <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke="#1a1a1a" stroke-width="2"/></svg>
@@ -101,7 +108,7 @@
       <li>Dmitri Shostakovich-Rimsky-Korsakov</li>
       <li>Eleanor Fitzgerald-Montmorency</li>
     </ul>
-  </div>
+  </section>
 
   <!-- SEED (4.1.3, Needs verification): the "Add student" button puts a message into a shared, visually hidden announcer
        and clears it 100ms later. Focus stays on the button, so this is a status message. The browser exposes a live region,
@@ -111,6 +118,22 @@
 
   <!-- DECOY: a plain native button with a visible, matching label. Its name is correct and must not be reported. (It is also the trigger for the announcer seed above.) -->
   <button type="button" class="add">Add student</button>
+  <!-- DECOY (4.1.3): the snackbars are added to a live region (role="status") that exists from page load. A message in a live region is correct. Don't log it. -->
+  <div class="snackbars" id="snackbars" role="status"></div>
+
+  <!-- DECOY (best practice only): the Undo button sits inside the role="status" region. A control inside a live region doesn't announce its role; O'Hara and Roselli advise against it. No success criterion fails on that alone, so it is a Best practice, never a card. -->
+  <!-- SEED (1.1.1, 2.2.1, 1.4.11): "Archive Priya" shows a snackbar with an Undo action that removes itself after 5 seconds.
+       - 2.2.1: an actionable message auto-dismisses, and there is no way to re-open it (no inbox or history).
+       - 1.1.1: the triangle icon is aria-hidden, but it is the only thing that says this is a warning. The text doesn't state the type.
+       - 1.4.11: the icon is 2.66:1 on the snackbar (see the CSS). -->
+  <button type="button" class="add" id="archive">Archive Priya</button>
+
+  <!-- DECOY (1.1.1, 2.2.1): this message has no timer, it names its own type in text ("Success:"), so its aria-hidden check icon is decorative,
+       and it has a named Dismiss button. Nothing here is a failure. Don't log it. -->
+  <button type="button" class="add" id="save">Save roster</button>
+
+  <!-- SEED (best practice): the focused button's inner text changes to show its new state ("Mute alerts" to "Unmute alerts"). Some screen readers don't announce it. Better: aria-pressed. -->
+  <button type="button" class="add" id="mute">Mute alerts</button>
 </main>
 
 <script>
@@ -126,7 +149,25 @@
   }
   document.querySelector('.add').addEventListener('click', () => announce('Student added to the roster'));
   more.addEventListener('click', () => setOpen(dd.hidden));
+  const mute = document.getElementById('mute');
+  mute.addEventListener('click', () => { mute.textContent = mute.textContent === 'Mute alerts' ? 'Unmute alerts' : 'Mute alerts'; });
   document.getElementById('close').addEventListener('click', () => setOpen(false));
+  const snackbars = document.getElementById('snackbars');
+  function snackbar(iconPath, iconColor, text, actionLabel, autoDismiss) {
+    const el = document.createElement('div');
+    el.className = 'snackbar';
+    el.innerHTML = '<svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 20 20"><path d="' + iconPath + '" fill="' + iconColor + '"/></svg><p class="snack-text"></p>';
+    el.querySelector('.snack-text').textContent = text;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = actionLabel;
+    btn.addEventListener('click', () => el.remove());
+    el.appendChild(btn);
+    snackbars.appendChild(el);
+    if (autoDismiss) setTimeout(() => el.remove(), 5000);
+  }
+  document.getElementById('archive').addEventListener('click', () => snackbar('M10 1l9 17H1z', '#6b6b6b', 'Priya Rao was moved to the archive.', 'Undo', true));
+  document.getElementById('save').addEventListener('click', () => snackbar('M3 10l5 5 9-10-2-1-7 8-3-3z', '#7ddc9a', 'Success: roster saved.', 'Dismiss notification', false));
 </script>
 </body>
 </html>

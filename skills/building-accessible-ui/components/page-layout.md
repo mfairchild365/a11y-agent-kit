@@ -44,8 +44,8 @@ Full views with navigation, hero content, product cards / listings, promos, and 
 <main id="maincontent" tabindex="-1">
   <h1>Fresh this week</h1>
 
-  <section aria-labelledby="featured-heading">
-    <h2 id="featured-heading">Featured</h2>
+  <section>
+    <h2>Featured</h2>
     <ul>
       <li>
         <article>
