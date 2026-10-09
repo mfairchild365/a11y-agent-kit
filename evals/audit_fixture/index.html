@@ -72,9 +72,9 @@
     </li>
   </ul>
 
-  <div class="dropdown" id="dd" hidden>
+  <section class="dropdown" id="dd" aria-labelledby="dd-h" hidden>
     <div class="top">
-      <h3>More students</h3>
+      <h3 id="dd-h">More students</h3>
       <button type="button" class="close" id="close">
         <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke="#1a1a1a" stroke-width="2"/></svg>
       </button>
@@ -86,7 +86,7 @@
       <li>Dmitri Shostakovich-Rimsky-Korsakov</li>
       <li>Eleanor Fitzgerald-Montmorency</li>
     </ul>
-  </div>
+  </section>
 
   <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 
@@ -96,6 +96,8 @@
   <button type="button" class="add" id="archive">Archive Priya</button>
 
   <button type="button" class="add" id="save">Save roster</button>
+
+  <button type="button" class="add" id="mute">Mute alerts</button>
 </main>
 
 <script>
@@ -111,6 +113,8 @@
   }
   document.querySelector('.add').addEventListener('click', () => announce('Student added to the roster'));
   more.addEventListener('click', () => setOpen(dd.hidden));
+  const mute = document.getElementById('mute');
+  mute.addEventListener('click', () => { mute.textContent = mute.textContent === 'Mute alerts' ? 'Unmute alerts' : 'Mute alerts'; });
   document.getElementById('close').addEventListener('click', () => setOpen(false));
   const snackbars = document.getElementById('snackbars');
   function snackbar(iconPath, iconColor, text, actionLabel, autoDismiss) {

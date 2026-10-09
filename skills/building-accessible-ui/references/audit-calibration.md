@@ -27,6 +27,7 @@ Severity comes from what the user can't do, not from which success criterion fai
 - A status icon (red x, orange triangle, green check) is **not decorative** when the message text doesn't also state the type ("Error", "Warning", "Success"). Text that only hints at it doesn't count. Hiding such an icon with `aria-hidden` fails 1.1.1: give it a text alternative, or make the text state the type. An icon beside text that does state the type is decorative: don't log it.
 - An auto-dismissing message fails 2.2.1 unless the user can turn off, adjust or extend the limit, or there is an alternative that doesn't depend on the timer. Pause on hover or focus is a good fix but not enough alone, because users may not reach the message in time. The expected fix: **actionable or important messages don't auto-dismiss**, and **dismissed messages can be re-opened** (for example a notification inbox or history).
 - A message in a live region (`role="status"`, `role="alert"`) is correct for 4.1.3. Don't log it.
+- A toast or snackbar that has a title must mark it up as a heading. A title in bold text, a `<div>` or a `<span>` is a 1.3.1 failure (rated as a fake heading; see `audit-procedures.md` 1.3.1).
 - An interactive control other than Dismiss inside a live-region toast (an Undo button, for example) is a **Best practice**, not a finding: the live region doesn't announce the control's role, and users may not reach it in time. No success criterion fails on that alone. If the message also times out, log the timeout under 2.2.1.
 
 **What a criterion requires comes from its W3C Understanding document, not from memory.** The boundaries are in `audit-procedures.md` ("Does not fail"); read the Understanding page (`https://www.w3.org/WAI/WCAG22/Understanding/<slug>.html`) for any criterion whose boundary is in doubt.
@@ -46,3 +47,12 @@ Things that are not issues, or that are reported elsewhere. Add an entry here wh
 
 - **Documentation and test-coverage gaps** (a README table out of date, missing unit tests). They are not user-facing accessibility findings. At most one "Maintainer notes" line under Out of scope, never in the digest. Exception: documentation that makes a false accessibility claim users would rely on is a real finding.
 - **`list-style: none` on a list without `role="list"`.** Not a WCAG failure: the markup is still a list, and Safari with VoiceOver drops list semantics from unstyled lists by design (an Apple decision). Don't log it. If you mention it at all, it is a Best practice, never a finding.
+
+## D. Best practices to look for
+
+Gaps with no success criterion behind them. Each gets one row in the Best practices table, labelled "Best practice", with no severity. Look for them on every audit.
+
+- **A named section that already has a heading.** A `<section>` or `role="region"` with `aria-label` or `aria-labelledby` and a visible heading becomes a landmark, so screen reader users hear the name next to the heading. Avoid the name whenever possible. A name that tells apart two landmarks of the same kind (two `<nav>`) is needed, so don't log that.
+- **A focused button whose inner text changes to show a new state** ("Mute" to "Unmute", "Archive" to "Undo archive"). Some screen readers don't announce inner text changes. Better: `aria-pressed` or another state attribute, a separate status message, or a focus move to a control whose name says the result. If the text change is the only way the user learns the outcome of an action (no live region, no focus move), also list it under Needs verification for 4.1.3, with the screen reader check. A toggle that only shows its own state stays a Best practice.
+- **An interactive control other than Dismiss inside a live-region toast** (section A, status messages).
+- **A skipped heading level** (`audit-procedures.md` 1.3.1).

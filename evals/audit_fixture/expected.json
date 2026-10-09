@@ -98,6 +98,28 @@
       "found_by": "live-region-probe.mjs reports a transient message (about 100ms); whether it is spoken needs a screen reader"
     },
     {
+      "id": "named-section-with-heading",
+      "element": ["dropdown", "more students", "section", "panel"],
+      "match": ["named section", "labelled section", "labeled section", "section with a heading", "redundant name", "redundant landmark"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "correction": "C-020",
+      "found_by": "static review: the section has aria-labelledby and a visible h3"
+    },
+    {
+      "id": "button-text-state-change",
+      "element": ["mute", "alerts", "button"],
+      "match": ["inner text", "button text", "mute alerts", "unmute", "text change", "label change", "changes its text"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "correction": "C-021",
+      "found_by": "static review: the click handler rewrites the button's textContent"
+    },
+    {
       "id": "snackbar-timeout",
       "element": ["snackbar", "archive", "undo", "notification"],
       "match": ["auto-dismiss", "dismiss", "timer", "time limit", "5 seconds", "disappear", "snackbar", "timing"],

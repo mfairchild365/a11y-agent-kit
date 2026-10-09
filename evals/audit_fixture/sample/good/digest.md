@@ -3,7 +3,7 @@
 2. Fix the "+5" hover and open contrast (#3)
 3. Darken the filter input's border to 3:1 (#4)
 
-Critical 5 · Moderate 5 · Minor 0 · Best practice 3 · Needs verification 1
+Critical 5 · Moderate 5 · Minor 0 · Best practice 5 · Needs verification 1
 Checks: axe, keyboard, hover, 320px reflow and contrast run. No screen reader.
 
 #1 · Critical · 2.1.1 · Tooltip bubbles (3) — can't be reached by keyboard → make them focusable, named buttons
@@ -19,7 +19,9 @@ Checks: axe, keyboard, hover, 320px reflow and contrast run. No screen reader.
 #11 · Best practice · Initials bubbles — no reduced-motion block for the hover scale → add a prefers-reduced-motion rule
 #12 · Best practice · Export list button — its 1.7:1 border isn't required (the text identifies it) → optionally darken it
 #13 · Best practice · Snackbar Undo button — inside the live region, its role isn't announced → move Undo next to the row or into a history
-#14 · Needs verification · 4.1.3 · "Add student" announcer — message removed after about 110ms (probe: transient) → test with NVDA and VoiceOver
+#14 · Best practice · More students dropdown — named section with a visible heading → remove aria-labelledby
+#15 · Best practice · "Mute alerts" button — inner text change isn't announced by some screen readers → keep the text, use aria-pressed
+#16 · Needs verification · 4.1.3 · "Add student" announcer — message removed after about 110ms (probe: transient) → test with NVDA and VoiceOver
 
 Full report: evals/audit_fixture/sample/good/report.html
 Open it: shown in the app (sample: no real file was opened)

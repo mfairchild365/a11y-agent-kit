@@ -130,7 +130,7 @@ is kept for comparison with skill-creator's numbers.
 
 ## Audit agent check
 
-`audit_fixture/index.html` is a small class roster with 12 seeded defects and 9 decoys that look
+`audit_fixture/index.html` is a small class roster with 14 seeded defects and 9 decoys that look
 suspicious but are correct. `audit_fixture/expected.json` is the answer key: for each seed, its
 WCAG SC, the allowed severity range, the report tier it belongs in (card, Minor row, or Needs
 verification) and the expected instance count. The seeds are chosen to exercise the report

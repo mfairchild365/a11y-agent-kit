@@ -9,6 +9,7 @@ Regions/landmarks, heading outline, and view title.
 - Use `<header>`, `<nav>`, `<main>`, `<footer>` for their semantic roles. Avoid `role="banner"`, `role="navigation"`, `role="main"`, `role="contentinfo"` on generic elements unless a native landmark can't be used.
 - Exactly one `<main>` per page. On multi-page sites, make `<main id="maincontent" tabindex="-1">` the bypass-block target.
 - If multiple landmarks of the same kind exist (e.g., two `<nav>`), give each a unique accessible name via `aria-label` or `aria-labelledby`.
+- Don't name a `<section>` or `role="region"` that already has a visible heading (`aria-label` or `aria-labelledby`): it becomes a landmark that screen readers announce next to the heading, a redundant announcement. An unnamed `<section>` isn't a landmark. Name a landmark only when the name tells it apart from another of the same kind.
 - Complementary content uses `<aside>`. Search regions use `role="search"` on a `<form>` or a wrapping element.
 
 ### Heading outline
@@ -28,6 +29,7 @@ Regions/landmarks, heading outline, and view title.
 - [ ] Major regions use native landmarks: `<header>`, `<nav>`, `<main>`, `<footer>` (and `<aside>` / `role="search"` when applicable).
 - [ ] Exactly one `<main>` per view.
 - [ ] Duplicated landmarks (e.g., multiple `<nav>`) each have a unique accessible name via `aria-label` or `aria-labelledby`.
+- [ ] Sections that have a visible heading aren't also given `aria-label` or `aria-labelledby`.
 - [ ] Exactly one `<h1>` per view, describing the view topic.
 - [ ] Heading levels are nested and never skipped (no `<h1>` → `<h3>`).
 - [ ] Headings are used for sections of content, not for visual styling of decorative text.

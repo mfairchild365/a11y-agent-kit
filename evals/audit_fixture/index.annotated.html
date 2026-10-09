@@ -92,9 +92,10 @@
     </li>
   </ul>
 
-  <div class="dropdown" id="dd" hidden>
+  <!-- SEED (best practice): the panel is a section named with aria-labelledby, and it has a visible heading. Redundant name, announced twice. -->
+  <section class="dropdown" id="dd" aria-labelledby="dd-h" hidden>
     <div class="top">
-      <h3>More students</h3>
+      <h3 id="dd-h">More students</h3>
       <!-- SEED (4.1.2): icon-only button with no accessible name. axe: button-name. -->
       <button type="button" class="close" id="close">
         <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 2l12 12M14 2L2 14" stroke="#1a1a1a" stroke-width="2"/></svg>
@@ -107,7 +108,7 @@
       <li>Dmitri Shostakovich-Rimsky-Korsakov</li>
       <li>Eleanor Fitzgerald-Montmorency</li>
     </ul>
-  </div>
+  </section>
 
   <!-- SEED (4.1.3, Needs verification): the "Add student" button puts a message into a shared, visually hidden announcer
        and clears it 100ms later. Focus stays on the button, so this is a status message. The browser exposes a live region,
@@ -130,6 +131,9 @@
   <!-- DECOY (1.1.1, 2.2.1): this message has no timer, it names its own type in text ("Success:"), so its aria-hidden check icon is decorative,
        and it has a named Dismiss button. Nothing here is a failure. Don't log it. -->
   <button type="button" class="add" id="save">Save roster</button>
+
+  <!-- SEED (best practice): the focused button's inner text changes to show its new state ("Mute alerts" to "Unmute alerts"). Some screen readers don't announce it. Better: aria-pressed. -->
+  <button type="button" class="add" id="mute">Mute alerts</button>
 </main>
 
 <script>
@@ -145,6 +149,8 @@
   }
   document.querySelector('.add').addEventListener('click', () => announce('Student added to the roster'));
   more.addEventListener('click', () => setOpen(dd.hidden));
+  const mute = document.getElementById('mute');
+  mute.addEventListener('click', () => { mute.textContent = mute.textContent === 'Mute alerts' ? 'Unmute alerts' : 'Mute alerts'; });
   document.getElementById('close').addEventListener('click', () => setOpen(false));
   const snackbars = document.getElementById('snackbars');
   function snackbar(iconPath, iconColor, text, actionLabel, autoDismiss) {
