@@ -8,6 +8,7 @@ Open relevant files when the change contains (or needs to contain) the matching 
 - `forms.md` — forms (inputs/fields).
 - `disclosure-widget.md` — button + hidden panel (FAQs, "show more").
 - `tooltip.md` — hover/focus tooltips on controls; toggletips for standalone info buttons.
+- `toast.md` — toasts / snackbars: when to use one, text-only status, history instead of timers.
 - `modal-dialog.md` — blocking overlay with focus trap.
 - `page-layout.md` — full views (primarily web): landmarks, skip link, navigation, cards, promos.
 

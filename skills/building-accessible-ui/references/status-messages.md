@@ -1,6 +1,6 @@
 # Status messages (WCAG 4.1.3)
 
-Announcing dynamic content changes (toasts, inline validation summaries, loading/progress, cart/count changes) to assistive tech without moving focus. WCAG defines a status message as a change in content that tells the user about the success or result of an action, the waiting state of an app, the progress of a process, or the existence of errors, and that doesn't change context. Because focus does not move, the user needs another channel (a live region or role) for the change to be perceivable. Keep messages short and specific; avoid duplicate announcements; do not announce *and* move focus — pick one. If a UI/component library provides an announcement primitive, prefer it.
+Announcing dynamic content changes (toasts, inline validation summaries, loading/progress, cart/count changes) to assistive tech without moving focus. WCAG defines a status message as a change in content that tells the user about the success or result of an action, the waiting state of an app, the progress of a process, or the existence of errors, and that doesn't change context. Because focus does not move, the user needs another channel (a live region or role) for the change to be perceivable. Keep messages short and specific; avoid duplicate announcements; do not announce *and* move focus — pick one. If a UI/component library provides an announcement primitive, prefer it. For toasts and snackbars (timers, actions, history), see `components/toast.md`.
 
 ## What counts
 

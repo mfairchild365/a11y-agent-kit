@@ -4,7 +4,7 @@
 
 - **Scope:** `index.html`, its dropdown and its snackbars. Out of scope: nothing else.
 - **Verdict:** No Blockers. Keyboard users can't reach the student bubbles, and a contrast failure and an unnamed button make the overflow dropdown hard to use.
-- **Findings:** Blocker 0, Critical 5, Moderate 5, Minor 0. 2 best practices. 1 more needs verification.
+- **Findings:** Blocker 0, Critical 5, Moderate 5, Minor 0. 3 best practices. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
 - **Fix first:**
   1. Make the initials bubbles keyboard-reachable and named (#1)
@@ -244,12 +244,13 @@ None.
 |---|---|---|---|---|
 | 11 | Initials bubbles | No prefers-reduced-motion block for the hover scale | Wrap the `transform` transition in `@media (prefers-reduced-motion: no-preference)`. | High |
 | 12 | Export list button | Its 1.7:1 border is not required to contrast, because the 17:1 text identifies the button | Optionally darken the border to 3:1 or more so every control is clearly delineated. | High |
+| 13 | Snackbar after "Archive Priya" | An Undo button inside the live region: its role isn't announced and users may not reach it before the timer ends (the timer itself is #7) | Show Undo next to the archived row or in a history list, and keep the toast text-only. | Medium |
 
 ## Needs verification
 
 | # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |
 |---|---|---|---|---|---|
-| 13 | Announcer after "Add student" | 4.1.3 | Minor | The probe reports a transient message: "Student added to the roster" is put into a hidden `aria-live` announcer and removed after about 110ms. The region existed before and is exposed. | Test with NVDA and VoiceOver whether the message is spoken. |
+| 14 | Announcer after "Add student" | 4.1.3 | Minor | The probe reports a transient message: "Student added to the roster" is put into a hidden `aria-live` announcer and removed after about 110ms. The region existed before and is exposed. | Test with NVDA and VoiceOver whether the message is spoken. |
 
 ## Passed / not an issue
 
@@ -262,7 +263,7 @@ None.
 
 ## Needs manual testing
 
-- Screen reader announcement of the status message (#13).
+- Screen reader announcement of the status message (#14).
 - Voice control on the "JD" bubble (#10).
 
 ## Out of scope

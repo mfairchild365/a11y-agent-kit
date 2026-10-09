@@ -170,6 +170,13 @@
       "why": "A panel or dropdown edge isn't required to contrast (1.4.11). Best practice at most."
     },
     {
+      "id": "snackbar-undo-in-live-region",
+      "match": ["undo button", "undo inside", "interactive control", "action in the live region", "control inside the live region", "action inside"],
+      "allowed_tiers": ["best-practice"],
+      "correction": "C-019",
+      "why": "An Undo button inside a role=status toast. Best practice only: the live region doesn't announce the control's role. The timeout is a separate 2.2.1 issue."
+    },
+    {
       "id": "snackbar-live-region",
       "match": ["snackbar live region", "role=\"status\"", "snackbars region", "snackbar region", "status region"],
       "allowed_tiers": ["best-practice"],

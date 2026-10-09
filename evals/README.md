@@ -6,8 +6,8 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 
 ## What's here
 
-- `evals.json` — 9 test prompts (7 adapted from upstream `microsoft/a11y-llm-eval` scenarios,
-  2 new ones) with human-readable expectations.
+- `evals.json` — 10 test prompts (7 adapted from upstream `microsoft/a11y-llm-eval` scenarios,
+  3 new ones) with human-readable expectations.
 - `files/account-settings.html` — seeded input page for eval 8 (deliberately contains a few
   out-of-scope accessibility issues, to check that the skill reports them rather than
   silently rewriting unrelated code).
@@ -82,7 +82,7 @@ CLAUDE.md, or user plugins. From the repo root:
 npm i --prefix evals                     # base-layer deps (once)
 ./evals/fetch-upstream.sh                # upstream layer (optional, once)
 
-# 9 evals × 2 configs × 4 runs = 72 runs
+# 10 evals × 2 configs × 4 runs = 80 runs
 python3 evals/run_cli_eval.py --model claude-sonnet-4-6 \
   --workspace evals/workspace/sonnet46 --scratch "$TMPDIR/s46" --runs 4
 
@@ -130,7 +130,7 @@ is kept for comparison with skill-creator's numbers.
 
 ## Audit agent check
 
-`audit_fixture/index.html` is a small class roster with 12 seeded defects and 8 decoys that look
+`audit_fixture/index.html` is a small class roster with 12 seeded defects and 9 decoys that look
 suspicious but are correct. `audit_fixture/expected.json` is the answer key: for each seed, its
 WCAG SC, the allowed severity range, the report tier it belongs in (card, Minor row, or Needs
 verification) and the expected instance count. The seeds are chosen to exercise the report
