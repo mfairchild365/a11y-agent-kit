@@ -2,9 +2,9 @@
 
 ## Summary
 
-- **Scope:** `index.html` and its dropdown. Out of scope: nothing else.
+- **Scope:** `index.html`, its dropdown and its snackbars. Out of scope: nothing else.
 - **Verdict:** No Blockers. Keyboard users can't reach the student bubbles, and a contrast failure and an unnamed button make the overflow dropdown hard to use.
-- **Findings:** Blocker 0, Critical 4, Moderate 3, Minor 0. 2 best practices. 1 more needs verification.
+- **Findings:** Blocker 0, Critical 5, Moderate 5, Minor 0. 2 best practices. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
 - **Fix first:**
   1. Make the initials bubbles keyboard-reachable and named (#1)
@@ -127,15 +127,76 @@ The icon-only close button in the dropdown. 1 instance.
   - **Confidence:** High. Flagged by axe and confirmed in the accessibility tree.
   - **Source:** axe `button-name` (critical)
 
+### Element: Snackbar after "Archive Priya"
+
+A message with a warning icon and an Undo button that appears after "Archive Priya". 1 instance.
+
+#### 6. Critical · 1.4.11 · 1 instances · High confidence · Warning icon is 2.66:1 against the snackbar
+
+- **Summary:** The icon, #6b6b6b on the #2b2b2b snackbar, is 2.66:1, below 3:1. See also #8.
+- **Why this severity:** The icon is the only cue to the message type, so it is a required cue and Critical (calibration A). Any other 1.4.11 failure would be Moderate at minimum.
+- **Screenshot:** ![Finding 6: the dim grey triangle icon on the dark snackbar, outlined](screenshots/finding-06-snackbar-icon-contrast.png)
+  Text evidence: computed colors #6b6b6b on #2b2b2b, 2.657:1.
+- **Suggested fix:** Use an icon color of at least 3:1 against #2b2b2b, for example #f0b429.
+- **Evidence:**
+  - **WCAG SC:** 1.4.11 Non-text Contrast
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Click "Archive Priya".
+    2. Read the icon's fill and the snackbar's background from the computed styles.
+  - **Observed:** 2.657:1.
+  - **Expected:** At least 3:1 for a graphic needed to understand the content (1.4.11).
+  - **Relevant elements:** `.snackbar svg path`
+  - **Confidence:** High. Calculated from the stylesheet.
+  - **Source:** contrast calculation
+
+#### 7. Moderate · 2.2.1 · 1 instances · High confidence · Actionable message disappears after 5 seconds and can't be re-opened
+
+- **Summary:** The snackbar removes itself after 5 seconds (`setTimeout(..., 5000)`), including its Undo action. There is no way to turn the limit off, extend it, or bring the message back. See also #6 and #8 (the same snackbar's icon).
+- **Why this severity:** By impact (no confirmed anchor). The message carries an action, so a keyboard or screen reader user who needs longer than 5 seconds to reach Undo loses it.
+- **Screenshot:** ![Finding 7: the dark snackbar "Priya Rao was moved to the archive." with its Undo button, outlined](screenshots/finding-07-snackbar-timeout.png)
+  Text evidence: the script removes the element after 5000ms; there is no inbox or history.
+- **Suggested fix:** Don't auto-dismiss actionable or important messages: keep this one until the user dismisses it or acts. Let users re-open dismissed messages (for example a notifications inbox or history). Pausing the timer on hover and focus helps too, but isn't enough alone, because a user may not get the pointer or focus into the message within 5 seconds.
+- **Evidence:**
+  - **WCAG SC:** 2.2.1 Timing Adjustable
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Open `index.html` and click "Archive Priya".
+    2. Wait 5 seconds.
+  - **Observed:** The snackbar and its Undo button are removed. Nothing records that it appeared.
+  - **Expected:** The user can turn off, adjust or extend the limit, or an alternative that doesn't depend on the timer exists (2.2.1).
+  - **Relevant elements:** `.snackbar` created by `#archive`
+  - **Confidence:** High. Reproduced in Edge; the timer is in the page script.
+  - **Source:** browser check and the live-region probe
+
+#### 8. Moderate · 1.1.1 · 1 instances · High confidence · Warning icon is hidden, and the text doesn't say it is a warning
+
+- **Summary:** The triangle icon is `aria-hidden`, but it is the only thing that says this is a warning. The text, "Priya Rao was moved to the archive.", doesn't state the type. See also #6 and #7.
+- **Why this severity:** By impact (no confirmed anchor). A screen reader user doesn't learn the type of the message. Not Minor, because the type is information.
+- **Screenshot:** ![Finding 8: the triangle icon at the left of the snackbar, outlined](screenshots/finding-08-snackbar-icon-hidden.png)
+  Text evidence: accessibility tree: the snackbar reads "Priya Rao was moved to the archive. Undo" with no mention of a warning.
+- **Suggested fix:** Give the icon a text alternative ("Warning") or start the text with the type ("Warning: ..."). Keep the icon hidden only when the text states the type.
+- **Evidence:**
+  - **WCAG SC:** 1.1.1 Non-text Content
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Click "Archive Priya".
+    2. Read the snackbar in the accessibility tree.
+  - **Observed:** `<svg aria-hidden="true">` carries the warning; the text doesn't.
+  - **Expected:** Non-text content that conveys information has a text alternative serving the equivalent purpose (1.1.1).
+  - **Relevant elements:** `.snackbar svg`
+  - **Confidence:** High. Confirmed in the accessibility tree.
+  - **Source:** accessibility tree
+
 ### Element: Student dropdown
 
 The panel opened by "+5". 1 instance.
 
-#### 6. Moderate · 1.4.10 · 1 instances · High confidence · Dropdown overflows at 320px
+#### 9. Moderate · 1.4.10 · 1 instances · High confidence · Dropdown overflows at 320px
 
 - **Summary:** The dropdown is a fixed 26rem wide and long names don't wrap, so the page scrolls sideways at 320px.
 - **Why this severity:** Reflow failures are Moderate (calibration A). Users who zoom to 400% scroll in two directions but can still read everything.
-- **Screenshot:** ![Finding 6: the outlined dropdown cut off at the right edge of a 320px viewport](screenshots/finding-06-dropdown-reflow.png)
+- **Screenshot:** ![Finding 9: the outlined dropdown cut off at the right edge of a 320px viewport](screenshots/finding-09-dropdown-reflow.png)
   Text evidence: `document.documentElement.scrollWidth` is 464 at a 320px viewport.
 - **Suggested fix:** Replace the fixed width with `max-width: 100%` and let names wrap (`white-space: normal; overflow-wrap: anywhere`).
 - **Evidence:**
@@ -154,11 +215,11 @@ The panel opened by "+5". 1 instance.
 
 The one clickable initials bubble. 1 instance.
 
-#### 7. Moderate · 2.5.3 · 1 instances · Medium confidence · Accessible name doesn't contain the visible label
+#### 10. Moderate · 2.5.3 · 1 instances · Medium confidence · Accessible name doesn't contain the visible label
 
 - **Summary:** The bubble shows "JD" but is named "John Doe", so a voice-control user saying "click JD" doesn't activate it.
 - **Why this severity:** Label in Name mismatches are Moderate (calibration A). Voice-control users can still say the full name or use a numbered overlay.
-- **Screenshot:** ![Finding 7: the outlined "JD" button in the roster; its accessible name is "John Doe"](screenshots/finding-07-label-in-name.png)
+- **Screenshot:** ![Finding 10: the outlined "JD" button in the roster; its accessible name is "John Doe"](screenshots/finding-10-label-in-name.png)
   Text evidence: accessibility tree: `button "John Doe": JD`.
 - **Suggested fix:** Set `aria-label="JD, John Doe"`.
 - **Evidence:**
@@ -181,26 +242,28 @@ None.
 
 | # | Element | What | Suggested fix | Confidence |
 |---|---|---|---|---|
-| 8 | Initials bubbles | No prefers-reduced-motion block for the hover scale | Wrap the `transform` transition in `@media (prefers-reduced-motion: no-preference)`. | High |
-| 9 | Export list button | Its 1.7:1 border is not required to contrast, because the 17:1 text identifies the button | Optionally darken the border to 3:1 or more so every control is clearly delineated. | High |
+| 11 | Initials bubbles | No prefers-reduced-motion block for the hover scale | Wrap the `transform` transition in `@media (prefers-reduced-motion: no-preference)`. | High |
+| 12 | Export list button | Its 1.7:1 border is not required to contrast, because the 17:1 text identifies the button | Optionally darken the border to 3:1 or more so every control is clearly delineated. | High |
 
 ## Needs verification
 
 | # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |
 |---|---|---|---|---|---|
-| 10 | Announcer after "Add student" | 4.1.3 | Minor | The probe reports a transient message: "Student added to the roster" is put into a hidden `aria-live` announcer and removed after about 110ms. The region existed before and is exposed. | Test with NVDA and VoiceOver whether the message is spoken. |
+| 13 | Announcer after "Add student" | 4.1.3 | Minor | The probe reports a transient message: "Student added to the roster" is put into a hidden `aria-live` announcer and removed after about 110ms. The region existed before and is exposed. | Test with NVDA and VoiceOver whether the message is spoken. |
 
 ## Passed / not an issue
 
 - The header icon is `aria-hidden` and decorative: correct.
+- The snackbars are added to a `role="status"` region that exists from page load: correct for 4.1.3.
+- The "Save roster" snackbar has no timer, says "Success:" in text, so its hidden check icon is decorative, and its Dismiss button is named: correct.
 - The "Add student" button is a native `<button>` whose name matches its label: correct.
 - The "marking period" line runs past the edge at 320px, but it is one line, so no one scrolls back-and-forth to read it. Not a 1.4.10 failure.
 - The dropdown's edge is a soft shadow only. A panel edge isn't required to contrast (1.4.11), so it is not logged.
 
 ## Needs manual testing
 
-- Screen reader announcement of the status message (#10).
-- Voice control on the "JD" bubble (#7).
+- Screen reader announcement of the status message (#13).
+- Voice control on the "JD" bubble (#10).
 
 ## Out of scope
 

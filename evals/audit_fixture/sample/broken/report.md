@@ -177,6 +177,7 @@ The one clickable initials bubble. 1 instance.
 | # | Element | WCAG SC | Title | Suggested fix | Confidence |
 |---|---|---|---|---|---|
 | 8 | `ul` lists (roster and dropdown) | 1.3.1 | list-style: none drops list semantics in Safari | Add `role="list"` to both `<ul>` elements. | Medium |
+| 16 | Snackbar warning icon | 1.4.11 | Snackbar warning icon is 2.66:1 against the snackbar | Use a lighter icon color. | High |
 | 12 | Initials bubbles | Best practice | Rated Minor: no prefers-reduced-motion block | Wrap the transition | High |
 
 ## Best practices
