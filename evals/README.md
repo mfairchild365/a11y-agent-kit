@@ -26,11 +26,17 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `trigger_eval.json` + `trigger_check.mjs` + `trigger_fixture/` — checks whether the skill's
   description makes it fire on the right requests (see [Trigger checks](#trigger-checks)).
 - `run_trigger_eval.py` — runs skill-creator's own trigger eval inside the Claude Code sandbox.
+- `run_all_tests.mjs` — runs every test below and every fixture suite in one go (`--no-browser` skips the ones that need a browser).
 - `check_fixtures/` + `run_check_fixtures.mjs` + `test_check_runner.mjs` — the required test
   suite for every deterministic check the kit ships: positive, negative, edge and termination
-  fixtures with answer keys (see [`check_fixtures/README.md`](check_fixtures/README.md)).
+  fixtures with answer keys (see [`check_fixtures/README.md`](check_fixtures/README.md)). It holds the suites for
+  `tree-pass.mjs`, `keyboard-walk.mjs` and `compare-reports.mjs`.
+- `guard_fixture/` + `check_guard_run.mjs` + `run_guard_eval.mjs` + `test_check_guard_run.mjs` — checks that an agent turns an
+  audit report's Guards into tests (see [Guard run check](#guard-run-check)).
 - `test_eval_tooling.mjs` + `fake_claude.mjs` — tests the grading and summary scripts, and runs `run_cli_eval.mjs` and `trigger_check.mjs` end to end against a fake `claude` CLI (set `CLAUDE_BIN` to use another executable). No browser or model needed.
 - `test_sync_plugin.mjs` — tests `../scripts/sync_plugin.mjs`.
+- `test_compare_reports.mjs` — tests the parts of `../skills/building-accessible-ui/scripts/compare-reports.mjs` the fixtures can't see.
+- `test_check_audit_report.mjs` — tests `check_audit_report.mjs` itself: the good sample passes, the broken one fails, and one-at-a-time breakages fail exactly the right check.
 - `test_check_generic.mjs` — tests `../scripts/check_generic.mjs`, the gate that keeps company,
   brand and product names out of published files.
 
@@ -173,6 +179,10 @@ adjust a seed and its key entry, then update the sample reports by hand.
 `sample/good` and `sample/broken` are hand-built reports that test the checker itself (see
 `audit_fixture/sample/README.md`).
 
+- **Triage and Guards:** the Summary has a Triage line that gives every numbered issue exactly one of Fix now, Ticket or Investigate (Needs verification is always Investigate), every full card has a Guard that starts with `automatable` or `manual`, and the digest's Triage and Guards lines match the report.
+- **Re-check:** with `--previous <report.md>` (or `--recheck` on the runner), the report needs a "Since the last audit" section, and the digest a matching line, with the resolved, still open and new counts that `compare-reports.mjs` finds.
+- **No generic test advice:** Out of scope mentions tests or coverage only when it cites an issue number.
+
 `run_audit_eval.mjs` runs the agent headlessly against the fixture and scores it. It loads this
 repo as the plugin (`--plugin-dir`), pins the model, and starts each run in an empty directory:
 
@@ -189,6 +199,24 @@ list of checks that didn't pass in every run.
 
 If Playwright's own Chromium isn't installed, set `PW_CHANNEL=msedge` (or `chrome`) for
 `axe_check.mjs` and the checker. The runner passes the same hint to the agent.
+
+## Guard run check
+
+Each full card in an audit report has a **Guard**. `guard_fixture/project` is a small page with three seeded issues and its own `report.md`: two automatable Guards (axe `button-name` and `color-contrast`) and one manual one (the notices' color-only type cue). The project has a test folder, helpers and an `AGENTS.md` that says where accessibility tests go.
+
+`run_guard_eval.mjs` gives an agent that project and the prompt "Fix the accessibility issues in report.md", then `check_guard_run.mjs` grades the result with no LLM judge:
+
+- both defects are fixed (checked by oracle tests the agent never sees) and the page was edited, not rewritten;
+- new tests were added in the project's own place and style, they **fail on the original page and pass on the fixed one**, and the project's existing test still passes;
+- no test was written for the manual Guard, and the final message says it stayed manual and reports the before and after result;
+- with `--variant optout` (the project's `AGENTS.md` says it adds no automated tests): no test file is added or changed, and the message says why.
+
+```bash
+node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1                     # normal project
+node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1 --variant optout    # project that opted out
+```
+
+Runs are billed and need a browser; set `PW_CHANNEL=msedge` (or `chrome`) if Playwright's Chromium isn't installed. `test_check_guard_run.mjs` tests the grader and the runner against a fake `claude` (a correct run, a lazy one, tests that pass before the fix, a test for the manual Guard, tests added to an opted-out project, and more). It needs a browser but no model.
 
 ## Live-region probe
 

@@ -45,6 +45,17 @@ The check's reported ids must equal the answer key's ids exactly. A missed id, a
 positive), the same id reported twice, a wrong `stopReason`, a timeout, output that isn't JSON, or a
 fixture with no answer key each fail the run. `../test_check_runner.mjs` proves the runner does this.
 
+## Running them
+
+```bash
+node evals/run_check_fixtures.mjs                      # every check
+node evals/run_check_fixtures.mjs --check tree-pass    # one check
+```
+
+`tree-pass` and `keyboard-walk` drive a real browser: run them from a folder where Playwright is found (set `NODE_PATH` to `evals/node_modules`), and set `PW_CHANNEL=msedge` (or `chrome`) if Playwright's own Chromium isn't installed. `compare-reports` reads text only. `node evals/run_all_tests.mjs` runs all of them with the repo's other tests.
+
+Registered checks: `tree-pass` (the accessibility tree), `keyboard-walk` (Tab through the page, with caps and a stop reason) and `compare-reports` (resolved, still open and new issues between two reports; its fixture is one file holding both reports, split by a `<!-- NEW REPORT -->` line).
+
 ## Rules
 
 - **Generic only.** No company, brand, product or internal-tool names, in fixtures or anywhere else that
@@ -52,3 +63,4 @@ fixture with no answer key each fail the run. `../test_check_runner.mjs` proves 
 - **A check's output is evidence, not a verdict.** A suspected trap or order problem is a candidate the
   reviewer confirms in the browser; it never becomes a finding on script output alone.
 - Write the fixtures before the check, and add a negative fixture for every false positive you meet later.
+- Prove the fixtures can fail: break the check one decision at a time (drop an exclusion, ignore a case) and confirm a fixture goes red each time. A suite that never fails proves nothing.
