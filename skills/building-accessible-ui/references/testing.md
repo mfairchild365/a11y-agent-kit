@@ -71,6 +71,58 @@ If every runtime fails, report the first command you ran, its exact stderr, and 
 
 To test a status message (4.1.3), run `scripts/live-region-probe.mjs` in the skill folder on a freshly loaded page. It records live-region changes that are added and removed within milliseconds, which a look at the DOM misses. It shows what the browser exposes, not what a screen reader speaks. Usage is in `references/audit-procedures.md`, entry 4.1.3.
 
+## Tree pass and keyboard walk
+
+Two scripts in the skill's `scripts/` folder give a review repeatable evidence from a real browser. Run them on the rendered UI, beside axe, when you review existing UI. They are not a substitute for axe, and not a place to add tests to a project.
+
+| Script | What it reads | What it reports |
+|---|---|---|
+| `tree-pass.mjs` | The browser's accessibility tree, which every screen reader reads | `interactive-no-name`, `label-not-in-name`, `repeated-link-name`, `repeated-control-name`, `aria-hidden-focusable`, `duplicate-landmark-name`, `multiple-main`, `no-main`, `heading-level-skip`, `no-h1` |
+| `keyboard-walk.mjs` | Where focus lands as it presses Tab | `focus-no-name`, `unreachable-by-tab`, `focus-cycle-candidate`, `focus-stuck-candidate`, `tabindex-positive` |
+
+```bash
+node <skill folder>/scripts/tree-pass.mjs <url or html file> --json
+node <skill folder>/scripts/keyboard-walk.mjs <url or html file> --json
+```
+
+Run them from a folder that has Playwright installed, or set `NODE_PATH` to its `node_modules` folder. `PW_CHANNEL=msedge` (or `chrome`) uses an installed browser. Drop `--json` for a readable list.
+
+How to read the output:
+
+- **Candidates, not verdicts.** Each finding is a lead. Reproduce it before it goes in a report (the real keyboard for the walk, the tree for the pass), then set the confidence from that. See `audit-calibration.md` section E.
+- **`stopReason`.** `complete` means the whole page was covered. Anything else (`node-cap`, `load-timeout`, `stop-cap`, `time-cap`, `cycle`, `stuck`, `modal-cycle`) means it stopped early and says why. Name it under Checks, and don't conclude that something is missing from a page the script didn't finish.
+- **What they don't check:** visible focus, contrast, reading order, target size, hover and focus content, status messages (use `live-region-probe.mjs`), or what a screen reader says. Cross-origin frames are skipped or counted as one stop.
+- **Don't treat a clean run as a pass.** It means these narrow checks found nothing.
+
+## Reaching signed-in and deep states
+
+A review of a page behind a sign-in, a setup step or a particular state needs that state first. In order:
+
+1. **Use the project's own way in.** Its test fixtures, saved sign-in state, seed or mock server, Storybook story, or the Playwright setup its tests already use. Don't build a second one.
+2. **Drive the page to the state** (open the dialog, trigger the error, expand the menu) with the real keyboard and clicks, then run the scripts and axe there. A script that loads a URL sees only what loads by itself, so for a state you reach by interaction, check it by hand or script the interaction first.
+3. **If there is no way in, ask the user** how to reach it. Never guess a password, never write credentials, tokens or a saved sign-in file into a report, a scratch file you leave behind, or the project.
+4. **Frames.** The scripts cover same-origin frames and open shadow roots. Content in a cross-origin frame is opened at its own URL as a separate pass, and the report says so.
+
+## Project conventions
+
+Before you audit or fix, read the notes the project keeps for contributors and agents (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, an accessibility doc, or the README). Follow what they say about:
+
+- the component library: which wrapper components already handle accessibility, and where a library defect is fixed (see `audit-calibration.md` section E)
+- the copy and translation workflow, including files you must not edit
+- the styling approach and the import conventions
+- how to run the project's accessibility tests, and how to sign in for them
+
+They win over the generic advice here. This file doesn't define a format for them, and you don't create one. Checks that belong to one company or one product (its components, its routes, its sign-in) live in that project's own test suite and notes, not in this skill.
+
+## Turning a reported issue into a fix with a test
+
+When you fix an issue from an audit report, each full card has a **Guard**: the smallest check that fails now and passes after the fix.
+
+- **Automatable Guard, and the project hasn't opted out (§1).** Write the test first, in the project's own strategy (§2). Run it and confirm it fails for the reason the report gives. Then fix, run it, and confirm it passes. §4 still applies: re-run on the final artifact.
+- **Manual Guard.** Don't invent a test. Do the check by hand after the fix, and list it in your summary as a check that is still manual.
+- **Opted out.** Don't add tests. Say that the Guards were not turned into tests, and why.
+- Report which Guards became tests, which stayed manual, and the before and after result of each test.
+
 ## Process safety
 
 - Stop only what you started, using the handle you got when you started it: `browser.close()` for a browser you launched, the PID you recorded for a server you spawned.

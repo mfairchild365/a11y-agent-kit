@@ -69,12 +69,45 @@
     {
       "id": "dropdown-reflow",
       "element": ["dropdown"],
-      "match": ["reflow", "320", "overflow", "scroll"],
+      "match": ["dropdown"],
       "sc": "1.4.10",
       "severity": ["Moderate"],
       "tier": "card",
       "instances": 1,
       "found_by": "browser at 320 CSS px with the dropdown open"
+    },
+    {
+      "id": "banner-focus-ring",
+      "element": ["notice", "banner", "link"],
+      "match": ["focus ring", "focus indicator", "focus", "outline", "6aa6f0"],
+      "sc": "1.4.11",
+      "severity": ["Critical", "Blocker"],
+      "tier": "card",
+      "instances": 2,
+      "correction": "C-026",
+      "found_by": "computed focus outline against each notice fill: 2.52:1 on the info fill, 2.59:1 on the error fill"
+    },
+    {
+      "id": "banner-clipped-left",
+      "element": ["notice", "banner", "link", "maintenance"],
+      "match": ["cut off", "clipped", "left edge", "nowrap", "read the full details", "link label"],
+      "sc": "1.4.10",
+      "severity": ["Minor"],
+      "tier": "minor",
+      "instances": 1,
+      "correction": "C-023",
+      "found_by": "browser at 320 CSS px: the long link's left edge is at -13px, so its first characters can't be seen or scrolled to"
+    },
+    {
+      "id": "banner-color-only",
+      "element": ["notice", "banner"],
+      "match": ["color alone", "color only", "colour alone", "by color", "by colour", "use of color", "only by fill"],
+      "sc": "1.4.1",
+      "severity": ["Moderate", "Critical"],
+      "tier": "card",
+      "instances": 2,
+      "correction": "C-024",
+      "found_by": "markup and a grayscale view: the info and error notices differ only by fill color, with no icon or type word"
     },
     {
       "id": "reduced-motion",
@@ -176,6 +209,13 @@
       "match": ["list-style", "role=\"list\"", "list semantics", "lists lose"],
       "correction": "C-013",
       "why": "list-style: none without role=\"list\" isn't a WCAG failure. Safari with VoiceOver drops list semantics from unstyled lists by design. Don't log it."
+    },
+    {
+      "id": "banner-link-context",
+      "match": ["learn more", "link purpose", "2.4.4", "generic link"],
+      "allowed_tiers": ["best-practice"],
+      "correction": "C-025",
+      "why": "The \"Learn more\" link's message is in a sibling <p> inside the same container <div>. That is its context. Best practice at most (aria-describedby)."
     },
     {
       "id": "single-line-overflow",

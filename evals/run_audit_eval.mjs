@@ -12,7 +12,9 @@
 //
 // Usage (from the repo root):
 //   node evals/run_audit_eval.mjs --model claude-sonnet-5-5 [--runs 3] [--via direct|subagent]
-//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe]
+//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck]
+//   --recheck gives the agent audit_fixture/sample/good/report.md as a previous report and also checks the
+//            'Since the last audit' section and digest line against scripts/compare-reports.mjs
 //
 // Runs are billed to your account and take several minutes each: start with --runs 1.
 // Run outside the Claude Code sandbox: Chromium can't launch inside it.
@@ -22,6 +24,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { claudeCommand } from "./lib/claude.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.dirname(here);
@@ -32,7 +35,7 @@ const opt = (name, dflt) => {
 };
 const model = opt("model");
 if (!model) {
-  console.error("Usage: node evals/run_audit_eval.mjs --model <model-id> [--runs N] [--via direct|subagent] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe]");
+  console.error("Usage: node evals/run_audit_eval.mjs --model <model-id> [--runs N] [--via direct|subagent] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck]");
   process.exit(2);
 }
 const runs = +opt("runs", "1");
@@ -41,6 +44,8 @@ const scratch = path.resolve(opt("scratch", path.join(os.tmpdir(), "audit-eval")
 const out = path.resolve(opt("out", path.join(here, "workspace", "audit")));
 const timeoutMs = +opt("timeout", "1800") * 1000;
 const skipAxe = argv.includes("--skip-axe");
+const recheck = argv.includes("--recheck");
+const previousReport = path.join(here, "audit_fixture", "sample", "good", "report.md");
 if (!["direct", "subagent"].includes(via)) { console.error("--via must be direct or subagent"); process.exit(2); }
 
 // --plugin-dir registers the agent under its file name (accessibility-reviewer.agent.md).
@@ -52,6 +57,7 @@ function prompt() {
     via === "direct"
       ? "Audit index.html in the current directory for accessibility."
       : `Use the accessibility-reviewer agent (${AGENT}) to audit index.html in the current directory for accessibility. Show me the agent's report.`,
+    ...(recheck ? ["A previous audit of this page is in previous-report.md. This is a re-check: audit the page again and say what has changed since then."] : []),
     "Write your report files (report.md, report.html and the screenshots folder) to ./audit-out instead of the system temp directory.",
   ];
   if (fs.existsSync(nodeModules)) {
@@ -81,6 +87,7 @@ for (let n = 1; n <= runs; n++) {
   fs.rmSync(cwd, { recursive: true, force: true });
   fs.mkdirSync(cwd, { recursive: true });
   fs.copyFileSync(path.join(here, "audit_fixture", "index.html"), path.join(cwd, "index.html"));
+  if (recheck) fs.copyFileSync(previousReport, path.join(cwd, "previous-report.md"));
   const runOut = path.join(out, `run-${n}`);
   fs.rmSync(runOut, { recursive: true, force: true });
   fs.mkdirSync(runOut, { recursive: true });
@@ -95,7 +102,8 @@ for (let n = 1; n <= runs; n++) {
   const t0 = Date.now();
   const env = { ...process.env };
   if (fs.existsSync(nodeModules)) env.NODE_PATH = nodeModules;
-  const r = spawnSync("claude", cmd, { cwd, env, encoding: "utf8", timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
+  const launch = claudeCommand(cmd);
+  const r = spawnSync(launch.cmd, launch.args, { cwd, env, encoding: "utf8", timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
   fs.writeFileSync(path.join(runOut, "stream.jsonl"), r.stdout || "");
   fs.writeFileSync(path.join(runOut, "stderr.txt"), r.stderr || "");
   let finalText = "";
@@ -114,7 +122,7 @@ for (let n = 1; n <= runs; n++) {
     continue;
   }
   completed += 1;
-  const chk = spawnSync(process.execPath, [path.join(here, "check_audit_report.mjs"), runOut, "--digest", path.join(runOut, "final-message.md"), "--json", ...(skipAxe ? ["--skip-axe"] : [])], { encoding: "utf8" });
+  const chk = spawnSync(process.execPath, [path.join(here, "check_audit_report.mjs"), runOut, "--digest", path.join(runOut, "final-message.md"), "--json", ...(skipAxe ? ["--skip-axe"] : []), ...(recheck ? ["--previous", previousReport] : [])], { encoding: "utf8" });
   let res;
   try { res = JSON.parse(chk.stdout); } catch { console.log(`  checker crashed: ${chk.stderr.trim().split("\n")[0]}`); continue; }
   fs.writeFileSync(path.join(runOut, "check.json"), JSON.stringify(res, null, 2));

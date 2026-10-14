@@ -1,0 +1,12 @@
+{
+  "findings": [
+    "new@2.4.4|header link",
+    "new@4.1.2|close button",
+    "new@best practice|icon|new note",
+    "resolved@2.1.1|tooltip on the student bubble",
+    "resolved@2.4.4|footer link",
+    "resolved@4.1.3|status",
+    "resolved@best practice|icon|old note"
+  ],
+  "stopReason": "complete"
+}

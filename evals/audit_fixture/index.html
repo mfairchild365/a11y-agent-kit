@@ -40,6 +40,12 @@
   .field { display: block; width: 14rem; padding: .4rem; border: 1px solid #c8c8c8; background: #fff; color: #1a1a1a; font: inherit; margin-bottom: 1rem; }
 
   .hint { white-space: nowrap; margin: 0 0 1rem; }
+  .notice { display: flex; flex-direction: column; align-items: center; gap: .5rem; max-width: 24rem; padding: .75rem 1rem; margin: 0 0 .5rem; color: #fff; }
+  .notice p { margin: 0; }
+  .notice-info { background: #1f5fae; }
+  .notice-error { background: #b3261e; }
+  .notice-link { color: #fff; white-space: nowrap; }
+  .notice-link:focus-visible { outline: 3px solid #6aa6f0; outline-offset: 2px; }
   .outlined { padding: .4rem .9rem; border: 1px solid #c8c8c8; background: #fff; color: #1a1a1a; font: inherit; cursor: pointer; margin-left: .5rem; }
   .snackbars { margin-top: 1rem; max-width: 24rem; }
   .snackbar { display: flex; align-items: center; gap: .75rem; background: #2b2b2b; color: #fff; padding: .75rem 1rem; border-radius: 4px; margin-top: .5rem; }
@@ -61,6 +67,14 @@
   <input id="filter" class="field" type="text">
   <button type="button" class="outlined">Export list</button>
   <p class="hint">Showing results for the current marking period of the academic year</p>
+  <div class="notice notice-info">
+    <p>Maintenance is planned for Saturday, 2:00 to 6:00 AM.</p>
+    <a class="notice-link" href="#maintenance">Read the full details of the maintenance schedule</a>
+  </div>
+  <div class="notice notice-error">
+    <p>The roster sync did not finish.</p>
+    <a class="notice-link" href="#sync">Learn more</a>
+  </div>
 
   <ul class="roster">
     <li><div class="bubble">AL<span class="tip">Ana Lee</span></div></li>

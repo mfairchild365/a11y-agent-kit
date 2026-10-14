@@ -1,0 +1,9 @@
+{
+  "script": "skills/building-accessible-ui/scripts/compare-reports.mjs",
+  "args": [
+    "--combined",
+    "{fixture}",
+    "--json"
+  ],
+  "timeoutMs": 20000
+}

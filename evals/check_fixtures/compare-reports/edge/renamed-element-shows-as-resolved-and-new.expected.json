@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "new@4.1.2|submit button",
+    "resolved@4.1.2|save button"
+  ],
+  "stopReason": "complete"
+}

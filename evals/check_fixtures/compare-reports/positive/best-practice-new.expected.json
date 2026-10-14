@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "new@best practice|icon|missing reducedmotion block"
+  ],
+  "stopReason": "complete"
+}

@@ -4,12 +4,13 @@
 
 - **Scope:** `index.html`, its dropdown and its snackbars. Out of scope: nothing else.
 - **Verdict:** No Blockers. Keyboard users can't reach the student bubbles, and a contrast failure and an unnamed button make the overflow dropdown hard to use.
-- **Findings:** Blocker 0, Critical 5, Moderate 5, Minor 0. 5 best practices. 1 more needs verification.
+- **Findings:** Blocker 0, Critical 6, Moderate 6, Minor 1. 6 best practices. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
 - **Fix first:**
   1. Make the initials bubbles keyboard-reachable and named (#1)
   2. Fix the "+5" hover and open contrast (#3)
   3. Name the close button (#5)
+- **Triage:** Fix now #1 #3 #4 #5 #6 #8 #10 #11 #14 #17 #19 #20 · Ticket #2 #7 #9 #12 #13 #15 #18 · Investigate #16
 
 ## Findings
 
@@ -24,6 +25,7 @@ Three initials-only bubbles that show the full name in a tooltip on hover. 3 ins
 - **Screenshot:** ![Finding 1: the three outlined initials bubbles; after one Tab, focus has skipped them and sits on the JD button](screenshots/finding-01-bubbles-not-focusable.png)
   Text evidence: the first Tab stop is `#jd`; the three bubbles have `tabIndex = -1` and no role.
 - **Suggested fix:** Make each bubble a named, focusable element, for example `<button type="button" class="bubble" aria-label="AL, Ana Lee">AL</button>`.
+- **Guard:** automatable: Playwright. Tab from the top of the page and assert each initials bubble takes focus and has an accessible name (`getByRole('button', { name: /AL/ })`).
 - **Evidence:**
   - **WCAG SC:** 2.1.1 Keyboard
   - **Status:** pre-existing
@@ -44,6 +46,7 @@ Three initials-only bubbles that show the full name in a tooltip on hover. 3 ins
 - **Screenshot:** ![Finding 2: the AL bubble hovered with its "Ana Lee" tooltip showing, the three bubbles outlined](screenshots/finding-02-tooltip-hover.png)
   Text evidence: pressing Escape with the tooltip showing does not close it; moving onto the tip hides it.
 - **Suggested fix:** Keep the tooltip open while the pointer is on the bubble or the tip (remove the 0.5rem gap), and close it on Escape.
+- **Guard:** automatable: Playwright. Hover a bubble, move the pointer onto the tooltip and assert it stays visible; press Escape and assert it closes.
 - **Evidence:**
   - **WCAG SC:** 1.4.13 Content on Hover or Focus
   - **Status:** pre-existing
@@ -68,6 +71,7 @@ The "+5" overflow button. 1 instance.
 - **Screenshot:** ![Finding 3: the outlined "+5" button in its open and hover state, grey fill with blue text](screenshots/finding-03-more-contrast.png)
   Text evidence: axe `color-contrast` (serious): 3.83 (foreground #146eb3, background #d9dada, 12px).
 - **Suggested fix:** Use a darker hover and open fill (for example white text on #146eb3) or a darker text color.
+- **Guard:** automatable: a contrast test on the hover and open fill and text colors (at least 4.5:1), or axe `color-contrast` with the button forced into `:hover`.
 - **Evidence:**
   - **WCAG SC:** 1.4.3 Contrast (Minimum)
   - **Status:** pre-existing
@@ -91,6 +95,7 @@ The text input above the roster. 1 instance.
 - **Screenshot:** ![Finding 4: the outlined "Filter students" input, its pale border barely visible against the white page](screenshots/finding-04-input-boundary.png)
   Text evidence: border #c8c8c8 on #ffffff = 1.67:1, computed from the rendered colors.
 - **Suggested fix:** Darken the border to at least 3:1, for example `#767676` (4.5:1).
+- **Guard:** automatable: a contrast test on the input's border color against the page background (at least 3:1).
 - **Evidence:**
   - **WCAG SC:** 1.4.11 Non-text Contrast
   - **Status:** pre-existing
@@ -115,6 +120,7 @@ The icon-only close button in the dropdown. 1 instance.
 - **Screenshot:** ![Finding 5: the outlined X button at the top right of the dropdown](screenshots/finding-05-close-no-name.png)
   Text evidence: axe `button-name` (critical) on `#close`.
 - **Suggested fix:** Add `aria-label="Close"`.
+- **Guard:** automatable: axe `button-name` on the page.
 - **Evidence:**
   - **WCAG SC:** 4.1.2 Name, Role, Value
   - **Status:** pre-existing
@@ -138,6 +144,7 @@ A message with a warning icon and an Undo button that appears after "Archive Pri
 - **Screenshot:** ![Finding 6: the dim grey triangle icon on the dark snackbar, outlined](screenshots/finding-06-snackbar-icon-contrast.png)
   Text evidence: computed colors #6b6b6b on #2b2b2b, 2.657:1.
 - **Suggested fix:** Use an icon color of at least 3:1 against #2b2b2b, for example #f0b429.
+- **Guard:** automatable: a contrast test on the icon color against the snackbar background (at least 3:1).
 - **Evidence:**
   - **WCAG SC:** 1.4.11 Non-text Contrast
   - **Status:** pre-existing
@@ -157,6 +164,7 @@ A message with a warning icon and an Undo button that appears after "Archive Pri
 - **Screenshot:** ![Finding 7: the dark snackbar "Priya Rao was moved to the archive." with its Undo button, outlined](screenshots/finding-07-snackbar-timeout.png)
   Text evidence: the script removes the element after 5000ms; there is no inbox or history.
 - **Suggested fix:** Don't auto-dismiss actionable or important messages: keep this one until the user dismisses it or acts. Let users re-open dismissed messages (for example a notifications inbox or history). Pausing the timer on hover and focus helps too, but isn't enough alone, because a user may not get the pointer or focus into the message within 5 seconds.
+- **Guard:** automatable: Playwright. Archive a row, wait 6 seconds and assert the snackbar is still there; dismiss it and assert it can be re-opened.
 - **Evidence:**
   - **WCAG SC:** 2.2.1 Timing Adjustable
   - **Status:** pre-existing
@@ -176,6 +184,7 @@ A message with a warning icon and an Undo button that appears after "Archive Pri
 - **Screenshot:** ![Finding 8: the triangle icon at the left of the snackbar, outlined](screenshots/finding-08-snackbar-icon-hidden.png)
   Text evidence: accessibility tree: the snackbar reads "Priya Rao was moved to the archive. Undo" with no mention of a warning.
 - **Suggested fix:** Give the icon a text alternative ("Warning") or start the text with the type ("Warning: ..."). Keep the icon hidden only when the text states the type.
+- **Guard:** automatable: Playwright. Assert the warning icon has an accessible name, or that the message text starts with "Warning".
 - **Evidence:**
   - **WCAG SC:** 1.1.1 Non-text Content
   - **Status:** pre-existing
@@ -188,6 +197,50 @@ A message with a warning icon and an Undo button that appears after "Archive Pri
   - **Confidence:** High. Confirmed in the accessibility tree.
   - **Source:** accessibility tree
 
+### Element: Info and error notices
+
+Two notices with a link each, shown after the "Showing results" line. 2 instances.
+
+#### 17. Critical · 1.4.11 · 2 instances · High confidence · Focus ring is below 3:1 on both notice fills
+
+- **Summary:** The link's author-styled focus ring (#6aa6f0) is 2.52:1 against the info fill (#1f5fae) and 2.59:1 against the error fill (#b3261e). Low-vision keyboard users lose track of focus. See also #19 (the same link, cut off at 320px).
+- **Why this severity:** Anchor: an author-styled focus indicator below 3:1 is Critical (calibration A).
+- **Screenshot:** ![Finding 17: the info notice's link with its pale focus ring on the blue fill](screenshots/finding-17-notice-focus-ring.png)
+  Text evidence: computed `outline-color` rgb(106, 166, 240) on `background-color` #1f5fae gives 2.52:1; on #b3261e, 2.59:1.
+- **Suggested fix:** Use a ring color that reaches 3:1 against every notice fill, such as white (#fff: 6.35:1 and 6.54:1), or add an inner ring in a contrasting color.
+- **Guard:** automatable: a contrast test on the focus ring color against each notice fill (at least 3:1).
+- **Evidence:**
+  - **WCAG SC:** 1.4.11 Non-text Contrast
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Open `index.html` and Tab to each notice link.
+    2. Read the computed outline color and the notice's background color.
+    3. Compute the ratio for each fill.
+  - **Observed:** 2.52:1 and 2.59:1.
+  - **Expected:** An author-styled focus indicator has at least 3:1 against its adjacent colors (1.4.11, 2.4.7).
+  - **Relevant elements:** `.notice-link:focus-visible`
+  - **Confidence:** High. Computed from the styles.
+  - **Source:** browser check
+
+#### 18. Moderate · 1.4.1 · 2 instances · High confidence · The notice type is shown by fill color alone
+
+- **Summary:** The info notice is blue and the error notice is red. There is no icon, no visible type word, and the message text doesn't say "Information" or "Error". Users who can't tell the colors apart can't tell the types apart. The author can't be relied on to write the type into the message.
+- **Why this severity:** By impact (no confirmed anchor). The type is information, and nothing else gives it.
+- **Screenshot:** ![Finding 18: the two outlined notices, which differ only by fill color](screenshots/finding-18-notice-color-only.png)
+  Text evidence: no icon element and no type text in either notice's markup.
+- **Suggested fix:** Add a visible type cue that doesn't depend on color: an icon with a distinct shape and a text alternative, or a visible type word at the start of the message.
+- **Guard:** manual: look at the notices without their fill color (grayscale or forced colors); the type must still be stated by an icon or a word. A person judges whether the cue states the type.
+- **Evidence:**
+  - **WCAG SC:** 1.4.1 Use of Color
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Open `index.html` and view the two notices in grayscale.
+  - **Observed:** The two notices look the same apart from their lightness.
+  - **Expected:** Color isn't the only means of conveying information (1.4.1).
+  - **Relevant elements:** `.notice-info`, `.notice-error`
+  - **Confidence:** High. The markup has no other cue.
+  - **Source:** browser check
+
 ### Element: Student dropdown
 
 The panel opened by "+5". 1 instance.
@@ -199,6 +252,7 @@ The panel opened by "+5". 1 instance.
 - **Screenshot:** ![Finding 9: the outlined dropdown cut off at the right edge of a 320px viewport](screenshots/finding-09-dropdown-reflow.png)
   Text evidence: `document.documentElement.scrollWidth` is 464 at a 320px viewport.
 - **Suggested fix:** Replace the fixed width with `max-width: 100%` and let names wrap (`white-space: normal; overflow-wrap: anywhere`).
+- **Guard:** automatable: Playwright at 320 px. Assert the dropdown causes no horizontal scroll (`scrollWidth <= clientWidth`).
 - **Evidence:**
   - **WCAG SC:** 1.4.10 Reflow
   - **Status:** pre-existing
@@ -222,6 +276,7 @@ The one clickable initials bubble. 1 instance.
 - **Screenshot:** ![Finding 10: the outlined "JD" button in the roster; its accessible name is "John Doe"](screenshots/finding-10-label-in-name.png)
   Text evidence: accessibility tree: `button "John Doe": JD`.
 - **Suggested fix:** Set `aria-label="JD, John Doe"`.
+- **Guard:** automatable: axe `label-content-name-mismatch` (enable it), or assert the button's name contains "JD".
 - **Evidence:**
   - **WCAG SC:** 2.5.3 Label in Name
   - **Status:** pre-existing
@@ -236,7 +291,9 @@ The one clickable initials bubble. 1 instance.
 
 ## Minor issues
 
-None.
+| # | Element | WCAG SC | Title | Suggested fix | Confidence |
+|---|---|---|---|---|---|
+| 19 | Info notice link | 1.4.10 | The long link label is cut off at the left edge at 320px, so its first characters can't be seen or scrolled to | Let the link wrap (`white-space: normal`). | High |
 
 ## Best practices
 
@@ -247,6 +304,7 @@ None.
 | 13 | Snackbar after "Archive Priya" | An Undo button inside the live region: its role isn't announced and users may not reach it before the timer ends (the timer itself is #7) | Show Undo next to the archived row or in a history list, and keep the toast text-only. | Medium |
 | 14 | More students dropdown | Named section that already has a heading: the panel has `aria-labelledby` and a visible `h3`, so the name is announced twice | Remove `aria-labelledby` and keep the heading. | Medium |
 | 15 | "Mute alerts" button | Its inner text changes to "Unmute alerts" to show state; some screen readers don't announce a text change on a focused button | Keep the text fixed and use `aria-pressed`. | Medium |
+| 20 | "Learn more" link in the error notice | The message sits in a sibling `<p>` in the same container, so it has context; the name is still generic in a links list | Add `aria-describedby` pointing to the message, or a fuller name. | Medium |
 
 ## Needs verification
 
