@@ -4,7 +4,7 @@
 
 - **Scope:** `index.html`, its dropdown and its snackbars. Out of scope: nothing else.
 - **Verdict:** No Blockers. Keyboard users can't reach the student bubbles, and a contrast failure and an unnamed button make the overflow dropdown hard to use.
-- **Findings:** Blocker 0, Critical 5, Moderate 5, Minor 0. 5 best practices. 1 more needs verification.
+- **Findings:** Blocker 0, Critical 6, Moderate 6, Minor 1. 6 best practices. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
 - **Fix first:**
   1. Make the initials bubbles keyboard-reachable and named (#1)
@@ -188,6 +188,48 @@ A message with a warning icon and an Undo button that appears after "Archive Pri
   - **Confidence:** High. Confirmed in the accessibility tree.
   - **Source:** accessibility tree
 
+### Element: Info and error notices
+
+Two notices with a link each, shown after the "Showing results" line. 2 instances.
+
+#### 17. Critical · 1.4.11 · 2 instances · High confidence · Focus ring is below 3:1 on both notice fills
+
+- **Summary:** The link's author-styled focus ring (#6aa6f0) is 2.52:1 against the info fill (#1f5fae) and 2.59:1 against the error fill (#b3261e). Low-vision keyboard users lose track of focus. See also #19 (the same link, cut off at 320px).
+- **Why this severity:** Anchor: an author-styled focus indicator below 3:1 is Critical (calibration A).
+- **Screenshot:** ![Finding 17: the info notice's link with its pale focus ring on the blue fill](screenshots/finding-17-notice-focus-ring.png)
+  Text evidence: computed `outline-color` rgb(106, 166, 240) on `background-color` #1f5fae gives 2.52:1; on #b3261e, 2.59:1.
+- **Suggested fix:** Use a ring color that reaches 3:1 against every notice fill, such as white (#fff: 6.35:1 and 6.54:1), or add an inner ring in a contrasting color.
+- **Evidence:**
+  - **WCAG SC:** 1.4.11 Non-text Contrast
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Open `index.html` and Tab to each notice link.
+    2. Read the computed outline color and the notice's background color.
+    3. Compute the ratio for each fill.
+  - **Observed:** 2.52:1 and 2.59:1.
+  - **Expected:** An author-styled focus indicator has at least 3:1 against its adjacent colors (1.4.11, 2.4.7).
+  - **Relevant elements:** `.notice-link:focus-visible`
+  - **Confidence:** High. Computed from the styles.
+  - **Source:** browser check
+
+#### 18. Moderate · 1.4.1 · 2 instances · High confidence · The notice type is shown by fill color alone
+
+- **Summary:** The info notice is blue and the error notice is red. There is no icon, no visible type word, and the message text doesn't say "Information" or "Error". Users who can't tell the colors apart can't tell the types apart. The author can't be relied on to write the type into the message.
+- **Why this severity:** By impact (no confirmed anchor). The type is information, and nothing else gives it.
+- **Screenshot:** ![Finding 18: the two outlined notices, which differ only by fill color](screenshots/finding-18-notice-color-only.png)
+  Text evidence: no icon element and no type text in either notice's markup.
+- **Suggested fix:** Add a visible type cue that doesn't depend on color: an icon with a distinct shape and a text alternative, or a visible type word at the start of the message.
+- **Evidence:**
+  - **WCAG SC:** 1.4.1 Use of Color
+  - **Status:** pre-existing
+  - **Repro steps:**
+    1. Open `index.html` and view the two notices in grayscale.
+  - **Observed:** The two notices look the same apart from their lightness.
+  - **Expected:** Color isn't the only means of conveying information (1.4.1).
+  - **Relevant elements:** `.notice-info`, `.notice-error`
+  - **Confidence:** High. The markup has no other cue.
+  - **Source:** browser check
+
 ### Element: Student dropdown
 
 The panel opened by "+5". 1 instance.
@@ -236,7 +278,9 @@ The one clickable initials bubble. 1 instance.
 
 ## Minor issues
 
-None.
+| # | Element | WCAG SC | Title | Suggested fix | Confidence |
+|---|---|---|---|---|---|
+| 19 | Info notice link | 1.4.10 | The long link label is cut off at the left edge at 320px, so its first characters can't be seen or scrolled to | Let the link wrap (`white-space: normal`). | High |
 
 ## Best practices
 
@@ -247,6 +291,7 @@ None.
 | 13 | Snackbar after "Archive Priya" | An Undo button inside the live region: its role isn't announced and users may not reach it before the timer ends (the timer itself is #7) | Show Undo next to the archived row or in a history list, and keep the toast text-only. | Medium |
 | 14 | More students dropdown | Named section that already has a heading: the panel has `aria-labelledby` and a visible `h3`, so the name is announced twice | Remove `aria-labelledby` and keep the heading. | Medium |
 | 15 | "Mute alerts" button | Its inner text changes to "Unmute alerts" to show state; some screen readers don't announce a text change on a focused button | Keep the text fixed and use `aria-pressed`. | Medium |
+| 20 | "Learn more" link in the error notice | The message sits in a sibling `<p>` in the same container, so it has context; the name is still generic in a links list | Add `aria-describedby` pointing to the message, or a fuller name. | Medium |
 
 ## Needs verification
 
