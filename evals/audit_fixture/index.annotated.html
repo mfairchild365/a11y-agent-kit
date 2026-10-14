@@ -53,6 +53,12 @@
   /* DECOY (1.4.10): one long single line that runs past the edge at 320px. The user isn't forced to scroll
      back-and-forth to read line by line, so it isn't a Reflow failure. Best practice at most (wrap it). */
   .hint { white-space: nowrap; margin: 0 0 1rem; }
+  .notice { display: flex; flex-direction: column; align-items: center; gap: .5rem; max-width: 24rem; padding: .75rem 1rem; margin: 0 0 .5rem; color: #fff; }
+  .notice p { margin: 0; }
+  .notice-info { background: #1f5fae; }
+  .notice-error { background: #b3261e; }
+  .notice-link { color: #fff; white-space: nowrap; }   /* SEED (1.4.10, Minor to Moderate): the long nowrap link in a centered column overflows both sides at 320px, so its left end is cut off and can't be scrolled to. */
+  .notice-link:focus-visible { outline: 3px solid #6aa6f0; outline-offset: 2px; }   /* SEED (1.4.11, Critical): #6aa6f0 ring on the #1f5fae fill is 2.52:1 and on the #b3261e fill 2.59:1 (needs 3:1). */
   .outlined { padding: .4rem .9rem; border: 1px solid #c8c8c8; background: #fff; color: #1a1a1a; font: inherit; cursor: pointer; margin-left: .5rem; }
   /* SEED (1.4.11, Moderate at minimum): the warning icon is #6b6b6b on the #2b2b2b snackbar, 2.66:1 (needs 3:1). It carries the message type, so it is a required cue. */
   .snackbars { margin-top: 1rem; max-width: 24rem; }
@@ -76,6 +82,16 @@
   <input id="filter" class="field" type="text">
   <button type="button" class="outlined">Export list</button>
   <p class="hint">Showing results for the current marking period of the academic year</p>
+  <!-- SEED (1.4.1): the two notices show their type (info, error) by fill color only. No icon, no visible type word, and the message text does not state it. -->
+  <!-- DECOY (2.4.4): the "Learn more" link's message is in a sibling <p> inside the same container <div>. That is context. Best practice at most (aria-describedby). -->
+  <div class="notice notice-info">
+    <p>Maintenance is planned for Saturday, 2:00 to 6:00 AM.</p>
+    <a class="notice-link" href="#maintenance">Read the full details of the maintenance schedule</a>
+  </div>
+  <div class="notice notice-error">
+    <p>The roster sync did not finish.</p>
+    <a class="notice-link" href="#sync">Learn more</a>
+  </div>
 
   <ul class="roster">
     <!-- SEED, two issues on the same three bubbles (instances: 3 each):

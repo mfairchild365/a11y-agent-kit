@@ -35,9 +35,11 @@ Open the skill's `references/testing.md` before running anything, and follow its
 Beyond axe, drive the rendered UI in the browser and check what axe can't:
 
 - **Keyboard:** Tab order, visible focus, Enter/Space/Escape/arrow behavior, no traps.
+- **Focus indicator contrast (always):** for every focusable control, read the author-styled focus ring from computed styles and compute its ratio (3:1, unrounded) against each background it sits on: every variant, fill, state and theme. Do this even when axe is clean. It is the check most often skipped.
 - **Hover and focus content:** tooltips and popovers appear on focus as well as hover, are dismissible with Escape, and stay visible while hovered.
 - **Names:** read the accessibility tree for each control. Compare the accessible name with the visible label (2.5.3).
-- **Reflow and zoom:** 320 CSS px wide and 200% zoom, with long text and many items. No clipping or two-dimensional scroll.
+- **Reflow and zoom:** 320 CSS px wide and 200% zoom, with long text and many items. No clipping or two-dimensional scroll. Read the first and last word of every line: text cut off at the left edge or by `overflow: hidden` is lost content (a failure), even on one line.
+- **Color alone:** for each thing color shows (message type, state), find the non-color cue the component itself renders, in every configuration (icon off, visually hidden text). Don't pass it, or park it under Needs verification, because the author might write the type in the message.
 - **Media features:** `prefers-reduced-motion: reduce` and `forced-colors: active`.
 - **States:** exercise each state the component has (open, disabled, error, loading, empty, overflow).
 
