@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "aria-hidden-focusable@#hid"
+  ],
+  "stopReason": "complete"
+}

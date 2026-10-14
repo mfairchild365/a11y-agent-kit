@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "repeated-link-name@details"
+  ],
+  "stopReason": "complete"
+}

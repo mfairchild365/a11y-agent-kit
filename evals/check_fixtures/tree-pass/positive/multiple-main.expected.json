@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "multiple-main@frame-0"
+  ],
+  "stopReason": "complete"
+}

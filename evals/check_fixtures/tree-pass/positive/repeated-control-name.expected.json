@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "repeated-control-name@remove"
+  ],
+  "stopReason": "complete"
+}
