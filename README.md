@@ -96,24 +96,25 @@ gemini-extension.json             Gemini CLI extension manifest
 skills/building-accessible-ui/    the skill
 agents/                           the review agent (Markdown; source of truth)
 codex/agents/                     generated Codex TOML version of the agent; don't edit
-scripts/sync_plugin.py            regenerates codex/agents and checks manifests agree
+scripts/sync_plugin.mjs           regenerates codex/agents, checks manifests agree and names stay generic
 evals/                            eval harness for the skill (not needed at runtime)
 ```
 
+The repo's tooling is Node, so one runtime covers the shipped scripts, the checks and the evals. Two eval helpers, `build_review.py` and `run_trigger_eval.py`, stay Python because they run and patch skill-creator's own Python modules.
+
 ## Development
 
-- **Editing the agent.** Edit only `agents/*.agent.md`, then run `python3 scripts/sync_plugin.py` to regenerate the Codex TOML.
+- **Editing the agent.** Edit only `agents/*.agent.md`, then run `node scripts/sync_plugin.mjs` to regenerate the Codex TOML.
 - **Editing the skill.** Follow [`skills/building-accessible-ui/AUTHORING.md`](skills/building-accessible-ui/AUTHORING.md). See [`evals/README.md`](evals/README.md) for the eval loop.
 - **Checking before a commit:**
 
   ```
-  python3 scripts/sync_plugin.py --check   # generated files fresh; names/versions agree
-  claude plugin validate --strict .        # Claude marketplace + plugin manifests
-  node scripts/check_generic.mjs           # no company, brand or product names in tracked files
-  node evals/run_check_fixtures.mjs        # every deterministic check against its fixtures
+  node scripts/sync_plugin.mjs --check   # generated files fresh; names/versions agree; names stay generic
+  claude plugin validate --strict .      # Claude marketplace + plugin manifests
+  node evals/run_check_fixtures.mjs      # every deterministic check against its fixtures
   ```
 
-  Published files stay generic: no company, brand, product or internal-tool names. The gate checks tracked files against hashes in `scripts/brand_terms.sha256` (add a term with `node scripts/check_generic.mjs --hash "Some Name"`). Any script that decides something on its own needs fixtures under `evals/check_fixtures/` ([rules](evals/check_fixtures/README.md)).
+  Published files stay generic: no company, brand, product or internal-tool names. `sync_plugin.mjs --check` runs the gate (`scripts/check_generic.mjs`) over tracked files against hashes in `scripts/brand_terms.sha256`; add a term with `node scripts/check_generic.mjs --hash "Some Name"`. Any script that decides something on its own needs fixtures under `evals/check_fixtures/` ([rules](evals/check_fixtures/README.md)).
 - **Releasing:**
   1. Bump `version` in `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json` and `gemini-extension.json`. Claude Code uses `version` to detect updates.
   2. Update [`CHANGELOG.md`](CHANGELOG.md).

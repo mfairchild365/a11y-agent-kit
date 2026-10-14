@@ -38,6 +38,7 @@ export function loadTerms(file) {
 
 function listFiles(root) {
   try {
+    if (!fs.existsSync(path.join(root, ".git"))) throw new Error("not the root of a git checkout");
     const out = execFileSync("git", ["ls-files", "-z"], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
     return out.split("\0").filter(Boolean);
   } catch {

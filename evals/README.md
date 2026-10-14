@@ -11,41 +11,43 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `files/account-settings.html` — seeded input page for eval 8 (deliberately contains a few
   out-of-scope accessibility issues, to check that the skill reports them rather than
   silently rewriting unrelated code).
-- `axe_check.mjs` + `grade_axe.py` — base grading layer: runs axe-core against each run's
+- `axe_check.mjs` + `grade_axe.mjs` — base grading layer: runs axe-core against each run's
   delivered HTML and merges one pass/fail expectation into its `grading.json`.
-- `fetch-upstream.sh` + `grade_upstream.py` — optional second grading layer (see below).
-- `run_cli_eval.py` — runs every eval headlessly through `claude -p`, pinned to an exact
+- `fetch-upstream.sh` + `grade_upstream.mjs` — optional second grading layer (see below).
+- `run_cli_eval.mjs` — runs every eval headlessly through `claude -p`, pinned to an exact
   model, with and without the skill installed (see [Running the loop](#running-the-loop)).
-- `strict_summary.py` — zero-defect scoring (a run passes only if every defect check passes),
+- `strict_summary.mjs` — zero-defect scoring (a run passes only if every defect check passes),
   matching the a11y-llm-eval report metric.
 - `build_review.py` — builds skill-creator's review viewer, escaping `</script>` in the
   embedded HTML outputs so the viewer doesn't break.
 - `audit_fixture/` + `check_audit_report.mjs` + `run_audit_eval.mjs` — a seeded sample page with an
   answer key, and a checker and runner for the `accessibility-reviewer` agent's reports (see
   [Audit agent check](#audit-agent-check)).
-- `trigger_eval.json` + `trigger_check.py` + `trigger_fixture/` — checks whether the skill's
+- `trigger_eval.json` + `trigger_check.mjs` + `trigger_fixture/` — checks whether the skill's
   description makes it fire on the right requests (see [Trigger checks](#trigger-checks)).
 - `run_trigger_eval.py` — runs skill-creator's own trigger eval inside the Claude Code sandbox.
 - `check_fixtures/` + `run_check_fixtures.mjs` + `test_check_runner.mjs` — the required test
   suite for every deterministic check the kit ships: positive, negative, edge and termination
   fixtures with answer keys (see [`check_fixtures/README.md`](check_fixtures/README.md)).
+- `test_eval_tooling.mjs` + `fake_claude.mjs` — tests the grading and summary scripts, and runs `run_cli_eval.mjs` and `trigger_check.mjs` end to end against a fake `claude` CLI (set `CLAUDE_BIN` to use another executable). No browser or model needed.
+- `test_sync_plugin.mjs` — tests `../scripts/sync_plugin.mjs`.
 - `test_check_generic.mjs` — tests `../scripts/check_generic.mjs`, the gate that keeps company,
   brand and product names out of published files.
 
 ## Grading has two layers
 
-**Base layer** (`grade_axe.py`, always available): one generic axe-core check per run, plus
+**Base layer** (`grade_axe.mjs`, always available): one generic axe-core check per run, plus
 whatever the skill-creator grader subagent judges from `evals.json`'s scenario- and
 process-level expectations (fieldset/legend grouping, `aria-describedby` links, focus
 management, and so on — read from the markup and the run's transcript).
 
-**Upstream layer** (`fetch-upstream.sh` + `grade_upstream.py`, optional): the 7 scenarios
+**Upstream layer** (`fetch-upstream.sh` + `grade_upstream.mjs`, optional): the 7 scenarios
 adapted from upstream also have much more thorough, purpose-built Playwright behavioral
 checks in `microsoft/a11y-llm-eval` — real keyboard interaction (Escape closes a dialog,
 arrow keys move between radios, Space toggles a checkbox), focus trapping, and so on. Rather
 than re-implement or copy those, `fetch-upstream.sh` downloads a **pinned commit's** tarball
 of just `node_runner/` and `test_cases/` into `evals/.upstream/` (gitignored, not vendored),
-and `grade_upstream.py` runs them against each run's output, merging their results in as
+and `grade_upstream.mjs` runs them against each run's output, merging their results in as
 `"[upstream] ..."` expectations. A run with no HTML, or one where the runner crashes, gets a
 failing `[upstream]` expectation instead of being skipped, so it can't count as clean.
 
@@ -60,7 +62,7 @@ base layer only.
 
 ```bash
 ./evals/fetch-upstream.sh          # idempotent; no-ops if already at the pinned commit
-python3 evals/grade_upstream.py evals/workspace/iteration-1
+node evals/grade_upstream.mjs evals/workspace/iteration-1
 ```
 
 Both `evals/` and `evals/.upstream/a11y-llm-eval/node_runner` need their own
@@ -79,7 +81,7 @@ upstream checks will fail to find elements they used to find by class name.
 ## Running the loop
 
 This follows the skill-creator loop (runs with and without the skill, grading, aggregating,
-review viewer), but uses `run_cli_eval.py` to produce the runs instead of subagents. The CLI
+review viewer), but uses `run_cli_eval.mjs` to produce the runs instead of subagents. The CLI
 pins an exact model ID and starts each run in an empty directory with no repo context,
 CLAUDE.md, or user plugins. From the repo root:
 
@@ -88,12 +90,12 @@ npm i --prefix evals                     # base-layer deps (once)
 ./evals/fetch-upstream.sh                # upstream layer (optional, once)
 
 # 10 evals × 2 configs × 4 runs = 80 runs
-python3 evals/run_cli_eval.py --model claude-sonnet-4-6 \
+node evals/run_cli_eval.mjs --model claude-sonnet-4-6 \
   --workspace evals/workspace/sonnet46 --scratch "$TMPDIR/s46" --runs 4
 
-python3 evals/grade_axe.py evals/workspace/sonnet46
-python3 evals/grade_upstream.py evals/workspace/sonnet46      # optional
-python3 evals/strict_summary.py evals/workspace/sonnet46 --write
+node evals/grade_axe.mjs evals/workspace/sonnet46
+node evals/grade_upstream.mjs evals/workspace/sonnet46      # optional
+node evals/strict_summary.mjs evals/workspace/sonnet46 --write
 ```
 
 Each run's `meta.json` records the model that answered, whether the Skill tool was invoked,
@@ -109,7 +111,7 @@ python3 -m scripts.aggregate_benchmark evals/workspace/sonnet46 --skill-name bui
 python3 evals/build_review.py evals/workspace/sonnet46          # writes review.html
 ```
 
-Without LLM grading, `strict_summary.py` reports only the programmatic view (axe +
+Without LLM grading, `strict_summary.mjs` reports only the programmatic view (axe +
 upstream) and says so in its table.
 
 ## Trigger checks
@@ -120,13 +122,13 @@ runs in a copy of `trigger_fixture/`, a small fake app, so requests that name fi
 to files that exist.
 
 ```bash
-python3 evals/trigger_check.py --model claude-sonnet-4-6 --desc current=- --runs 3 \
+node evals/trigger_check.mjs --model claude-sonnet-4-6 --desc current=- --runs 3 \
   --out evals/workspace/trigger
-python3 evals/trigger_check.py --model claude-sonnet-4-6 \
+node evals/trigger_check.mjs --model claude-sonnet-4-6 \
   --desc current=- --desc candidate=path/to/description.txt --runs 3 --out evals/workspace/trigger
 ```
 
-`trigger_check.py` installs the real skill (optionally with a different description) and
+`trigger_check.mjs` installs the real skill (optionally with a different description) and
 stops each run as soon as the model invokes the skill, starts writing files, makes 10 tool
 calls, or hits `--timeout`. It prints fire rates per group and lists every should-trigger
 miss. Use it rather than skill-creator's `run_eval.py`, which only counts the skill if it's
@@ -200,11 +202,11 @@ The probe shows what the browser exposes. It can't show what a screen reader spe
 
 ## Environment notes
 
-- `run_trigger_eval.py` and `build_review.py` look for skill-creator in the Claude Code
+- `run_trigger_eval.py` and `build_review.py` are the only Python here (they run and patch skill-creator's own Python modules). They look for skill-creator in the Claude Code
   plugin cache (`~/.claude/plugins/cache/claude-plugins-official/skill-creator/`). Set
   `SKILL_CREATOR_DIR` to the skill-creator skill's directory to use another copy.
 - Scratch directories default to the system temp dir; pass `--scratch` to change them.
-- Inside the Claude Code sandbox, Chromium can't launch, so `grade_axe.py` and
-  `grade_upstream.py` fail every run. Run them outside the sandbox.
+- Inside the Claude Code sandbox, Chromium can't launch, so `grade_axe.mjs` and
+  `grade_upstream.mjs` fail every run. Run them outside the sandbox.
 - `claude -p` runs are billed to your account. A full 72-run pass takes a while; start
   with `--only` and `--runs 1`.
