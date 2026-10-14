@@ -26,6 +26,11 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `trigger_eval.json` + `trigger_check.py` + `trigger_fixture/` — checks whether the skill's
   description makes it fire on the right requests (see [Trigger checks](#trigger-checks)).
 - `run_trigger_eval.py` — runs skill-creator's own trigger eval inside the Claude Code sandbox.
+- `check_fixtures/` + `run_check_fixtures.mjs` + `test_check_runner.mjs` — the required test
+  suite for every deterministic check the kit ships: positive, negative, edge and termination
+  fixtures with answer keys (see [`check_fixtures/README.md`](check_fixtures/README.md)).
+- `test_check_generic.mjs` — tests `../scripts/check_generic.mjs`, the gate that keeps company,
+  brand and product names out of published files.
 
 ## Grading has two layers
 

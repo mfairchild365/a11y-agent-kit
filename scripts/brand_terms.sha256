@@ -1,0 +1,9 @@
+# SHA-256 of normalized names that must not appear in published files (see scripts/check_generic.mjs).
+# Add one with: node scripts/check_generic.mjs --hash "Some Name"
+356696a17247132c1ae955aa76f4965ed4328a9a5e712fb2557f7e87a5043b2e
+0b2d7f9f6eed8ebfe00e53f88c208afb6325ea061c0cf951abf7dfa8b7c3333f
+7fb0d045db6916218e763320086964098def9d20ed370232e5a9b99f19db5a48
+74662ce89f6cc5b444bcace3e42fd7848c472d52927e1b560caaa76b08cbc80f
+48705997f0b62d3bd79cd5c8d7b89433a0ebd9ec22ffd34b691e0db558587d90
+c7d6c4aa1fa49682cd78581a2f5e6a9edf6e5e20d12ee61095e333eec9d14f8b
+393473b18fa4c4716793006988862ca4e419eab70296b217519be0122a98e17d

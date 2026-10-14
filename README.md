@@ -109,7 +109,11 @@ evals/                            eval harness for the skill (not needed at runt
   ```
   python3 scripts/sync_plugin.py --check   # generated files fresh; names/versions agree
   claude plugin validate --strict .        # Claude marketplace + plugin manifests
+  node scripts/check_generic.mjs           # no company, brand or product names in tracked files
+  node evals/run_check_fixtures.mjs        # every deterministic check against its fixtures
   ```
+
+  Published files stay generic: no company, brand, product or internal-tool names. The gate checks tracked files against hashes in `scripts/brand_terms.sha256` (add a term with `node scripts/check_generic.mjs --hash "Some Name"`). Any script that decides something on its own needs fixtures under `evals/check_fixtures/` ([rules](evals/check_fixtures/README.md)).
 - **Releasing:**
   1. Bump `version` in `.claude-plugin/plugin.json`, `.cursor-plugin/plugin.json` and `gemini-extension.json`. Claude Code uses `version` to detect updates.
   2. Update [`CHANGELOG.md`](CHANGELOG.md).
