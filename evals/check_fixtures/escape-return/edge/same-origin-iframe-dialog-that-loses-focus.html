@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<iframe id="fr" title="inner" srcdoc="&lt;button id=t aria-haspopup=dialog&gt;Open&lt;/button&gt;&lt;div id=d role=dialog aria-label=d hidden&gt;&lt;button id=c&gt;Close&lt;/button&gt;&lt;/div&gt;&lt;script&gt;var T=document.getElementById('t'),D=document.getElementById('d');T.onclick=function(){D.hidden=false;document.getElementById('c').focus()};D.onkeydown=function(e){if(e.key==='Escape'){D.hidden=true;document.activeElement.blur()}if(e.key==='Tab'){e.preventDefault();document.getElementById('c').focus()}}&lt;/script&gt;"></iframe><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

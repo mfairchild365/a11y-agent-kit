@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="a">A</button><button id="b">B</button><button id="c">C</button>
+</main>
+<script>var m={"a":"c"};document.addEventListener("keydown",function(e){if(e.key==="Tab"&&e.shiftKey){var t=m[document.activeElement.id];if(t){e.preventDefault();document.getElementById(t).focus()}}})</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "arrow-nav-no-move@#a",
+    "arrow-nav-no-move@#b"
+  ],
+  "stopReason": "complete"
+}

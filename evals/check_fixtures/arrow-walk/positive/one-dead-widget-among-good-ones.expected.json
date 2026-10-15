@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "arrow-nav-no-move@#dead"
+  ],
+  "stopReason": "complete"
+}

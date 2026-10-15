@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="a" aria-haspopup="dialog">Open a</button><dialog id="da" aria-label="da"><p>Content</p><button class="close">Close</button></dialog><script>(function(){var T=document.getElementById("a"),D=document.getElementById("da");T.addEventListener("click",function(){D.showModal()});D.querySelector(".close").addEventListener("click",function(){D.close()})})();</script><button id="b" aria-haspopup="dialog" aria-expanded="false">Open b</button><div id="db" role="dialog" aria-modal="true" aria-label="db" hidden><p>Content</p><input aria-label="Name"><a href="#">Help</a></div><script>(function(){var T=document.getElementById("b"),D=document.getElementById("db");
+function f(){return [].slice.call(D.querySelectorAll('button,a[href],input,[tabindex]:not([tabindex="-1"])'))}
+function open(){D.hidden=false;T.setAttribute("aria-expanded","true");f()[0].focus()}
+function close(){D.hidden=true;T.setAttribute("aria-expanded","false");T.focus()}
+T.addEventListener("click",open);
+D.addEventListener("keydown",function(e){if(e.key==="Escape"&&false){close()}
+if(e.key==="Tab"&&true){var a=f();if(e.shiftKey&&document.activeElement===a[0]){e.preventDefault();a[a.length-1].focus()}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){e.preventDefault();a[0].focus()}}});
+var c=D.querySelector(".close");if(c)c.addEventListener("click",close)})();</script><button id="c" aria-haspopup="menu" aria-expanded="false">Menu c</button><div id="mc" role="menu" aria-label="mc" hidden><button role="menuitem">One</button><button role="menuitem">Two</button></div><script>(function(){var T=document.getElementById("c"),M=document.getElementById("mc");
+T.addEventListener("click",function(){M.hidden=false;T.setAttribute("aria-expanded","true");M.querySelector("[role=menuitem]").focus()});
+M.addEventListener("keydown",function(e){if(e.key==="Escape"&&true){M.hidden=true;T.setAttribute("aria-expanded","false");T.focus()}})})();</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

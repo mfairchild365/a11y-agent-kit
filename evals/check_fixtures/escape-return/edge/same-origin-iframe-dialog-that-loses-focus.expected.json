@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "focus-not-returned@#fr >>> #t"
+  ],
+  "stopReason": "complete"
+}

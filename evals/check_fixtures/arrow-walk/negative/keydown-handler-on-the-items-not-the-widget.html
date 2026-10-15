@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<div role="tablist" id="w" aria-label="w"><button role="tab" id="w-i0" tabindex="0">Item 1</button><button role="tab" id="w-i1" tabindex="-1">Item 2</button><button role="tab" id="w-i2" tabindex="-1">Item 3</button></div><script>[].slice.call(document.querySelectorAll("#w [role=tab]")).forEach(function(it,i,all){it.addEventListener("keydown",function(e){if(e.key==="ArrowRight"&&i<all.length-1){all.forEach(function(x){x.tabIndex=-1});all[i+1].tabIndex=0;all[i+1].focus()}if(e.key==="ArrowLeft"&&i>0){all.forEach(function(x){x.tabIndex=-1});all[i-1].tabIndex=0;all[i-1].focus()}})})</script>
+</main>
+</body>
+</html>

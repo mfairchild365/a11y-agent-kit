@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="a">A</button>
+</main>
+<script>setTimeout(function(){var b=document.createElement("button");b.id="late";b.textContent="Late";document.querySelector("main").appendChild(b)},50)</script>
+</body>
+</html>

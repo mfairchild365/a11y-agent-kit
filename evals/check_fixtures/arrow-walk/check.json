@@ -1,0 +1,14 @@
+{
+  "script": "skills/building-accessible-ui/scripts/arrow-walk.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-widgets",
+    "5",
+    "--max-ms",
+    "2500",
+    "--load-timeout",
+    "2500"
+  ],
+  "timeoutMs": 90000
+}

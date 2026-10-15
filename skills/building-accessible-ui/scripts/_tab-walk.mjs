@@ -50,7 +50,10 @@ export function describeActive(makeSelector) {
   if (!reg.map.has(el)) reg.map.set(el, ++reg.n);
   reg.active = el;
   const selector = makeSelector();
-  return { uid: reg.map.get(el), selector: selector(el), prevented, inModal: !!el.closest('dialog:modal, [aria-modal="true"]') };
+  // Tab and Shift+Tab pick different members of an unchecked radio group (the first, then the last), so the
+  // members of a group share a key.
+  const group = el.localName === "input" && el.type === "radio" && el.name ? `radio:${el.form ? [...document.forms].indexOf(el.form) : "-"}:${el.name}` : null;
+  return { uid: reg.map.get(el), selector: selector(el), group, prevented, inModal: !!el.closest('dialog:modal, [aria-modal="true"]') };
 }
 
 // ---- runs in node ------------------------------------------------------------------------------------
@@ -65,16 +68,17 @@ export async function installTabCapture(page) {
   });
 }
 
-// Presses Tab until the walk ends. onStop(info) runs once for each newly visited control, while it still has
+// Presses Tab (or Shift+Tab with backward: true) until the walk ends. onStop(info) runs once for each newly visited control, while it still has
 // focus. Returns { ended, trap }, where trap is { kind: "stuck" | "cycle", info } when a possible trap ended it.
-export async function walkTab(page, { maxStops, maxMs, onStop }) {
+export async function walkTab(page, { maxStops, maxMs, onStop, backward = false }) {
+  const key = backward ? "Shift+Tab" : "Tab";
   const started = Date.now();
   const seen = new Set();
   let first = null, prev = null, stillCount = 0, noneStreak = 0;
   for (let press = 1; ; press++) {
     if (press > maxStops) return { ended: "stop-cap", trap: null };
     if (Date.now() - started > maxMs) return { ended: "time-cap", trap: null };
-    await page.keyboard.press("Tab");
+    await page.keyboard.press(key);
     const info = await page.evaluate(inPage(describeActive));
     if (info.none) { if (++noneStreak >= 2) return { ended: "complete", trap: null }; continue; }
     noneStreak = 0;

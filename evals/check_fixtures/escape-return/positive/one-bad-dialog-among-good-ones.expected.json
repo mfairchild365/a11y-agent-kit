@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "escape-does-not-close@#b"
+  ],
+  "stopReason": "complete"
+}

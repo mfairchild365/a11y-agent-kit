@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="t" aria-haspopup="dialog">Open t</button><dialog id="d" aria-label="d"><p>Content</p><button class="close">Close</button></dialog><script>(function(){var T=document.getElementById("t"),D=document.getElementById("d");T.addEventListener("click",function(){D.showModal()});D.querySelector(".close").addEventListener("click",function(){D.close()})})();</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

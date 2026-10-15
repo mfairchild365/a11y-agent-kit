@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "shift-tab-unreached@#host >>> #s2"
+  ],
+  "stopReason": "complete"
+}

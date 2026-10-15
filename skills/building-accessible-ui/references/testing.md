@@ -73,18 +73,24 @@ To test a status message (4.1.3), run `scripts/live-region-probe.mjs` in the ski
 
 ## Tree pass and keyboard walk
 
-Three scripts in the skill's `scripts/` folder give a review repeatable evidence from a real browser. Run them on the rendered UI, beside axe, when you review existing UI. They are not a substitute for axe, and not a place to add tests to a project.
+Six scripts in the skill's `scripts/` folder give a review repeatable evidence from a real browser. Run them on the rendered UI, beside axe, when you review existing UI. They are not a substitute for axe, and not a place to add tests to a project.
 
 | Script | What it reads | What it reports |
 |---|---|---|
 | `tree-pass.mjs` | The browser's accessibility tree, which every screen reader reads | `interactive-no-name`, `label-not-in-name`, `repeated-link-name`, `repeated-control-name`, `aria-hidden-focusable`, `duplicate-landmark-name`, `multiple-main`, `no-main`, `heading-level-skip`, `no-h1` |
 | `keyboard-walk.mjs` | Where focus lands as it presses Tab | `focus-no-name`, `unreachable-by-tab`, `focus-cycle-candidate`, `focus-stuck-candidate`, `tabindex-positive` |
 | `focus-contrast.mjs` | What changes on each control on keyboard focus (computed styles), and the background behind it | `focus-indicator-low-contrast`, `focus-indicator-unmeasured`, `focus-indicator-none`, plus the unrounded ratio of every control |
+| `shift-tab-walk.mjs` | The Tab walk, then the Shift+Tab walk on a fresh load, compared | `shift-tab-unreached`, `reached-only-by-shift-tab`, `shift-tab-order-differs`, `shift-tab-trap-candidate` |
+| `arrow-walk.mjs` | Whether the arrow keys move focus in each tab list, toolbar, menu, listbox, tree, radio group and grid | `composite-not-focusable`, `arrow-nav-no-move`, `arrow-nav-leaves-widget`, `arrow-nav-wrong-order` |
+| `escape-return.mjs` | Each dialog, menu and popup opened with the keyboard, then Escape, then where focus is | `escape-does-not-close`, `focus-not-returned`, `focus-not-moved-into-dialog`, `modal-focus-escapes` |
 
 ```bash
 node <skill folder>/scripts/tree-pass.mjs <url or html file> --json
 node <skill folder>/scripts/keyboard-walk.mjs <url or html file> --json
 node <skill folder>/scripts/focus-contrast.mjs <url or html file> --json
+node <skill folder>/scripts/shift-tab-walk.mjs <url or html file> --json
+node <skill folder>/scripts/arrow-walk.mjs <url or html file> --json
+node <skill folder>/scripts/escape-return.mjs <url or html file> --json   # add --trigger <css> for a control that opens an overlay without saying so
 ```
 
 Run them from a folder that has Playwright installed, or set `NODE_PATH` to its `node_modules` folder. `PW_CHANNEL=msedge` (or `chrome`) uses an installed browser. Drop `--json` for a readable list.
@@ -92,9 +98,10 @@ Run them from a folder that has Playwright installed, or set `NODE_PATH` to its 
 How to read the output:
 
 - **Candidates, not verdicts.** Each finding is a lead. Reproduce it before it goes in a report (the real keyboard for the walk, the tree for the pass), then set the confidence from that. See `audit-calibration.md` section E.
-- **`stopReason`.** `complete` means the whole page was covered. Anything else (`node-cap`, `load-timeout`, `stop-cap`, `time-cap`, `cycle`, `stuck`, `modal-cycle`) means it stopped early and says why. Name it under Checks, and don't conclude that something is missing from a page the script didn't finish.
+- **`stopReason`.** `complete` means the whole page was covered. Anything else (`node-cap`, `load-timeout`, `stop-cap`, `time-cap`, `widget-cap`, `trigger-cap`, `cycle`, `stuck`, `modal-cycle`) means it stopped early and says why. Name it under Checks, and don't conclude that something is missing from a page the script didn't finish.
 - **`focus-contrast.mjs` in one paragraph.** It reads the indicator that appears on keyboard focus (an outline, a box-shadow ring, a border or fill that changed) and the stack of backgrounds behind it, walking up through transparent ones, and prints the ratio with no rounding. An outside ring sits on the parent's background, an inside one on the control's own. A two-tone ring passes when either tone reaches `--min` (3:1 by default). It leaves the browser's own ring alone (`ua-default`), measures the end of a transition and not the middle, and reports a ring over an image or gradient, or one that never stops animating, as `unmeasured` for you to measure by hand. A control whose ring is drawn on an ancestor (`:focus-within`) or a pseudo-element is `elsewhere`, and one that only changes text color or underline is `other-change`; neither is reported. Run it on the state you want measured: open the menu or dialog first.
-- **What they don't check:** whether the order makes sense, reading order, target size, hover and focus content, status messages (use `live-region-probe.mjs`), or what a screen reader says. Cross-origin frames are skipped or counted as one stop.
+- **The keys beyond Tab, in one paragraph.** `shift-tab-walk.mjs` walks the page forward and then backward on a fresh load and compares them: the members of a radio group count as one stop (Tab lands on the first, Shift+Tab on the last), and a walk that stopped early is not compared. `arrow-walk.mjs` finds widgets by role, enters each the way a keyboard user would (the `tabindex="0"` item, else the selected one, else the first; a widget with `aria-activedescendant` is entered by focusing the widget), presses the keys its role and `aria-orientation` call for, and checks that focus or the active descendant moves to the neighbouring item and stays inside; a radio group or grid answers either axis, and a grid only has to move. `escape-return.mjs` opens each trigger on a fresh load with Enter, checks a modal takes focus and keeps Tab inside it, presses Escape, and checks the overlay is gone and focus is back on the trigger. A disclosure (a button that shows a region) isn't a trigger. Escape that leaves an overlay open is a 2.1.2 candidate only when no Close control was found; with one, it is a Best practice.
+- **What they don't check:** whether the order makes sense, reading order, target size, hover and focus content, status messages (use `live-region-probe.mjs`), Home and End, type-ahead, Enter or Space on a custom control, overlays that open on hover or need a pointer, or what a screen reader says. Cross-origin frames are skipped or counted as one stop.
 - **Don't treat a clean run as a pass.** It means these narrow checks found nothing.
 
 ## Reaching signed-in and deep states

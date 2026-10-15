@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<div role="tablist" id="w" aria-label="w"><button role="tab" tabindex="0" id="t0">One</button><button role="tab" tabindex="-1" aria-hidden="true" id="t1">Hidden</button><button role="tab" tabindex="-1" id="t2">Two</button></div><script>(function(){var w=document.getElementById("w");var items=[].slice.call(w.querySelectorAll("[role=tab]:not([aria-hidden])")).filter(function(i){return !i.disabled});var N=["ArrowRight"],P=["ArrowLeft"];
+function go(t){items.forEach(function(i){i.tabIndex=-1});items[t].tabIndex=0;items[t].focus()}
+w.addEventListener("keydown",function(e){var i=items.indexOf(document.activeElement);if(i<0)return;
+var isN=N.indexOf(e.key)>=0,isP=P.indexOf(e.key)>=0;if(!isN&&!isP)return;e.preventDefault();
+if("good"==="skip"){go(Math.max(0,Math.min(items.length-1,i+(isN?2:-2))));return}
+if("good"==="leave"){document.getElementById("outside").focus();return}
+if("good"==="blur"){document.activeElement.blur();return}
+if(isN)go(i<items.length-1?i+1:i);else go(i>0?i-1:i)})})();</script>
+
+</main>
+</body>
+</html>
