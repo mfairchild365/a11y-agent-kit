@@ -73,16 +73,18 @@ To test a status message (4.1.3), run `scripts/live-region-probe.mjs` in the ski
 
 ## Tree pass and keyboard walk
 
-Two scripts in the skill's `scripts/` folder give a review repeatable evidence from a real browser. Run them on the rendered UI, beside axe, when you review existing UI. They are not a substitute for axe, and not a place to add tests to a project.
+Three scripts in the skill's `scripts/` folder give a review repeatable evidence from a real browser. Run them on the rendered UI, beside axe, when you review existing UI. They are not a substitute for axe, and not a place to add tests to a project.
 
 | Script | What it reads | What it reports |
 |---|---|---|
 | `tree-pass.mjs` | The browser's accessibility tree, which every screen reader reads | `interactive-no-name`, `label-not-in-name`, `repeated-link-name`, `repeated-control-name`, `aria-hidden-focusable`, `duplicate-landmark-name`, `multiple-main`, `no-main`, `heading-level-skip`, `no-h1` |
 | `keyboard-walk.mjs` | Where focus lands as it presses Tab | `focus-no-name`, `unreachable-by-tab`, `focus-cycle-candidate`, `focus-stuck-candidate`, `tabindex-positive` |
+| `focus-contrast.mjs` | What changes on each control on keyboard focus (computed styles), and the background behind it | `focus-indicator-low-contrast`, `focus-indicator-unmeasured`, `focus-indicator-none`, plus the unrounded ratio of every control |
 
 ```bash
 node <skill folder>/scripts/tree-pass.mjs <url or html file> --json
 node <skill folder>/scripts/keyboard-walk.mjs <url or html file> --json
+node <skill folder>/scripts/focus-contrast.mjs <url or html file> --json
 ```
 
 Run them from a folder that has Playwright installed, or set `NODE_PATH` to its `node_modules` folder. `PW_CHANNEL=msedge` (or `chrome`) uses an installed browser. Drop `--json` for a readable list.
@@ -91,7 +93,8 @@ How to read the output:
 
 - **Candidates, not verdicts.** Each finding is a lead. Reproduce it before it goes in a report (the real keyboard for the walk, the tree for the pass), then set the confidence from that. See `audit-calibration.md` section E.
 - **`stopReason`.** `complete` means the whole page was covered. Anything else (`node-cap`, `load-timeout`, `stop-cap`, `time-cap`, `cycle`, `stuck`, `modal-cycle`) means it stopped early and says why. Name it under Checks, and don't conclude that something is missing from a page the script didn't finish.
-- **What they don't check:** visible focus, contrast, reading order, target size, hover and focus content, status messages (use `live-region-probe.mjs`), or what a screen reader says. Cross-origin frames are skipped or counted as one stop.
+- **`focus-contrast.mjs` in one paragraph.** It reads the indicator that appears on keyboard focus (an outline, a box-shadow ring, a border or fill that changed) and the stack of backgrounds behind it, walking up through transparent ones, and prints the ratio with no rounding. An outside ring sits on the parent's background, an inside one on the control's own. A two-tone ring passes when either tone reaches `--min` (3:1 by default). It leaves the browser's own ring alone (`ua-default`), measures the end of a transition and not the middle, and reports a ring over an image or gradient, or one that never stops animating, as `unmeasured` for you to measure by hand. A control whose ring is drawn on an ancestor (`:focus-within`) or a pseudo-element is `elsewhere`, and one that only changes text color or underline is `other-change`; neither is reported. Run it on the state you want measured: open the menu or dialog first.
+- **What they don't check:** whether the order makes sense, reading order, target size, hover and focus content, status messages (use `live-region-probe.mjs`), or what a screen reader says. Cross-origin frames are skipped or counted as one stop.
 - **Don't treat a clean run as a pass.** It means these narrow checks found nothing.
 
 ## Reaching signed-in and deep states

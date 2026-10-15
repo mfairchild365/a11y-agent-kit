@@ -52,9 +52,9 @@ node evals/run_check_fixtures.mjs                      # every check
 node evals/run_check_fixtures.mjs --check tree-pass    # one check
 ```
 
-`tree-pass` and `keyboard-walk` drive a real browser: run them from a folder where Playwright is found (set `NODE_PATH` to `evals/node_modules`), and set `PW_CHANNEL=msedge` (or `chrome`) if Playwright's own Chromium isn't installed. `compare-reports` reads text only. `node evals/run_all_tests.mjs` runs all of them with the repo's other tests.
+`tree-pass`, `keyboard-walk` and `focus-contrast` drive a real browser: run them from a folder where Playwright is found (set `NODE_PATH` to `evals/node_modules`), and set `PW_CHANNEL=msedge` (or `chrome`) if Playwright's own Chromium isn't installed. `compare-reports` reads text only. `node evals/run_all_tests.mjs` runs all of them with the repo's other tests.
 
-Registered checks: `tree-pass` (the accessibility tree), `keyboard-walk` (Tab through the page, with caps and a stop reason) and `compare-reports` (resolved, still open and new issues between two reports; its fixture is one file holding both reports, split by a `<!-- NEW REPORT -->` line).
+Registered checks: `tree-pass` (the accessibility tree), `keyboard-walk` (Tab through the page, with caps and a stop reason), `focus-contrast` (the contrast of each control's focus indicator) and `compare-reports` (resolved, still open and new issues between two reports; its fixture is one file holding both reports, split by a `<!-- NEW REPORT -->` line).
 
 ## Rules
 

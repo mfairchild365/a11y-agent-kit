@@ -30,11 +30,12 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `check_fixtures/` + `run_check_fixtures.mjs` + `test_check_runner.mjs` — the required test
   suite for every deterministic check the kit ships: positive, negative, edge and termination
   fixtures with answer keys (see [`check_fixtures/README.md`](check_fixtures/README.md)). It holds the suites for
-  `tree-pass.mjs`, `keyboard-walk.mjs` and `compare-reports.mjs`.
+  `tree-pass.mjs`, `keyboard-walk.mjs`, `focus-contrast.mjs` and `compare-reports.mjs`.
 - `guard_fixture/` + `check_guard_run.mjs` + `run_guard_eval.mjs` + `test_check_guard_run.mjs` — checks that an agent turns an
   audit report's Guards into tests (see [Guard run check](#guard-run-check)).
 - `test_eval_tooling.mjs` + `fake_claude.mjs` — tests the grading and summary scripts, and runs `run_cli_eval.mjs` and `trigger_check.mjs` end to end against a fake `claude` CLI (set `CLAUDE_BIN` to use another executable). No browser or model needed.
 - `test_sync_plugin.mjs` — tests `../scripts/sync_plugin.mjs`.
+- `test_contrast.mjs` — tests the pure contrast logic behind `focus-contrast.mjs` (ratios, alpha compositing, background stacks, every verdict). No browser.
 - `test_compare_reports.mjs` — tests the parts of `../skills/building-accessible-ui/scripts/compare-reports.mjs` the fixtures can't see.
 - `test_check_audit_report.mjs` — tests `check_audit_report.mjs` itself: the good sample passes, the broken one fails, and one-at-a-time breakages fail exactly the right check.
 - `test_check_generic.mjs` — tests `../scripts/check_generic.mjs`, the gate that keeps company,

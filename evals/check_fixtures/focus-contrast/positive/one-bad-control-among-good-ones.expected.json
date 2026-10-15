@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "focus-indicator-none@#bad"
+  ],
+  "stopReason": "complete"
+}

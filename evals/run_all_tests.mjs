@@ -27,11 +27,14 @@ const SUITES = [
   { name: "fixture runner tests", args: [path.join(here, "test_check_runner.mjs")] },
   { name: "eval tooling tests (graders, summaries, launchers)", args: [path.join(here, "test_eval_tooling.mjs")] },
   { name: "compare-reports tests", args: [path.join(here, "test_compare_reports.mjs")] },
+  { name: "contrast logic tests", args: [path.join(here, "test_contrast.mjs")] },
   { name: "audit report checker tests", args: [path.join(here, "test_check_audit_report.mjs")] },
   { name: "compare-reports fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "compare-reports"] },
   { name: "live-region probe tests", args: [path.join(here, "test_live_probe.mjs")], browser: true },
   { name: "tree-pass fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "tree-pass"], browser: true },
   { name: "keyboard-walk fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "keyboard-walk"], browser: true },
+  { name: "focus-contrast fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "focus-contrast"], browser: true },
+  { name: "focus-contrast on the seeded audit page", args: [path.join(here, "test_focus_contrast_on_audit_fixture.mjs")], browser: true },
   { name: "guard run grader and runner tests", args: [path.join(here, "test_check_guard_run.mjs")], browser: true },
 ];
 

@@ -26,6 +26,7 @@
 //   PW_CHANNEL=msedge (or chrome) uses an installed browser instead of Playwright's Chromium.
 
 import { launch, toUrl } from "./_browser.mjs";
+import { inPage, installTabCapture, walkTab } from "./_tab-walk.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
@@ -40,51 +41,7 @@ const loadTimeout = Number(opt("--load-timeout", 15000));
 const settleMs = Number(opt("--wait", 300));
 const NAMED_ROLES = new Set(["button", "link", "textbox", "searchbox", "checkbox", "radio", "combobox", "switch", "menuitem", "menuitemcheckbox", "menuitemradio", "tab", "slider", "spinbutton", "treeitem"]);
 
-// ---- runs in the page --------------------------------------------------------------------------------
-function makeSelector() {
-  const esc = (s) => (window.CSS && CSS.escape ? CSS.escape(s) : s);
-  const selector = (n) => {
-    const parts = [];
-    while (n && n.nodeType === 1) {
-      const root = n.getRootNode();
-      if (n.id && root.querySelectorAll && root.querySelectorAll("#" + esc(n.id)).length === 1) {
-        parts.unshift("#" + esc(n.id));
-        if (root.host) return selector(root.host) + " >>> " + parts.join(" > ");
-        break;
-      }
-      const same = n.parentElement ? [...n.parentElement.children].filter((c) => c.localName === n.localName) : [n];
-      parts.unshift(n.localName + (same.length > 1 ? `:nth-of-type(${same.indexOf(n) + 1})` : ""));
-      if (!n.parentElement && n.parentNode && n.parentNode.host) return selector(n.parentNode.host) + " >>> " + parts.join(" > ");
-      n = n.parentElement;
-    }
-    const win = n ? n.ownerDocument.defaultView : null;
-    const joined = parts.join(" > ");
-    return win && win.frameElement ? selector(win.frameElement) + " >>> " + joined : joined;
-  };
-  return selector;
-}
-
-function describeActive(makeSelector) {
-  const reg = window.__kw || (Object.defineProperty(window, "__kw", { value: { map: new WeakMap(), n: 0, active: null } }), window.__kw);
-  let el = document.activeElement;
-  for (;;) {
-    if (!el) break;
-    if (el.shadowRoot && el.shadowRoot.activeElement) { el = el.shadowRoot.activeElement; continue; }
-    if (/^i?frame$/.test(el.localName)) {
-      try { const d = el.contentDocument; if (d && d.activeElement && d.activeElement !== d.body) { el = d.activeElement; continue; } } catch { /* cross-origin: one stop */ }
-    }
-    break;
-  }
-  const tabEvent = window.__kwTab;
-  window.__kwTab = null;
-  const prevented = !!(tabEvent && tabEvent.defaultPrevented);
-  if (!el || el === document.body || el === document.documentElement) return { none: true, prevented };
-  if (!reg.map.has(el)) reg.map.set(el, ++reg.n);
-  reg.active = el;
-  const selector = makeSelector();
-  return { uid: reg.map.get(el), selector: selector(el), prevented, inModal: !!el.closest('dialog:modal, [aria-modal="true"]') };
-}
-
+// ---- runs in the page (the Tab helpers are in _tab-walk.mjs) ----
 function scanPage(makeSelector) {
   const reg = window.__kw || { map: new WeakMap() };
   const selector = makeSelector();
@@ -127,13 +84,7 @@ let stopReason = "complete";
 try {
   const context = await browser.newContext();
   const page = await context.newPage();
-  // The page functions are sent as source, and makeSelector is passed to each so they share it.
-  const inPage = (fn) => `(${fn.toString()})(${makeSelector.toString()})`;
-  // Remember the last Tab keydown (capture phase, so a page that stops propagation is still seen). Whether a
-  // script cancelled it is read after the press, when the event has finished dispatching.
-  await page.addInitScript(() => {
-    window.addEventListener("keydown", (e) => { if (e.key === "Tab") { try { window.top.__kwTab = e; } catch { /* cross-origin */ } } }, true);
-  });
+  await installTabCapture(page);
   try { await page.goto(toUrl(target), { waitUntil: "load", timeout: loadTimeout }); }
   catch (e) { if (/timeout/i.test(`${e.name} ${e.message}`)) stopReason = "load-timeout"; else throw e; }
   await page.waitForTimeout(settleMs);
@@ -151,39 +102,18 @@ try {
     } catch { return {}; }
   };
 
-  const started = Date.now();
-  const seen = new Map();
-  let first = null, prev = null, stillCount = 0, noneStreak = 0, ended = null;
-  for (let press = 1; ; press++) {
-    if (press > maxStops) { ended = "stop-cap"; break; }
-    if (Date.now() - started > maxMs) { ended = "time-cap"; break; }
-    await page.keyboard.press("Tab");
-    const info = await page.evaluate(inPage(describeActive));
-    if (info.none) { if (++noneStreak >= 2) { ended = "complete"; break; } continue; }
-    noneStreak = 0;
-    // Focus on the same control as the last press. With a single tab stop the browser wraps back to it, so
-    // that alone is not a trap. It is one when a script cancelled the Tab key (info.prevented) twice running.
-    if (prev !== null && info.uid === prev) {
-      if (!info.prevented && info.uid === first) { ended = "complete"; break; }
-      if (++stillCount >= 2) { ended = "stuck"; add("focus-stuck-candidate", "2.1.2", "candidate", info.selector, { element: info.selector, note: "A script cancelled Tab and focus did not move. Confirm focus can leave." }); break; }
-      continue;
-    }
-    stillCount = 0;
-    if (first === null) first = info.uid;
-    else if (info.uid === first) { ended = "complete"; break; }
-    prev = info.uid;
-    if (seen.has(info.uid)) {
-      if (info.inModal) { ended = "modal-cycle"; break; }
-      ended = "cycle";
-      add("focus-cycle-candidate", "2.1.2", "candidate", info.selector, { element: info.selector, note: "If a modal dialog is open this is expected; otherwise confirm focus can leave." });
-      break;
-    }
-    const ax = await axOfActive();
-    seen.set(info.uid, true);
-    stops.push({ selector: info.selector, role: ax.role || null, name: ax.name ?? null });
-    if (ax.name === "" && NAMED_ROLES.has(ax.role)) add("focus-no-name", "4.1.2", "candidate", info.selector, { role: ax.role, element: info.selector });
-  }
-  if (stopReason === "complete") stopReason = ended || "complete"; else if (ended && ended !== "complete") stopReason = ended;
+  const { ended, trap } = await walkTab(page, {
+    maxStops,
+    maxMs,
+    onStop: async (info) => {
+      const ax = await axOfActive();
+      stops.push({ selector: info.selector, role: ax.role || null, name: ax.name ?? null });
+      if (ax.name === "" && NAMED_ROLES.has(ax.role)) add("focus-no-name", "4.1.2", "candidate", info.selector, { role: ax.role, element: info.selector });
+    },
+  });
+  if (trap && trap.kind === "stuck") add("focus-stuck-candidate", "2.1.2", "candidate", trap.info.selector, { element: trap.info.selector, note: "A script cancelled Tab and focus did not move. Confirm focus can leave." });
+  if (trap && trap.kind === "cycle") add("focus-cycle-candidate", "2.1.2", "candidate", trap.info.selector, { element: trap.info.selector, note: "If a modal dialog is open this is expected; otherwise confirm focus can leave." });
+  if (stopReason === "complete") stopReason = ended; else if (ended !== "complete") stopReason = ended;
 
   const scanned = await page.evaluate(inPage(scanPage));
   for (const s of [...new Set(scanned.positive)]) add("tabindex-positive", "best practice", "best-practice-candidate", s, { element: s });
