@@ -1,0 +1,10 @@
+{
+  "findings": [
+    "framework@vitest-axe",
+    "runner@vitest"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

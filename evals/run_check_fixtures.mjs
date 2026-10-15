@@ -14,6 +14,8 @@ const repoRoot = path.join(here, "..");
 export const KINDS = ["positive", "negative", "edge", "termination"];
 const DEFAULT_TIMEOUT_MS = 20000;
 
+// JSON with the keys of every object in sorted order, so two answers that differ only in key order are equal.
+const canon = (v) => JSON.stringify(v, (k, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1))) : x));
 const ids = (findings) => (findings || []).map((f) => (typeof f === "string" ? f : f && f.id)).sort();
 
 // Returns [{check, fixture, ok, message}] for one check directory. Problems with the setup itself
@@ -58,6 +60,10 @@ export function runCheck(checkDir, { repo = repoRoot } = {}) {
       if (missing.length) problems.push(`missed: ${missing.join(", ")}`);
       if (extra.length) problems.push(`unexpected (false positive): ${extra.join(", ")}`);
       if (!missing.length && !extra.length && JSON.stringify(got) !== JSON.stringify(want)) problems.push(`same ids but different counts (expected ${want.length}, got ${got.length})`);
+      if (key.fields !== undefined) {
+        if (!key.fields || typeof key.fields !== "object" || Array.isArray(key.fields)) problems.push("the answer key's fields must be an object");
+        else for (const [name, want] of Object.entries(key.fields)) if (canon(out[name]) !== canon(want)) problems.push(`${name}: expected ${canon(want)}, got ${canon(out[name])}`);
+      }
       if (key.stopReason && out.stopReason !== key.stopReason) problems.push(`stopReason ${JSON.stringify(out.stopReason)}, expected ${JSON.stringify(key.stopReason)}`);
       add(name, !problems.length, problems.length ? problems.join("; ") : `${got.length} finding(s)${out.stopReason ? `, stopReason ${out.stopReason}` : ""} in ${Date.now() - started} ms`);
     }

@@ -14,3 +14,13 @@ export function spawnClaude(args, options) {
   const { cmd, args: full } = claudeCommand(args);
   return spawn(cmd, full, { ...options, shell: false });
 }
+
+// --budget <usd> becomes claude's --max-budget-usd: a hard cap on what one run may spend.
+export const budgetArgs = (budget) => (budget == null ? [] : ["--max-budget-usd", String(budget)]);
+export function parseBudget(text) {
+  const n = Number(text);
+  if (!Number.isFinite(n) || n <= 0) throw new Error(`--budget needs a positive number of dollars, got "${text}"`);
+  return n;
+}
+// What a run cost, from the result event's total_cost_usd, or "n/a" when the run was stopped before it reported.
+export const costText = (usd) => (typeof usd === "number" ? `$${usd.toFixed(4)}` : "n/a");

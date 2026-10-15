@@ -41,7 +41,7 @@ checks: `"skipKinds": { "termination": "the check reads one snapshot and never l
 
 ## How a fixture is judged
 
-The check's reported ids must equal the answer key's ids exactly. A missed id, an extra id (a false
+The check's reported ids must equal the answer key's ids exactly. An answer key may also have `fields`, an object of other top-level fields of the check's output that must match (compared as JSON, ignoring key order), for a check whose result is more than a list of findings, such as a verdict. A missed id, an extra id (a false
 positive), the same id reported twice, a wrong `stopReason`, a timeout, output that isn't JSON, or a
 fixture with no answer key each fail the run. `../test_check_runner.mjs` proves the runner does this.
 
@@ -54,7 +54,7 @@ node evals/run_check_fixtures.mjs --check tree-pass    # one check
 
 `tree-pass`, `keyboard-walk`, `focus-contrast`, `shift-tab-walk`, `arrow-walk` and `escape-return` drive a real browser: run them from a folder where Playwright is found (set `NODE_PATH` to `evals/node_modules`), and set `PW_CHANNEL=msedge` (or `chrome`) if Playwright's own Chromium isn't installed. `compare-reports` reads text only. `node evals/run_all_tests.mjs` runs all of them with the repo's other tests.
 
-Registered checks: `tree-pass` (the accessibility tree), `keyboard-walk` (Tab through the page, with caps and a stop reason), `focus-contrast` (the contrast of each control's focus indicator), `shift-tab-walk` (the Tab walk against the Shift+Tab walk), `arrow-walk` (arrow keys in composite widgets), `escape-return` (Escape and focus return for dialogs, menus and popups) and `compare-reports` (resolved, still open and new issues between two reports; its fixture is one file holding both reports, split by a `<!-- NEW REPORT -->` line).
+Registered checks: `tree-pass` (the accessibility tree), `keyboard-walk` (Tab through the page, with caps and a stop reason), `focus-contrast` (the contrast of each control's focus indicator), `shift-tab-walk` (the Tab walk against the Shift+Tab walk), `arrow-walk` (arrow keys in composite widgets), `escape-return` (Escape and focus return for dialogs, menus and popups) and `compare-reports` (resolved, still open and new issues between two reports; its fixture is one file holding both reports, split by a `<!-- NEW REPORT -->` line), `verify-fix` (the verdict and Guard coverage for a fix; its fixtures are JSON files with the two reports, the targets and the Guards, and the answer key's `fields` holds the verdict) and `detect-a11y-tests` (the test setup a project already has; its fixtures are JSON files holding a virtual project, `{ "files": { "<path>": "<content>" } }`, and the answer key's `fields` holds the setup class and sometimes the suggestion). Neither needs a browser.
 
 ## Rules
 

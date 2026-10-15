@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "regression@keyboard-walk:focus-no-name@#x"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}

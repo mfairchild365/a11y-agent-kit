@@ -12,7 +12,8 @@
 //
 // Usage (from the repo root):
 //   node evals/run_audit_eval.mjs --model claude-sonnet-5-5 [--runs 3] [--via direct|subagent]
-//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck]
+//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck] [--budget USD]
+//   --budget USD caps what each run may spend (claude's --max-budget-usd); the cost of each run is printed
 //   --recheck gives the agent audit_fixture/sample/good/report.md as a previous report and also checks the
 //            'Since the last audit' section and digest line against scripts/compare-reports.mjs
 //
@@ -24,7 +25,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { claudeCommand } from "./lib/claude.mjs";
+import { budgetArgs, claudeCommand, costText, parseBudget } from "./lib/claude.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.dirname(here);
@@ -35,7 +36,7 @@ const opt = (name, dflt) => {
 };
 const model = opt("model");
 if (!model) {
-  console.error("Usage: node evals/run_audit_eval.mjs --model <model-id> [--runs N] [--via direct|subagent] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck]");
+  console.error("Usage: node evals/run_audit_eval.mjs --model <model-id> [--runs N] [--via direct|subagent] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck] [--budget USD]");
   process.exit(2);
 }
 const runs = +opt("runs", "1");
@@ -44,6 +45,8 @@ const scratch = path.resolve(opt("scratch", path.join(os.tmpdir(), "audit-eval")
 const out = path.resolve(opt("out", path.join(here, "workspace", "audit")));
 const timeoutMs = +opt("timeout", "1800") * 1000;
 const skipAxe = argv.includes("--skip-axe");
+let budget = null;
+try { if (opt("budget")) budget = parseBudget(opt("budget")); } catch (e) { console.error(e.message); process.exit(2); }
 const recheck = argv.includes("--recheck");
 const previousReport = path.join(here, "audit_fixture", "sample", "good", "report.md");
 if (!["direct", "subagent"].includes(via)) { console.error("--via must be direct or subagent"); process.exit(2); }
@@ -94,7 +97,7 @@ for (let n = 1; n <= runs; n++) {
 
   const cmd = ["-p", "--model", model, "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
     "--plugin-dir", repo, "--permission-mode", "acceptEdits", "--allowedTools", "Read,Glob,Grep,Bash,Skill,Agent",
-    "--output-format", "stream-json", "--verbose"];
+    ...budgetArgs(budget), "--output-format", "stream-json", "--verbose"];
   if (via === "direct") cmd.push("--agent", AGENT);
   cmd.push(prompt());
 
@@ -107,8 +110,9 @@ for (let n = 1; n <= runs; n++) {
   fs.writeFileSync(path.join(runOut, "stream.jsonl"), r.stdout || "");
   fs.writeFileSync(path.join(runOut, "stderr.txt"), r.stderr || "");
   let finalText = "";
+  let cost = null;
   for (const l of (r.stdout || "").split("\n")) {
-    try { const ev = JSON.parse(l); if (ev.type === "result") finalText = ev.result || ""; } catch { /* skip */ }
+    try { const ev = JSON.parse(l); if (ev.type === "result") { finalText = ev.result || ""; cost = typeof ev.total_cost_usd === "number" ? ev.total_cost_usd : null; } } catch { /* skip */ }
   }
   fs.writeFileSync(path.join(runOut, "final-message.md"), finalText || "(no final message)");
 
@@ -117,7 +121,7 @@ for (let n = 1; n <= runs; n++) {
   const secs = Math.round((Date.now() - t0) / 1000);
   if (r.error || !fs.existsSync(path.join(runOut, "report.md"))) {
     const why = (r.stderr || finalText || "").trim().split("\n")[0];
-    console.log(`  no report.md produced after ${secs}s${r.error ? ` (${r.error.code || r.error.message})` : ""}${why ? `: ${why}` : ""}`);
+    console.log(`  no report.md produced after ${secs}s, cost ${costText(cost)}${r.error ? ` (${r.error.code || r.error.message})` : ""}${why ? `: ${why}` : ""}`);
     console.log(`  see ${runOut}`);
     continue;
   }
@@ -128,7 +132,7 @@ for (let n = 1; n <= runs; n++) {
   fs.writeFileSync(path.join(runOut, "check.json"), JSON.stringify(res, null, 2));
   tally(res.results, perCheck);
   recalls.push(res.recall);
-  console.log(`  ${secs}s. Recall ${res.recall}. ${res.passed}/${res.passed + res.failed} checks passed.`);
+  console.log(`  ${secs}s, cost ${costText(cost)}. Recall ${res.recall}. ${res.passed}/${res.passed + res.failed} checks passed.`);
   for (const f of res.results.filter((x) => !x.ok)) console.log(`    FAIL ${f.name}${f.detail ? ` -> ${f.detail}` : ""}`);
   for (const w of res.warnings) console.log(`    WARN ${w}`);
 }

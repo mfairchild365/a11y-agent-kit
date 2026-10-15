@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "guard-uncovered@4.1.2|close button",
+    "regression@1.4.1|notices",
+    "target-open@1.4.3|badge"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}

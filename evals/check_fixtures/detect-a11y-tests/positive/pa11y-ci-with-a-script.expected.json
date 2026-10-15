@@ -1,0 +1,10 @@
+{
+  "findings": [
+    "framework@pa11y-ci",
+    "test-script@a11y"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

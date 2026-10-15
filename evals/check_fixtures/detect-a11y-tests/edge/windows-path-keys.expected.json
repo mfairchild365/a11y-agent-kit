@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "a11y-test-file@src/a.test.tsx"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

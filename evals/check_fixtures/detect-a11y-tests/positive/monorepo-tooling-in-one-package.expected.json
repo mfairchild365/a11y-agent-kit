@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "framework@jest-axe",
+    "runner@jest",
+    "runner@mocha"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

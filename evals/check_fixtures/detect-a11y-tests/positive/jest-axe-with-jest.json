@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"devDependencies\":{\"jest\":\"^1.0.0\",\"jest-axe\":\"^1.0.0\"}}","src/a.test.tsx":"import { axe, toHaveNoViolations } from 'jest-axe';\nit('has no violations', async () => { expect(await axe(container)).toHaveNoViolations(); });\n"}}

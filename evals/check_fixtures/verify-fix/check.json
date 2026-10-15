@@ -1,0 +1,10 @@
+{
+  "script": "skills/building-accessible-ui/scripts/verify-fix.mjs",
+  "args": [
+    "--input",
+    "{fixture}",
+    "--format",
+    "json"
+  ],
+  "timeoutMs": 20000
+}

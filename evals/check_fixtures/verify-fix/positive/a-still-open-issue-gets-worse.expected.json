@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "worsened@1.4.1|notices"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}

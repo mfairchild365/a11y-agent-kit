@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"devDependencies\":{\"pa11y-ci\":\"^3.0.0\"},\"scripts\":{\"a11y\":\"pa11y-ci\",\"build\":\"tsc\"}}"}}

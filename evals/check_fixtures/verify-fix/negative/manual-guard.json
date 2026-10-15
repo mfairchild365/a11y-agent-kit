@@ -1,0 +1,13 @@
+{
+ "before": "# Accessibility audit: Fixture\n\n## Summary\n\n- **Scope:** fixture\n\n## Findings\n\n### Element: Notices\n\n#### 1. Moderate · 1.4.1 · 1 instance · High confidence · A problem\n\n- **Summary:** s\n\n## Minor issues\n\n| # | Element | WCAG SC | Title | Suggested fix | Confidence |\n|---|---|---|---|---|---|\n\n## Best practices\n\n| # | Element | What | Suggested fix | Confidence |\n|---|---|---|---|---|\n\n## Needs verification\n\n| # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |\n|---|---|---|---|---|---|\n\n## Out of scope\n\nNothing.\n",
+ "after": "# Accessibility audit: Fixture\n\n## Summary\n\n- **Scope:** fixture\n\n## Findings\n\n## Minor issues\n\n| # | Element | WCAG SC | Title | Suggested fix | Confidence |\n|---|---|---|---|---|---|\n\n## Best practices\n\n| # | Element | What | Suggested fix | Confidence |\n|---|---|---|---|---|\n\n## Needs verification\n\n| # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |\n|---|---|---|---|---|---|\n\n## Out of scope\n\nNothing.\n",
+ "targets": [
+  "1.4.1|Notices"
+ ],
+ "guards": [
+  {
+   "target": "1.4.1|Notices",
+   "kind": "manual"
+  }
+ ]
+}

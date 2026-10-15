@@ -1,0 +1,9 @@
+{
+  "script": "skills/building-accessible-ui/scripts/detect-a11y-tests.mjs",
+  "args": [
+    "--tree",
+    "{fixture}",
+    "--json"
+  ],
+  "timeoutMs": 20000
+}

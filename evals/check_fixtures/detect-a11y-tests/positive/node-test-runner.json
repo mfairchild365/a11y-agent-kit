@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"scripts\":{\"test\":\"node --test tests/*.test.mjs\"}}","tests/a.test.mjs":"it('adds', () => { expect(1 + 1).toBe(2); });\n"}}

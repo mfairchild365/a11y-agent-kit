@@ -11,6 +11,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { findOutputHtml, interpretAxe, mergeExpectation } from "./grade_axe.mjs";
 import { mergeUpstreamExpectations, toExpectations } from "./grade_upstream.mjs";
+import { budgetArgs, costText, parseBudget } from "./lib/claude.mjs";
 import { buildPrompt, parseStream } from "./run_cli_eval.mjs";
 import { isProcess, summarize } from "./strict_summary.mjs";
 import { installSkill, processEvent } from "./trigger_check.mjs";
@@ -125,6 +126,40 @@ const evalNames = JSON.parse(fs.readFileSync(path.join(here, "evals.json"), "utf
   const c = run("hang", ["--timeout", "2"]);
   check("trigger_check end to end: a silent stall is stopped by the timeout", c.r.status === 0 && c.summary.per_query[0].ended[0] === "timeout");
   check("trigger_check end to end: scratch directories are cleaned up", !fs.existsSync(path.join(tmp, "trig-scratch-skill", "current__q0__r1")));
+}
+
+// ---- cost controls: --budget reaches the CLI as --max-budget-usd, and each run's cost is printed
+check("budget: --budget becomes --max-budget-usd, and no budget adds nothing", budgetArgs(1.5).join(" ") === "--max-budget-usd 1.5" && budgetArgs(null).length === 0 && budgetArgs(undefined).length === 0);
+check("budget: a positive number of dollars is accepted", parseBudget("0.25") === 0.25 && parseBudget("3") === 3);
+check("budget: zero, a negative number, text and nothing are rejected", ["0", "-1", "abc", "", "NaN", "Infinity"].every((t) => { try { parseBudget(t); return false; } catch (e) { return /positive number of dollars/.test(e.message); } }));
+check("budget: costText shows four decimals, or n/a when the run never reported", costText(0.0123) === "$0.0123" && costText(0) === "$0.0000" && costText(null) === "n/a" && costText(undefined) === "n/a");
+check("budget: parseStream reads total_cost_usd from the result event, and null when there is none", (() => {
+  const a = put("cost1.jsonl", JSON.stringify({ type: "result", result: "ok", total_cost_usd: 0.5, usage: {} }));
+  const b = put("cost2.jsonl", JSON.stringify({ type: "result", result: "ok", usage: {} }));
+  return parseStream(a).cost === 0.5 && parseStream(b).cost === null;
+})());
+{
+  const argsFile = path.join(tmp, "args.json");
+  const withFake = (mode) => ({ ...process.env, CLAUDE_BIN: path.join(here, "fake_claude.mjs"), FAKE_CLAUDE: mode, FAKE_CLAUDE_ARGS_FILE: argsFile });
+  const only = evalNames[0];
+  const cli = (extra) => spawnSync(process.execPath, [path.join(here, "run_cli_eval.mjs"), "--model", "fake", "--workspace", path.join(tmp, "b-ws"), "--scratch", path.join(tmp, "b-scratch"), "--only", only, ...extra], { encoding: "utf8", env: withFake("done"), timeout: 60000 });
+  let r = cli(["--budget", "0.5"]);
+  let args = JSON.parse(fs.readFileSync(argsFile, "utf8"));
+  check("budget: run_cli_eval passes --max-budget-usd to the CLI, before the prompt", r.status === 0 && args[args.indexOf("--max-budget-usd") + 1] === "0.5" && args.indexOf("--max-budget-usd") < args.length - 1 && /Write the finished page/.test(args[args.length - 1]));
+  check("budget: run_cli_eval prints each run's cost and records it in timing.json", /cost=\$0\.0123/.test(r.stdout) && JSON.parse(fs.readFileSync(path.join(tmp, "b-ws", `eval-${only}`, "with_skill", "run-1", "timing.json"), "utf8")).total_cost_usd === 0.0123);
+  r = cli([]);
+  args = JSON.parse(fs.readFileSync(argsFile, "utf8"));
+  check("budget: with no --budget, run_cli_eval adds no budget flag", r.status === 0 && !args.includes("--max-budget-usd"));
+  check("budget: run_cli_eval rejects a bad --budget as a usage error", cli(["--budget", "0"]).status === 2 && cli(["--budget", "abc"]).status === 2);
+  const trig = spawnSync(process.execPath, [path.join(here, "trigger_check.mjs"), "--model", "fake", "--desc", "current=-", "--runs", "1", "--only", "0", "--scratch", path.join(tmp, "b-trig"), "--out", path.join(tmp, "b-trig-out"), "--budget", "2"], { encoding: "utf8", env: withFake("skill"), timeout: 60000 });
+  args = JSON.parse(fs.readFileSync(argsFile, "utf8"));
+  check("budget: trigger_check passes --max-budget-usd to the CLI, before the prompt", trig.status === 0 && args[args.indexOf("--max-budget-usd") + 1] === "2" && args.indexOf("--max-budget-usd") < args.length - 1);
+  check("budget: trigger_check rejects a bad --budget", spawnSync(process.execPath, [path.join(here, "trigger_check.mjs"), "--model", "x", "--desc", "a=-", "--out", path.join(tmp, "o"), "--budget", "-3"], { encoding: "utf8" }).status === 2);
+  const audit = spawnSync(process.execPath, [path.join(here, "run_audit_eval.mjs"), "--model", "fake", "--runs", "1", "--scratch", path.join(tmp, "b-audit"), "--out", path.join(tmp, "b-audit-out"), "--budget", "1.25"], { encoding: "utf8", env: withFake("done"), timeout: 60000 });
+  args = JSON.parse(fs.readFileSync(argsFile, "utf8"));
+  check("budget: run_audit_eval passes --max-budget-usd to the CLI and prints the run's cost", args[args.indexOf("--max-budget-usd") + 1] === "1.25" && /cost \$0\.0123/.test(audit.stdout));
+  check("budget: run_audit_eval rejects a bad --budget", spawnSync(process.execPath, [path.join(here, "run_audit_eval.mjs"), "--model", "x", "--budget", "free"], { encoding: "utf8" }).status === 2);
+  check("budget: run_guard_eval rejects a bad --budget", spawnSync(process.execPath, [path.join(here, "run_guard_eval.mjs"), "--model", "x", "--budget", "-1"], { encoding: "utf8" }).status === 2);
 }
 
 fs.rmSync(tmp, { recursive: true, force: true });

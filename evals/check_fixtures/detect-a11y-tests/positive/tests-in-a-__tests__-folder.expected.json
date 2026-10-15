@@ -1,0 +1,10 @@
+{
+  "findings": [
+    "a11y-test-file@src/__tests__/deep/a.js",
+    "runner@jest"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

@@ -18,14 +18,14 @@
 //   node evals/trigger_check.mjs --model claude-sonnet-4-6 \
 //       --desc current=<file> --desc B=<file> --runs 3 --out <dir>
 // Use --desc NAME=- to keep the skill's current description.
-// Options: --workers 8  --timeout 150 (seconds)  --scratch DIR  --only N (repeatable)
+// Options: --workers 8  --timeout 150 (seconds)  --scratch DIR  --only N (repeatable)  --budget USD (a hard cap per run)
 
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
-import { spawnClaude } from "./lib/claude.mjs";
+import { budgetArgs, parseBudget, spawnClaude } from "./lib/claude.mjs";
 
 const REPO = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SKILL_SRC = path.join(REPO, "skills", "building-accessible-ui");
@@ -67,14 +67,14 @@ export function processEvent(state, ev) {
 }
 
 function runOne(job) {
-  const { label, description, qi, query, n, model, scratch, timeout } = job;
+  const { label, description, qi, query, n, model, scratch, timeout, budget } = job;
   const cwd = path.join(scratch, `${label}__q${qi}__r${n}`);
   fs.rmSync(cwd, { recursive: true, force: true });
   fs.mkdirSync(cwd, { recursive: true });
   fs.cpSync(FIXTURE, cwd, { recursive: true });
   installSkill(cwd, description);
   const args = ["-p", "--model", model, "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
-    "--permission-mode", "acceptEdits", "--allowedTools", ALLOWED, "--output-format", "stream-json", "--verbose", query];
+    "--permission-mode", "acceptEdits", "--allowedTools", ALLOWED, ...budgetArgs(budget), "--output-format", "stream-json", "--verbose", query];
   return new Promise((resolve) => {
     const state = { triggered: false, calls: 0, firstTools: [], ended: "no_result" }; // no_result: stream closed without a result event
     const child = spawnClaude(args, { cwd, stdio: ["ignore", "pipe", "ignore"] });
@@ -107,13 +107,14 @@ function runOne(job) {
 }
 
 function parseArgs(argv) {
-  const a = { runs: 3, workers: 8, timeout: 150, scratch: path.join(os.tmpdir(), "bau-trigger"), desc: [], only: null };
+  const a = { runs: 3, workers: 8, timeout: 150, scratch: path.join(os.tmpdir(), "bau-trigger"), desc: [], only: null, budget: null };
   const need = (i) => { if (i + 1 >= argv.length) throw new Error(`${argv[i]} needs a value`); return argv[i + 1]; };
   for (let i = 0; i < argv.length; i += 2) {
     switch (argv[i]) {
       case "--model": a.model = need(i); break;
       case "--desc": a.desc.push(need(i)); break;
       case "--runs": a.runs = Number(need(i)); break;
+      case "--budget": a.budget = parseBudget(need(i)); break;
       case "--workers": a.workers = Number(need(i)); break;
       case "--timeout": a.timeout = Number(need(i)); break;
       case "--scratch": a.scratch = need(i); break;
@@ -150,7 +151,7 @@ async function main(argv) {
   const jobs = [];
   for (const [label, description] of descs)
     for (const qi of qis)
-      for (let n = 1; n <= a.runs; n++) jobs.push({ label, description, qi, query: QUERIES[qi].query, n, model: a.model, scratch, timeout: a.timeout });
+      for (let n = 1; n <= a.runs; n++) jobs.push({ label, description, qi, query: QUERIES[qi].query, n, model: a.model, scratch, timeout: a.timeout, budget: a.budget });
   console.log(`${jobs.length} runs, model=${a.model}`);
 
   const results = {}, firsts = {}, ends = {};

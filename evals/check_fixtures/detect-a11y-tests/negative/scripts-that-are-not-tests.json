@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"scripts\":{\"build\":\"tsc\",\"lint\":\"eslint .\",\"start\":\"node server.js\"}}"}}

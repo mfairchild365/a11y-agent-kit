@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"devDependencies\":{\"jest\":\"1\",\"jest-axe\":\"1\",\"@playwright/test\":\"1\",\"@axe-core/playwright\":\"1\",\"pa11y-ci\":\"1\"},\"scripts\":{\"test\":\"jest\",\"test:e2e\":\"playwright test\"}}"}}

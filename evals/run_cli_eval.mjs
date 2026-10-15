@@ -16,12 +16,12 @@
 // Usage (from the repo root):
 //   node evals/run_cli_eval.mjs --model claude-sonnet-4-6 \
 //       --workspace evals/workspace/sonnet46 --scratch "$TMPDIR/s46"
-// Options: --workers 6  --timeout 900 (seconds)  --only a,b  --run-start 1  --runs 1
+// Options: --workers 6  --timeout 900 (seconds)  --only a,b  --run-start 1  --runs 1  --budget USD (a hard cap per run)
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { spawnClaude } from "./lib/claude.mjs";
+import { budgetArgs, costText, parseBudget, spawnClaude } from "./lib/claude.mjs";
 
 const REPO = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SKILL_SRC = path.join(REPO, "skills", "building-accessible-ui");
@@ -38,7 +38,7 @@ export function buildPrompt(e) {
 }
 
 export function parseStream(file) {
-  const info = { skills_listed: null, plugins: null, skill_tool_calls: 0, tool_calls: {}, result: "", duration_ms: null, tokens: null, models: [] };
+  const info = { skills_listed: null, plugins: null, skill_tool_calls: 0, tool_calls: {}, result: "", duration_ms: null, tokens: null, models: [], cost: null };
   if (!fs.existsSync(file)) return info;
   for (const line of fs.readFileSync(file, "utf8").split(/\r?\n/)) {
     let ev;
@@ -57,6 +57,7 @@ export function parseStream(file) {
     } else if (ev.type === "result") {
       info.result = ev.result || "";
       info.duration_ms = ev.duration_ms ?? null;
+      info.cost = typeof ev.total_cost_usd === "number" ? ev.total_cost_usd : null;
       info.models = Object.keys(ev.modelUsage || {});
       const u = ev.usage || {};
       info.tokens = ["input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"].reduce((s, k) => s + (u[k] || 0), 0);
@@ -79,7 +80,7 @@ function runClaude(args, cwd, outFile, timeoutMs) {
 }
 
 async function runOne(job) {
-  const { e, cfg, model, scratch, workspace, timeout, n } = job;
+  const { e, cfg, model, scratch, workspace, timeout, n, budget } = job;
   const name = e.name;
   const cwd = path.join(scratch, `${name}__${cfg}__r${n}`);
   fs.rmSync(cwd, { recursive: true, force: true });
@@ -87,7 +88,7 @@ async function runOne(job) {
   if (cfg === "with_skill") fs.cpSync(SKILL_SRC, path.join(cwd, ".claude", "skills", "building-accessible-ui"), { recursive: true });
   if (name === "existing-page-save-feature") fs.copyFileSync(INPUT_FILE, path.join(cwd, "account-settings.html"));
   const args = ["-p", "--model", model, "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
-    "--permission-mode", "acceptEdits", "--allowedTools", ALLOWED_TOOLS, "--output-format", "stream-json", "--verbose", buildPrompt(e)];
+    "--permission-mode", "acceptEdits", "--allowedTools", ALLOWED_TOOLS, ...budgetArgs(budget), "--output-format", "stream-json", "--verbose", buildPrompt(e)];
   const t0 = Date.now();
   const status = await runClaude(args, cwd, path.join(cwd, "stream.jsonl"), timeout * 1000);
   const wall = Date.now() - t0;
@@ -103,11 +104,11 @@ async function runOne(job) {
     `Tool calls: ${JSON.stringify(info.tool_calls)}\nSkill tool invoked: ${info.skill_tool_calls} time(s)\n` +
     `Skills visible at start: ${JSON.stringify(info.skills_listed)}\nPlugins loaded: ${JSON.stringify(info.plugins)}\n`);
   const durMs = info.duration_ms || wall;
-  fs.writeFileSync(path.join(run, "timing.json"), JSON.stringify({ total_tokens: info.tokens, duration_ms: Math.trunc(durMs), total_duration_seconds: Math.round(durMs / 100) / 10 }));
+  fs.writeFileSync(path.join(run, "timing.json"), JSON.stringify({ total_tokens: info.tokens, total_cost_usd: info.cost, duration_ms: Math.trunc(durMs), total_duration_seconds: Math.round(durMs / 100) / 10 }));
   fs.writeFileSync(path.join(run, "meta.json"), JSON.stringify({ status, produced_index: produced, models: info.models, skill_tool_calls: info.skill_tool_calls, tool_calls: info.tool_calls, skills_listed: info.skills_listed, plugins: info.plugins }, null, 2));
   fs.mkdirSync(path.join(workspace, `eval-${name}`), { recursive: true });
   fs.writeFileSync(path.join(workspace, `eval-${name}`, "eval_metadata.json"), JSON.stringify({ eval_id: e.id, eval_name: e.name, prompt: e.prompt, assertions: e.expectations }, null, 2));
-  return `${name.padEnd(30)} ${cfg.padEnd(14)} run-${n} ${status.padEnd(8)} index=${produced} skillcalls=${info.skill_tool_calls} models=${JSON.stringify(info.models)}`;
+  return `${name.padEnd(30)} ${cfg.padEnd(14)} run-${n} ${status.padEnd(8)} index=${produced} skillcalls=${info.skill_tool_calls} models=${JSON.stringify(info.models)} cost=${costText(info.cost)}`;
 }
 
 function parseArgs(argv) {
@@ -123,6 +124,7 @@ function parseArgs(argv) {
       case "--only": a.only = new Set(need(i).split(",")); break;
       case "--run-start": a.runStart = Number(need(i)); break;
       case "--runs": a.runs = Number(need(i)); break;
+      case "--budget": a.budget = parseBudget(need(i)); break;
       default: throw new Error(`unknown option ${argv[i]}`);
     }
   }
@@ -142,7 +144,7 @@ async function main(argv) {
   for (let n = a.runStart; n < a.runStart + a.runs; n++)
     for (const e of evals) {
       if (a.only && !a.only.has(e.name)) continue;
-      for (const cfg of ["with_skill", "without_skill"]) jobs.push({ e, cfg, model: a.model, scratch, workspace, timeout: a.timeout, n });
+      for (const cfg of ["with_skill", "without_skill"]) jobs.push({ e, cfg, model: a.model, scratch, workspace, timeout: a.timeout, n, budget: a.budget });
     }
   console.log(`${jobs.length} runs, model=${a.model}, workers=${a.workers}`);
   // A small pool; results print in job order, like the Python version's executor.map.

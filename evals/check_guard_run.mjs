@@ -55,6 +55,7 @@ function scratch(tmp, name, { page, agentDir, withAgentTests = true, withOracle 
 export function grade({ agentDir, variant = "normal", message = null }) {
   const results = [];
   const warnings = [];
+  let fixed = []; // which of the two automatable defects the agent's page now passes: "button", "contrast"
   const check = (name, ok, detail = "") => results.push({ name, ok: !!ok, detail });
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "guard-run-"));
   try {
@@ -71,6 +72,7 @@ export function grade({ agentDir, variant = "normal", message = null }) {
     const page = read(agentPage);
     check("The page was edited, not rewritten: main, h1 and all four elements are still there", ["<main", "<h1", 'id="close"', 'id="badge"', 'id="notice-info"', 'id="notice-error"'].every((s) => page.includes(s)));
     const oracle = runTests(scratch(tmp, "oracle-after", { page: agentPage, withAgentTests: false, withOracle: true }), ["tests/oracle.test.mjs"]);
+    fixed = [oracle.passed.includes("oracle: button-name") && "button", oracle.passed.includes("oracle: color-contrast") && "contrast"].filter(Boolean);
     check("Both automatable defects are fixed (axe button-name and color-contrast pass on the agent's page)", oracle.ok && oracle.passed.length === 2, `failed: ${oracle.failed.join(", ") || "none"}`);
 
     const baseTestFiles = files(path.join(BASELINE, "tests"));
@@ -108,7 +110,7 @@ export function grade({ agentDir, variant = "normal", message = null }) {
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }
-  return { results, warnings };
+  return { results, warnings, fixed };
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

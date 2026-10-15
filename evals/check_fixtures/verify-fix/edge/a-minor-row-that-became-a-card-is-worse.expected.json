@@ -1,0 +1,10 @@
+{
+  "findings": [
+    "target-open@2.4.4|footer link",
+    "worsened@2.4.4|footer link"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}

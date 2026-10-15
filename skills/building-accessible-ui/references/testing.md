@@ -132,6 +132,7 @@ When you fix an issue from an audit report, each full card has a **Guard**: the 
 - **Manual Guard.** Don't invent a test. Do the check by hand after the fix, and list it in your summary as a check that is still manual.
 - **Opted out.** Don't add tests. Say that the Guards were not turned into tests, and why.
 - Report which Guards became tests, which stayed manual, and the before and after result of each test.
+- The whole loop (plan and approval, locating the component, checking the project's test setup, and `verify-fix.mjs` after the change) is in `references/fixing.md`. A fix that comes from a ticket or a report follows it; this section is the test-writing part.
 
 ## Process safety
 

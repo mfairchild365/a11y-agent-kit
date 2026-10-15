@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "target-open@1.4.3|badge"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "partial"
+  }
+}

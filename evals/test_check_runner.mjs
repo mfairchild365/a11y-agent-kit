@@ -14,6 +14,8 @@ const stub = path.join(here, "check_fixtures", "_selftest", "stub_check.mjs");
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "check-runner-"));
 const hang = path.join(tmp, "hang.mjs");
 fs.writeFileSync(hang, "setInterval(() => {}, 1000);\n");
+const fieldsStub = path.join(tmp, "fields.mjs");
+fs.writeFileSync(fieldsStub, 'console.log(JSON.stringify({ findings: [], stopReason: "complete", verdict: "fixed", counts: { a: 1, b: [2, 3] } }));\n');
 const notJson = path.join(tmp, "notjson.mjs");
 fs.writeFileSync(notJson, 'console.log("oops");\n');
 
@@ -59,6 +61,14 @@ check("a skip with an empty reason fails", failsWith(run({ skipKinds: { terminat
 check("a negative answer key that lists findings is rejected", failsWith(run({ fixtures: { ...good, "negative/a": ["<b></b>", { findings: ["x"] }] } }), "negative fixture"));
 check("a positive answer key that lists nothing is rejected", failsWith(run({ fixtures: { ...good, "positive/a": ["<b></b>", { findings: [] }] } }), "positive fixture"));
 check("a termination answer key with no stopReason is rejected", failsWith(run({ fixtures: { ...good, "termination/a": ['<i data-stop="cap"></i>', { findings: [] }] } }), "stopReason"));
+const fieldsRun = (key) => run({ script: fieldsStub, skipKinds: { positive: "x", negative: "x", termination: "x" }, fixtures: { "edge/a": ["<b></b>", { findings: [], ...key }] } });
+check("an answer key's fields that match the output pass", failures(fieldsRun({ fields: { verdict: "fixed", counts: { a: 1, b: [2, 3] } } })).length === 0);
+check("fields are compared whatever the order of their keys", failures(fieldsRun({ fields: { counts: { b: [2, 3], a: 1 } } })).length === 0);
+check("a field that differs fails, and says what it expected and got", failsWith(fieldsRun({ fields: { verdict: "regressed" } }), 'verdict: expected "regressed", got "fixed"'));
+check("a field the output does not have fails", failsWith(fieldsRun({ fields: { nope: 1 } }), "nope: expected 1, got undefined"));
+check("a field that differs deep inside an object or list fails", failsWith(fieldsRun({ fields: { counts: { a: 1, b: [2, 4] } } }), "counts: expected"));
+check("fields that are not an object are rejected", failsWith(fieldsRun({ fields: ["verdict"] }), "fields must be an object") && failsWith(fieldsRun({ fields: null }), "fields must be an object"));
+check("an answer key with no fields is unaffected", failures(fieldsRun({})).length === 0);
 check("the shipped self-test check passes", failures(runCheck(path.join(here, "check_fixtures", "_selftest", "stub"), { repo: path.join(here, "..") })).length === 0);
 
 fs.rmSync(tmp, { recursive: true, force: true });

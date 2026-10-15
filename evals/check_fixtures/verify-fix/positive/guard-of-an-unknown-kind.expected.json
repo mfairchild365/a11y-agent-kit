@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "invalid-guard@4.1.2|close button"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "fixed"
+  }
+}

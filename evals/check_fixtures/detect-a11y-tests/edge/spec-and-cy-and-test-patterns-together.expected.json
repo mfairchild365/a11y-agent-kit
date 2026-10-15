@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "a11y-test-file@a.test.js",
+    "a11y-test-file@b.spec.ts",
+    "a11y-test-file@c.cy.jsx"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

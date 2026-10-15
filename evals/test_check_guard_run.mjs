@@ -67,7 +67,8 @@ check("opt-out: a test file outside tests/ also fails", failedNames(run(agent({ 
 // ---- the runner, end to end against the fake CLI (no model): a good agent passes, a lazy one is caught
 {
   const runner = path.join(here, "run_guard_eval.mjs");
-  const go = (variant, mode) => spawnSync(process.execPath, [runner, "--model", "fake", "--variant", variant, "--runs", "1", "--scratch", path.join(tmp, `s-${variant}-${mode}`), "--out", path.join(tmp, `o-${variant}-${mode}`)], { encoding: "utf8", env: { ...process.env, CLAUDE_BIN: path.join(here, "fake_claude.mjs"), FAKE_CLAUDE: mode }, timeout: 300000 });
+  const argsFile = path.join(tmp, "guard-args.json");
+  const go = (variant, mode, extra = []) => spawnSync(process.execPath, [runner, "--model", "fake", "--variant", variant, "--runs", "1", "--scratch", path.join(tmp, `s-${variant}-${mode}`), "--out", path.join(tmp, `o-${variant}-${mode}`), ...extra], { encoding: "utf8", env: { ...process.env, CLAUDE_BIN: path.join(here, "fake_claude.mjs"), FAKE_CLAUDE: mode, FAKE_CLAUDE_ARGS_FILE: argsFile }, timeout: 300000 });
   const a = go("normal", "guard");
   check("run_guard_eval end to end: an agent that fixes the page and adds failing-then-passing tests exits 0", a.status === 0 && /1\/1 runs finished/.test(a.stdout));
   check("run_guard_eval end to end: it saves the agent's message and the grader's results", fs.existsSync(path.join(tmp, "o-normal-guard", "normal-run-1", "final-message.md")) && fs.existsSync(path.join(tmp, "o-normal-guard", "normal-run-1", "check.json")));
@@ -78,6 +79,22 @@ check("opt-out: a test file outside tests/ also fails", failedNames(run(agent({ 
   const d = go("optout", "guard");
   check("run_guard_eval end to end: an agent that adds tests to an opted-out project exits 1", d.status === 1 && /FAIL No test file was added or changed/.test(d.stdout));
   check("run_guard_eval: the opt-out file is not left in the scratch project, and AGENTS.md is the opt-out one", !fs.existsSync(path.join(tmp, "s-optout-guard-optout", "optout-run-1", "AGENTS.optout.md")) && /do not add automated tests/i.test(read(path.join(tmp, "s-optout-guard-optout", "optout-run-1", "AGENTS.md"))));
+  const budgeted = go("normal", "guard", ["--budget", "0.75"]);
+  const budgetArgsSeen = JSON.parse(fs.readFileSync(argsFile, "utf8"));
+  check("run_guard_eval end to end: --budget reaches the CLI as --max-budget-usd and each run's cost is printed", budgetArgsSeen[budgetArgsSeen.indexOf("--max-budget-usd") + 1] === "0.75" && /cost \$0\.0123/.test(budgeted.stdout));
+  go("normal", "guard");
+  check("run_guard_eval end to end: with no --budget the CLI gets no budget flag", !JSON.parse(fs.readFileSync(argsFile, "utf8")).includes("--max-budget-usd"));
+  const ap = go("normal", "guard", ["--approved-plan"]);
+  check("run_guard_eval --approved-plan: the plan is in the project and the prompt points at it", ap.status === 0 && fs.existsSync(path.join(tmp, "s-normal-guard", "normal-run-1", "a11y-fix-plan.md")) && /a11y-fix-plan\.md/.test(JSON.parse(fs.readFileSync(argsFile, "utf8")).at(-1)));
+  check("run_guard_eval --approved-plan: a good run also passes the verdict and coverage checks", ap.status === 0 && /checks passed/.test(ap.stdout) && JSON.parse(read(path.join(tmp, "o-normal-guard", "normal-run-1", "check.json"))).results.some((x) => /^verify-fix says/.test(x.name) && x.ok));
+  const apLazy = go("normal", "guard-lazy", ["--approved-plan"]);
+  check("run_guard_eval --approved-plan: fixing the page but writing none of the planned tests fails the coverage check", apLazy.status === 1 && /FAIL Both Guards are covered/.test(apLazy.stdout));
+  const apOut = go("optout", "guard-optout", ["--approved-plan"]);
+  check("run_guard_eval --approved-plan: the opt-out plan, followed, exits 0", apOut.status === 0);
+  const apOutBad = go("optout", "guard", ["--approved-plan"]);
+  check("run_guard_eval --approved-plan: tests added in the opted-out project fail the opt-out checks", apOutBad.status === 1 && /FAIL No test file was added/.test(apOutBad.stdout));
+  go("normal", "guard");
+  check("run_guard_eval: without --approved-plan no plan file is put in the project and no verify checks run", !fs.existsSync(path.join(tmp, "s-normal-guard", "normal-run-1", "a11y-fix-plan.md")) && !JSON.parse(read(path.join(tmp, "o-normal-guard", "normal-run-1", "check.json"))).results.some((x) => /^verify-fix says/.test(x.name)));
   check("run_guard_eval: missing --model is a usage error", spawnSync(process.execPath, [runner], { encoding: "utf8" }).status === 2);
 }
 

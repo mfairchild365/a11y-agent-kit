@@ -1,0 +1,18 @@
+{
+  "findings": [
+    "test-script@test:s00",
+    "test-script@test:s01",
+    "test-script@test:s02",
+    "test-script@test:s03",
+    "test-script@test:s04",
+    "test-script@test:s05",
+    "test-script@test:s06",
+    "test-script@test:s07",
+    "test-script@test:s08",
+    "test-script@test:s09"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "none"
+  }
+}

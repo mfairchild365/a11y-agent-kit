@@ -1,0 +1,7 @@
+{
+ "before": "# Accessibility audit: Fixture\r\n\r\n## Summary\r\n\r\n- **Scope:** fixture\r\n\r\n## Findings\r\n\r\n### Element: Close button\r\n\r\n#### 1. Critical · 4.1.2 · 1 instance · High confidence · A problem\r\n\r\n- **Summary:** s\r\n\r\n## Minor issues\r\n\r\n| # | Element | WCAG SC | Title | Suggested fix | Confidence |\r\n|---|---|---|---|---|---|\r\n\r\n## Best practices\r\n\r\n| # | Element | What | Suggested fix | Confidence |\r\n|---|---|---|---|---|\r\n\r\n## Needs verification\r\n\r\n| # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |\r\n|---|---|---|---|---|---|\r\n\r\n## Out of scope\r\n\r\nNothing.\r\n",
+ "after": "# Accessibility audit: Fixture\r\n\r\n## Summary\r\n\r\n- **Scope:** fixture\r\n\r\n## Findings\r\n\r\n## Minor issues\r\n\r\n| # | Element | WCAG SC | Title | Suggested fix | Confidence |\r\n|---|---|---|---|---|---|\r\n\r\n## Best practices\r\n\r\n| # | Element | What | Suggested fix | Confidence |\r\n|---|---|---|---|---|\r\n\r\n## Needs verification\r\n\r\n| # | Element | WCAG SC | Suspected severity | Why suspected | Check that would confirm it |\r\n|---|---|---|---|---|---|\r\n\r\n## Out of scope\r\n\r\nNothing.\r\n",
+ "targets": [
+  "4.1.2|Close button"
+ ]
+}

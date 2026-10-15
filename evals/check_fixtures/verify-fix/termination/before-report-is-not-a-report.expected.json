@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "unparseable@report"
+  ],
+  "stopReason": "unparseable",
+  "fields": {
+    "verdict": "unparseable"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "target-open@4.1.2|close button"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "unchanged"
+  }
+}

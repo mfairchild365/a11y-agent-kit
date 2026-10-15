@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "a11y-test-file@cypress/e2e/a.cy.js",
+    "framework@cypress-axe",
+    "runner@cypress"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}
