@@ -280,7 +280,7 @@ if (digestPath) {
     for (let k = i + 1; k < dl.length && /^\s*\d+\.\s+\S/.test(dl[k]) && !/^\s*\d+\.\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/.test(dl[k]); k++) n++;
     return n >= 1 && n <= 3;
   })());
-  const issueLine = /^\s*#(\d+)\s+·\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/;
+  const issueLine = /^\s*(?:[-*]\s+)?#(\d+)\s+·\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/;
   const listed = new Set(dl.map((l) => (l.match(issueLine) || [])[1]).filter(Boolean).map(Number));
   const missingIds = items.filter((i) => !listed.has(i.id)).map((i) => "#" + i.id);
   check("Digest has one line for every issue, starting with its report number (#N · Severity · ...)", missingIds.length === 0, "missing " + missingIds.join(", "));
