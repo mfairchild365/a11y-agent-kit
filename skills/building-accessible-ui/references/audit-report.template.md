@@ -54,7 +54,7 @@ Open it: <what was done: shown in the app, opened in the default browser, or "no
 
 The Triage line lists issue numbers only, and the Guards line counts the cards' Guard fields. Leave out the Since the last audit line unless a previous report was given.
 
-One line per issue, most severe first. Start each line with the issue's number in the report (`#N`), so the digest, Fix first and the report agree even though the digest is sorted by severity and the report is grouped by element. Don't repeat Fix first anywhere else.
+One line per issue, most severe first, including every Best practice and Needs verification item. Never group issues into a range or a combined line ("#14 to #19"): a digest of 20 issues is 20 lines, and still short. Start each line with the issue's number in the report (`#N`), so the digest, Fix first and the report agree even though the digest is sorted by severity and the report is grouped by element. Don't repeat Fix first anywhere else.
 
 ## Report
 

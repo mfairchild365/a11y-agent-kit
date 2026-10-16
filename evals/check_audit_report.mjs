@@ -270,7 +270,9 @@ for (const it of items) if (!claimed.has(it)) warnings.push(`#${it.id} [${it.kin
 
 // ---- digest ------------------------------------------------------------------------------
 if (digestPath) {
-  const dg = fs.readFileSync(digestPath, "utf8").replace(/\r\n/g, "\n");
+  // The reviewer ends its message with a "Caller:" note addressed to whoever relays it (it mentions the Fix first list). That
+  // note is not part of the digest.
+  const dg = fs.readFileSync(digestPath, "utf8").replace(/\r\n/g, "\n").replace(/^\s*caller:[\s\S]*$/im, "");
   const dl = dg.split("\n");
   check("Digest is short (60 lines or fewer)", dl.length <= 60, `${dl.length} lines`);
   check("Digest has one Fix first list of 3 or fewer", (dg.match(/fix first/gi) || []).length === 1 && (() => {
