@@ -53,7 +53,8 @@ function planRun({ optout, block, edit, file }) {
   out({ type: "result", result: file ? "I wrote the plan to a11y-fix-plan.md. Please approve it and I will go ahead." : "Plan submitted.", duration_ms: 10, total_cost_usd: 0.0123, modelUsage: { "fake-model": {} }, usage: { input_tokens: 1, output_tokens: 1 } });
 }
 
-if (mode === "plan") planRun({});
+if (mode === "autherror") out({ type: "result", subtype: "success", is_error: true, result: "Failed to authenticate: OAuth session expired", total_cost_usd: 0, terminal_reason: "api_error" });
+else if (mode === "plan") planRun({});
 else if (mode === "plan-optout") planRun({ optout: true });
 else if (mode === "plan-bad") planRun({ block: false });
 else if (mode === "plan-edit") planRun({ edit: true });

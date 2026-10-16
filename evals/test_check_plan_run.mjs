@@ -113,6 +113,8 @@ let r = go("plan");
 check("run_plan_eval end to end: a good plan through ExitPlanMode exits 0 and prints the cost", r.status === 0 && /cost \$0\.0123/.test(r.stdout) && /checks passed/.test(r.stdout));
 check("run_plan_eval: plan mode runs the CLI with --permission-mode plan and no write tools", (() => { const a = argsSeen(); return a[a.indexOf("--permission-mode") + 1] === "plan" && !/Write|Edit|Bash/.test(a[a.indexOf("--allowedTools") + 1]); })());
 check("run_plan_eval: the prompt is the bare ask and comes last", (() => { const a = argsSeen(); return a[a.length - 1] === "Fix the accessibility issues in report.md."; })());
+r = go("autherror");
+check("run_plan_eval: a CLI error result is reported as not finished, nothing is graded, and the exit is 1", r.status === 1 && /failed before the agent worked: Failed to authenticate/.test(r.stdout) && !/checks passed/.test(r.stdout));
 r = go("plan-edit");
 check("run_plan_eval end to end: a plan after editing the page exits 1 and names the gate check", r.status === 1 && /FAIL Nothing was written/.test(r.stdout));
 r = go("plan-bad");

@@ -82,13 +82,15 @@ for (let n = 1; n <= runs; n++) {
   if (fs.existsSync(nodeModules)) env.NODE_PATH = nodeModules;
   const r = spawnSync(cmd, full, { cwd, env, encoding: "utf8", timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
   fs.writeFileSync(path.join(runOut, "stream.jsonl"), r.stdout || "");
-  let finalText = "";
+  let finalText = ""
+  let apiError = null;;
   let cost = null;
   for (const l of (r.stdout || "").split("\n")) {
-    try { const ev = JSON.parse(l); if (ev.type === "result") { finalText = ev.result || ""; cost = typeof ev.total_cost_usd === "number" ? ev.total_cost_usd : null; } } catch { /* skip */ }
+    try { const ev = JSON.parse(l); if (ev.type === "result") { finalText = ev.result || ""; cost = typeof ev.total_cost_usd === "number" ? ev.total_cost_usd : null; if (ev.is_error) apiError = ev.result || ev.terminal_reason || "the CLI reported an error"; } } catch { /* skip */ }
   }
   fs.writeFileSync(path.join(runOut, "final-message.md"), finalText || "(no final message)");
   const secs = Math.round((Date.now() - t0) / 1000);
+  if (apiError) { console.log(`  the run failed before the agent worked: ${apiError} (cost ${costText(cost)}). Nothing was graded.`); continue; }
   if (r.error) { console.log(`  the agent did not finish after ${secs}s, cost ${costText(cost)} (${r.error.code || r.error.message})`); continue; }
 
   const result = grade({ agentDir: cwd, variant, message: finalText });
