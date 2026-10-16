@@ -51,8 +51,9 @@ const recheck = argv.includes("--recheck");
 const previousReport = path.join(here, "audit_fixture", "sample", "good", "report.md");
 if (!["direct", "subagent"].includes(via)) { console.error("--via must be direct or subagent"); process.exit(2); }
 
-// --plugin-dir registers the agent under its file name (accessibility-reviewer.agent.md).
-const AGENT = "a11y-agent-kit:accessibility-reviewer.agent";
+// --plugin-dir registers the agent as <plugin>:<name>. (Older CLI versions registered it under its file name,
+// accessibility-reviewer.agent; if this name is not found, the CLI lists the available agents in its error.)
+const AGENT = "a11y-agent-kit:accessibility-reviewer";
 const nodeModules = path.join(here, "node_modules");
 
 function prompt() {
