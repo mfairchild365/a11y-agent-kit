@@ -65,7 +65,7 @@ Gaps with no success criterion behind them. Each gets one row in the Best practi
 - **A generic link name whose message is in the same container** (section C): add `aria-describedby` or a fuller name.
 - **A single line that overflows the right edge at 320 px** but can be scrolled to: let it wrap.
 - **A skipped heading level** (`audit-procedures.md` 1.3.1), or a page with no level 1 heading.
-- **Repeated control names with no distinguishing context** (`audit-procedures.md` 4.1.2): ten "Remove" buttons that nothing ties to their rows. Not a failure of 4.1.2. Raise it to a finding only when the user can't tell which item a control acts on.
+- **Repeated control names with no distinguishing context** (`audit-procedures.md` 4.1.2): ten "Remove" buttons that nothing ties to their rows. Not a failure of 4.1.2. Raise it to a finding only when the user can't tell which item a control acts on, and then it is a 2.4.6 issue (the name doesn't describe the control's purpose).
 - **Escape that doesn't close an overlay that has a Close control** (`escape-return.mjs`, `audit-procedures.md` 2.1.1): the keyboard can still get out, so it is not a 2.1.2 failure. Without any keyboard way out it is.
 - **A positive `tabindex`** on a tabbable element (`keyboard-walk.mjs` `tabindex-positive`): it moves the element ahead of the page's natural order. Not a failure by itself, since 2.4.3 only fails when the resulting order loses meaning.
 
