@@ -26,6 +26,9 @@ const MANUAL_KEY = "1.4.1|Notices";
 const TEST_PATH = /^tests\/[^/]+\.test\.mjs(::.+)?$/;
 const PLACEHOLDER = /^(todo|tbd|none|n\/?a|-+|\.+)$/i;
 const WRITE_TOOLS = new Set(["Write", "Edit", "NotebookEdit", "MultiEdit"]);
+// Headless plan mode has no ExitPlanMode: the agent writes its plan to the CLI's own plans folder and stops. That file is
+// the plan, not an edit to the project.
+export const isPlanFileWrite = (t) => t.name === "Write" && typeof (t.input || {}).file_path === "string" && /[\\/]\.claude[\\/]plans[\\/]/.test(t.input.file_path);
 
 const read = (p) => fs.readFileSync(p, "utf8").replace(/\r\n/g, "\n");
 const filesIn = (dir) => (fs.existsSync(dir) ? fs.readdirSync(dir, { recursive: true }).filter((f) => fs.statSync(path.join(dir, f)).isFile()).map((f) => f.split(path.sep).join("/")).sort() : []);
@@ -59,12 +62,12 @@ export function gradePlan({ planText, reportText = read(path.join(BASELINE, "rep
   const check = (name, ok, detail = "") => results.push({ name, ok: !!ok, detail });
   const plan = String(planText || "");
 
-  const writes = toolUses.filter((t) => WRITE_TOOLS.has(t.name));
+  const writes = toolUses.filter((t) => WRITE_TOOLS.has(t.name) && !isPlanFileWrite(t));
   if (mode === "planfile") {
     check("Only the plan file was written (nothing in the project was edited before approval)", changed.length === 1 && changed[0] === PLAN_FILE, changed.join(", ") || "nothing written");
   } else {
     check("Nothing was written (the plan was proposed, not applied)", changed.length === 0 && writes.length === 0, [...changed, ...writes.map((w) => `${w.name} attempted`)].join(", "));
-    check("The plan was submitted with ExitPlanMode", toolUses.some((t) => t.name === "ExitPlanMode"));
+    check("The plan was submitted (ExitPlanMode, or written to the CLI's plans folder)", toolUses.some((t) => t.name === "ExitPlanMode" || isPlanFileWrite(t)));
   }
   check("There is a plan to read", plan.trim().length > 0);
   if (!plan.trim()) return { results, warnings };
@@ -94,12 +97,12 @@ export function gradePlan({ planText, reportText = read(path.join(BASELINE, "rep
   const coverage = sectionOf(plan, /^test coverage$/i);
   check("The plan has a Test coverage section", coverage !== null);
   if (coverage !== null) {
-    if (variant === "optout") check("Test coverage says the project opted out of tests", /opt(ed)?[- ]?out|do(es)? not add (automated )?tests|no automated tests/i.test(coverage));
+    if (variant === "optout") check("Test coverage says the project opted out of tests", /opt(s|ed)?[- ]?out|do(es)? not add (automated )?tests|no automated tests/i.test(coverage));
     else check("Test coverage names where the tests go (tests/)", /tests\//.test(coverage));
   }
   check("The plan says what will not change", sectionOf(plan, /will not change|won'?t change|out of scope/i) !== null);
   check("The plan lists risks", sectionOf(plan, /^risks?\b/i) !== null);
-  check("The plan does not claim the page is 'fully accessible'", !/fully accessible/i.test(plan.replace(/not (claim|call)[^.]*fully accessible/gi, "")));
+  check("The plan does not claim the page is 'fully accessible'", !/fully accessible/i.test(plan.replace(/\b(do not|don't|never|not)\b[^.]{0,40}fully accessible/gi, "")));
   if (mode === "planfile") check("The agent stopped and asked for approval", message != null && /approv|confirm|go ahead|let me know|review the plan/i.test(message));
   return { results, warnings };
 }
@@ -115,10 +118,12 @@ export function toolUsesOf(streamText) {
   return out;
 }
 
-// The plan text: the last ExitPlanMode's plan, else the plan file, else the final message.
+// The plan text: the last ExitPlanMode's plan, else a plan written to the CLI's plans folder, else the plan file in the project, else the final message.
 export function planOf({ toolUses, agentDir, finalText }) {
   const exits = toolUses.filter((t) => t.name === "ExitPlanMode" && typeof t.input.plan === "string");
   if (exits.length) return exits[exits.length - 1].input.plan;
+  const filed = toolUses.filter((t) => isPlanFileWrite(t) && typeof t.input.content === "string");
+  if (filed.length) return filed[filed.length - 1].input.content;
   const f = path.join(agentDir, PLAN_FILE);
   if (fs.existsSync(f)) return read(f);
   return finalText || "";

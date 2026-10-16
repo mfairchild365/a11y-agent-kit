@@ -62,6 +62,11 @@ check("a 'fully accessible' claim fails that check only", onlyFails(run(agent({ 
 check("opt-out: a fixed page with no tests and the reason given passes every check", failedNames(run(agent(), "optout", OPTOUT_MESSAGE)).length === 0);
 check("opt-out: adding a test file fails the opt-out check", onlyFails(run(agent({ tests: goodTests }), "optout", OPTOUT_MESSAGE), "No test file was added or changed"));
 check("opt-out: a message that gives no reason fails that check only", onlyFails(run(agent(), "optout", "Fixed #1 and #2."), "The message says no tests were added"));
+const run2 = (dir, variant, message, approvedPlan) => grade({ agentDir: dir, variant, message, approvedPlan });
+check("approved plan: saying the notices were left as a ticket satisfies the manual check", failedNames(run2(agent({ tests: goodTests }), "normal", "Fixed #1 and #2: both tests failed before and pass now. The notices stay a ticket and were not changed.", true)).length === 0);
+check("without an approved plan, \"ticket\" alone does not satisfy the manual check", onlyFails(run2(agent({ tests: goodTests }), "normal", "Fixed #1 and #2: both tests failed before and pass now. The notices stay a ticket.", false), "The message says the manual Guard stayed manual"));
+check("approved plan: a message that never mentions the notices still fails that check", onlyFails(run2(agent({ tests: goodTests }), "normal", "Fixed #1 and #2: both tests failed before and pass now.", true), "The message says the manual issue was left alone"));
+check("opt-out: \"AGENTS.md opts out of automated tests, so I added none\" counts as giving the reason", failedNames(run(agent(), "optout", "Fixed #1 and #2. The project AGENTS.md opts out of automated tests, so I added none.")).length === 0);
 check("opt-out: a test file outside tests/ also fails", failedNames(run(agent({ extra: { "a11y.spec.js": HEAD } }), "optout", OPTOUT_MESSAGE)).some((x) => x.startsWith("No test file was added or changed")));
 
 // ---- the runner, end to end against the fake CLI (no model): a good agent passes, a lazy one is caught

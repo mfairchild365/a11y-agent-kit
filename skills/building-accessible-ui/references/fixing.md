@@ -26,7 +26,7 @@ node <skill folder>/scripts/detect-a11y-tests.mjs <project folder>
 
 It reports the accessibility tooling it finds (jest-axe, vitest-axe, `@axe-core/playwright`, cypress-axe, pa11y, Lighthouse CI, the Storybook a11y addon, axe-core alone), the test runners, the test files that already call axe or pa11y, and a `setup` class. It reads only the repository. A project can test accessibility in ways it can't see, so treat the output as evidence, not a verdict.
 
-**The plan comes before the edit.** If your tool has a plan mode, use it: explore read-only, write the plan, and the user's approval of the plan is the gate (in Claude Code, `EnterPlanMode`, then `ExitPlanMode`). If it doesn't, write the plan to `a11y-fix-plan.md` and **stop until the user approves in words**. Don't edit project files before then. The only file you write before approval is the plan.
+**The plan comes before the edit, every time.** "Fix the issues in this report" is the request this rule is for: it is not approval to skip the plan, and neither is a small or easily reverted change. If your tool has a plan mode, use it: explore read-only, write the plan, and the user's approval of the plan is the gate (in Claude Code, `EnterPlanMode`, then `ExitPlanMode`). If it doesn't, write the plan to `a11y-fix-plan.md` and **stop until the user approves in words**. Don't edit project files before then. The only file you write before approval is the plan.
 
 ### Plan template
 
@@ -74,6 +74,7 @@ Rules for the `a11y-plan` block (the verify script reads it, so keep it valid JS
 - `renames`: `old=new`, for an element the fix changes in a way that changes its key (a button whose name changes from "X" to "Y").
 - `guards`: one entry per target. `kind` is `automatable` or `manual`. An automatable Guard names a `test` (`path` or `path::test name`) **or** gives a `waiver` with a real reason (the project opted out; no runner). "TODO" and "n/a" are not reasons.
 - The block must be the only `a11y-plan` block in the file.
+- Fix only the targets. An issue the report triaged as a ticket, or marked manual, goes under "What will not change" unless the user asks for it. A `manual` Guard never gets a test, not even a text check that stands in for it: it is checked by hand, and the summary says so.
 
 ### Encouraging tests, without forcing them
 

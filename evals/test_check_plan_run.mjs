@@ -75,6 +75,16 @@ check("Test coverage that never names tests/ fails that check only", onlyFails(n
 check("a missing 'what will not change' fails that check only", onlyFails(normal({ plan: { without: ["not"] } }), "The plan says what will not change"));
 check("a missing Risks section fails that check only", onlyFails(normal({ plan: { without: ["risks"] } }), "The plan lists risks"));
 check("a 'fully accessible' claim fails that check only", onlyFails(normal({ plan: { extra: "\nThe page will then be fully accessible.\n" } }), "The plan does not claim"));
+check("telling the reader not to call the page 'fully accessible' is not a claim", failedNames(normal({ plan: { extra: "\nDo not say the page is \"fully accessible\".\n" } })).length === 0);
+check("'the page is not fully accessible' is not a claim either", failedNames(normal({ plan: { extra: "\nThe page is not fully accessible yet.\n" } })).length === 0);
+check("a claim far from any negation still fails", failedNames(normal({ plan: { extra: "\nWe did not run a screen reader, but after this the page is fully accessible.\n" } })).some((x) => x.startsWith("The plan does not claim")));
+const PLANS_WRITE = { name: "Write", input: { file_path: "C:\\Users\\x\\.claude\\plans\\fix-it.md", content: "the plan text" } };
+check("headless plan mode: a plan written to the CLI's plans folder counts as submitted, and is not a project write", failedNames(normal({ grade: { toolUses: [{ name: "Read", input: {} }, PLANS_WRITE] } })).length === 0);
+check("the plans folder also matches with forward slashes", failedNames(normal({ grade: { toolUses: [{ name: "Write", input: { file_path: "/home/x/.claude/plans/p.md", content: "x" } }] } })).length === 0);
+check("a Write to the project is still a write, even beside a plans-folder write", onlyFails(normal({ grade: { toolUses: [PLANS_WRITE, { name: "Write", input: { file_path: "C:\\proj\\index.html", content: "x" } }, { name: "ExitPlanMode", input: {} }] } }), "Nothing was written"));
+check("a file named like the plans folder but elsewhere is a project write", failedNames(normal({ grade: { toolUses: [{ name: "Write", input: { file_path: "C:\\proj\\claude\\plans\\a.md", content: "x" } }] } })).some((x) => x.startsWith("Nothing was written")));
+check("the plan text comes from the plans-folder write when there is no ExitPlanMode", planOf({ toolUses: [PLANS_WRITE], agentDir: "x", finalText: "final" }) === "the plan text");
+check("ExitPlanMode still wins over a plans-folder write", planOf({ toolUses: [PLANS_WRITE, { name: "ExitPlanMode", input: { plan: "from exit" } }], agentDir: "x", finalText: "" }) === "from exit");
 check("a heading inside a code fence is not a section", sectionOf("```\n## Risks\nx\n```\n", /^risks?$/i) === null);
 check("a section ends at the next heading of the same level", sectionOf("## A\none\n## B\ntwo\n", /^a$/i) === "one");
 check("a sub-heading stays inside its section", sectionOf("## A\none\n### sub\nmore\n## B\n", /^a$/i).includes("more"));
@@ -128,6 +138,8 @@ check("run_plan_eval end to end: plan-file mode, the plan file and a request for
 check("run_plan_eval: plan-file mode tells the agent there is no plan mode and lets it write", (() => { const a = argsSeen(); return /no plan mode/.test(a[a.length - 1]) && a[a.indexOf("--permission-mode") + 1] === "acceptEdits"; })());
 r = go("plan", ["--mode", "planfile"]);
 check("run_plan_eval end to end: plan-file mode with no plan file exits 1", r.status === 1);
+go("plan", ["--use-skill"]);
+check("run_plan_eval: --use-skill names the skill in the prompt, and without it the prompt is the bare ask", argsSeen().at(-1) === "Use the building-accessible-ui skill. Fix the accessibility issues in report.md.");
 r = go("plan", ["--budget", "0.5"]);
 check("run_plan_eval: --budget reaches the CLI as --max-budget-usd", argsSeen()[argsSeen().indexOf("--max-budget-usd") + 1] === "0.5");
 go("plan");

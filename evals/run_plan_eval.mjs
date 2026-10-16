@@ -14,7 +14,7 @@
 //
 // Usage (from the repo root):
 //   node evals/run_plan_eval.mjs --model claude-sonnet-5-5 [--mode planmode|planfile] [--variant normal|optout]
-//        [--runs 1] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD]
+//        [--runs 1] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD] [--use-skill]
 //   --budget USD caps what each run may spend (claude's --max-budget-usd); the cost of each run is printed.
 //
 // Runs are billed to your account: start with --runs 1. No browser is needed. CLAUDE_BIN overrides the `claude`
@@ -43,6 +43,7 @@ if (!model || !["normal", "optout"].includes(variant) || !["planmode", "planfile
   process.exit(2);
 }
 const runs = +opt("runs", "1");
+const useSkill = argv.includes("--use-skill");
 let budget = null;
 try { if (opt("budget")) budget = parseBudget(opt("budget")); } catch (e) { console.error(e.message); process.exit(2); }
 const scratch = path.resolve(opt("scratch", path.join(os.tmpdir(), "plan-eval")));
@@ -51,7 +52,7 @@ const timeoutMs = +opt("timeout", "600") * 1000;
 const project = path.join(here, "guard_fixture", "project");
 
 const prompt = [
-  "Fix the accessibility issues in report.md.",
+  useSkill ? "Use the building-accessible-ui skill. Fix the accessibility issues in report.md." : "Fix the accessibility issues in report.md.",
   mode === "planfile" ? "This environment has no plan mode." : null,
 ].filter(Boolean).join("\n\n");
 

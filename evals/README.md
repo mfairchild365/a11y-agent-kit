@@ -227,7 +227,7 @@ Runs are billed and need a browser; set `PW_CHANNEL=msedge` (or `chrome`) if Pla
 
 ## Plan and fix-and-verify checks
 
-The skill says to plan before fixing and to check the fix with `verify-fix.mjs` (`references/fixing.md`). Two checks cover that, both with deterministic graders and no LLM judge. **They have been unit-tested against the fake CLI only; neither has been run on a real model yet.**
+The skill says to plan before fixing and to check the fix with `verify-fix.mjs` (`references/fixing.md`). Two checks cover that, both with deterministic graders and no LLM judge. **They are unit-tested against the fake CLI. On a real model they have had a smoke test only: one run per variant on `claude-haiku-5-5`, about a cent each. That shows the plumbing and the wording work, not how reliable the behaviour is.**
 
 `run_plan_eval.mjs` gives an agent the Guard fixture project and the prompt "Fix the accessibility issues in report.md", then `check_plan_run.mjs` grades the plan:
 
@@ -243,6 +243,8 @@ node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --budget 1
 node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --mode planfile --variant optout --budget 1
 node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1 --approved-plan --budget 2
 ```
+
+`--use-skill` (on both runners) puts "Use the building-accessible-ui skill." in the prompt. Without it the model has to decide to load the skill, which `trigger_check.mjs` covers; with a bare prompt the small model sometimes skipped it. In headless plan mode there is no `ExitPlanMode`, so the agent writes its plan to the CLI's own plans folder; the grader reads the plan from there and doesn't count it as a project write. A result with `is_error` (an expired login, say) is reported as "failed before the agent worked" and not graded.
 
 The plan eval needs no browser. Every eval runner takes `--budget USD` (claude's `--max-budget-usd`) and prints each run's cost.
 

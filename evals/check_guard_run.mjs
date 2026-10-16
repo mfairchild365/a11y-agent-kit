@@ -52,7 +52,8 @@ function scratch(tmp, name, { page, agentDir, withAgentTests = true, withOracle 
   return dir;
 }
 
-export function grade({ agentDir, variant = "normal", message = null }) {
+// approvedPlan: the agent followed a plan that leaves the manual issue out, so "stayed manual" can be said as "left as a ticket".
+export function grade({ agentDir, variant = "normal", message = null, approvedPlan = false }) {
   const results = [];
   const warnings = [];
   let fixed = []; // which of the two automatable defects the agent's page now passes: "button", "contrast"
@@ -82,7 +83,7 @@ export function grade({ agentDir, variant = "normal", message = null }) {
 
     if (variant === "optout") {
       check("No test file was added or changed (the project opted out)", changedOrNew.length === 0 && strayTests.length === 0, [...changedOrNew, ...strayTests].join(", "));
-      if (message != null) check("The message says no tests were added because the project opted out", /opt(ed)?[- ]?out|do(es)? not add (automated )?tests|no tests? (were |was )?added|not (turned|added)[^.]*tests?/i.test(message));
+      if (message != null) check("The message says no tests were added because the project opted out", /opt(s|ed)?[- ]?out|do(es)? not add (automated )?tests|no tests? (were |was )?added|not (turned|added)[^.]*tests?/i.test(message));
     } else {
       const hasExisting = exists(path.join(agentDir, "tests", "existing.test.mjs"));
       const existing = hasExisting ? runTests(agentDir, ["tests/existing.test.mjs"]) : { ok: false, passed: [], failed: ["tests/existing.test.mjs is missing"] };
@@ -102,11 +103,11 @@ export function grade({ agentDir, variant = "normal", message = null }) {
       if (passBefore.length) warnings.push(`new test(s) that also pass on the original page, so they guard nothing: ${passBefore.join("; ")}`);
       check("No test was written for the manual Guard (nothing in the new tests touches the notices)", !MANUAL_MARKERS.some((m) => newText.includes(m)), MANUAL_MARKERS.filter((m) => newText.includes(m)).join(", "));
       if (message != null) {
-        check("The message says the manual Guard stayed manual", /manual/i.test(message));
+        check(approvedPlan ? "The message says the manual issue was left alone (manual, or a ticket)" : "The message says the manual Guard stayed manual", (approvedPlan ? /manual|ticket|untouched|not changed|left alone/i : /manual/i).test(message));
         check("The message reports the tests failing before the fix and passing after it", /fail/i.test(message) && /pass/i.test(message));
       }
     }
-    if (message != null) check("The message does not claim the page is 'fully accessible'", !/fully accessible/i.test(message.replace(/not (claim|call)[^.]*fully accessible/gi, "")));
+    if (message != null) check("The message does not claim the page is 'fully accessible'", !/fully accessible/i.test(message.replace(/\b(do not|don't|never|not)\b[^.]{0,40}fully accessible/gi, "")));
   } finally {
     fs.rmSync(tmp, { recursive: true, force: true });
   }

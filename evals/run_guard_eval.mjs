@@ -11,7 +11,7 @@
 //
 // Usage (from the repo root):
 //   node evals/run_guard_eval.mjs --model claude-sonnet-5-5 [--variant normal|optout] [--runs 3]
-//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD] [--approved-plan]
+//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD] [--use-skill] [--approved-plan]
 //   --approved-plan  puts an approved fix plan (evals/guard_fixture/plans/) in the project as a11y-fix-plan.md and asks the
 //                    agent to follow it. Besides the Guard checks, it then grades what verify-fix.mjs would say about the
 //                    fix (check_fix_verify.mjs): the verdict, and whether each Guard became the planned test or was waived.
@@ -44,6 +44,7 @@ if (!model || !["normal", "optout"].includes(variant)) {
   process.exit(2);
 }
 const runs = +opt("runs", "1");
+const useSkill = argv.includes("--use-skill");
 const approved = argv.includes("--approved-plan");
 let budget = null;
 try { if (opt("budget")) budget = parseBudget(opt("budget")); } catch (e) { console.error(e.message); process.exit(2); }
@@ -54,7 +55,7 @@ const nodeModules = path.join(here, "node_modules");
 const project = path.join(here, "guard_fixture", "project");
 
 const prompt = [
-  approved ? "Fix the accessibility issues in report.md by following a11y-fix-plan.md, which the user has approved." : "Fix the accessibility issues in report.md.",
+  (useSkill ? "Use the building-accessible-ui skill. " : "") + (approved ? "Fix the accessibility issues in report.md by following a11y-fix-plan.md, which the user has approved." : "Fix the accessibility issues in report.md."),
   "NODE_PATH points at an install of playwright and axe-core. If Playwright's own Chromium isn't installed, set PW_CHANNEL=msedge or chrome when you run the project's tests. Don't run npm install or playwright install.",
 ].join("\n\n");
 
@@ -93,7 +94,7 @@ for (let n = 1; n <= runs; n++) {
   if (apiError) { console.log(`  the run failed before the agent worked: ${apiError} (cost ${costText(cost)}). Nothing was graded.`); continue; }
   if (r.error) { console.log(`  the agent did not finish after ${secs}s, cost ${costText(cost)} (${r.error.code || r.error.message})`); continue; }
 
-  const result = grade({ agentDir: cwd, variant, message: finalText });
+  const result = grade({ agentDir: cwd, variant, message: finalText, approvedPlan: approved });
   if (result.environmentError) { console.error(result.environmentError); process.exit(2); }
   if (approved) result.results.push(...gradeVerify({ agentDir: cwd, variant, fixed: result.fixed || [] }).results);
   completed += 1;
