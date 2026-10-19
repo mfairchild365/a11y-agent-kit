@@ -78,6 +78,7 @@ base layer only.
 - Controls are found by role and accessible name, not class names, because model-built pages differ.
 - A run with no HTML, or a check that crashes, times out or prints garbage, merges a **failing** expectation. It is never skipped, so strict scoring can't count a run it couldn't check as clean.
 - Every wait is bounded (`--max-ms`), and a page that blocks the main thread ends in `time-cap` or `load-timeout`.
+- Known limit: a control counts as visible to a sighted user unless it is `display: none`, `visibility: hidden`, `hidden`, `inert` or `opacity: 0`. A page that hides a control only by moving it off-screen (`left: -9999px`, a transform that pushes a fixed toast below the viewport), clipping it or giving it no size is still read as visible, so "the user can recover after the timer" can pass wrongly on such a page. Live regions are judged by exposure to assistive technology, where opacity does not hide them.
 - Each check has a fixture suite in `check_fixtures/behavior-<name>/` (positive, negative, edge and termination pages; the answer key also lists which results the check must decline to decide), and each was sabotaged one decision at a time.
 
 ```bash
