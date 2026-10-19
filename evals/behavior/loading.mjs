@@ -54,7 +54,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const spin = await page.evaluate(() => {
       const vis = (el) => el.checkVisibility({ checkVisibilityCSS: true, visibilityProperty: true });
       const looksLike = (e) => /spin|load|busy|progress/i.test(`${e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className} ${e.id}`) || e.getAttribute("role") === "progressbar" || e.getAnimations().some((a) => a.effect && a.effect.getComputedTiming().iterations === Infinity);
-      const c = [...document.querySelectorAll("body *")].filter((e) => vis(e) && looksLike(e) && !e.querySelector("button,input,a,li"));
+      // a control that is named or classed like a loading state ("load-results", "is-loading") is the button, not the spinner
+      const control = "button,a,input,select,textarea,summary,[role=button]";
+      const c = [...document.querySelectorAll("body *")].filter((e) => vis(e) && looksLike(e) && !e.matches(control) && !e.closest(control) && !e.querySelector(`${control},li`));
       if (!c.length) return null;
       // the innermost candidate, so a wrapper called "loading" does not stand for its spinner
       const el = c.find((e) => !c.some((o) => o !== e && e.contains(o))) || c[0];

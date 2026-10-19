@@ -25,7 +25,7 @@ function say(msg, undoEl) {
 function archive(btn) {
   var li = btn.closest('li'), n = li.getAttribute('data-n');
   function restore() {
-    document.querySelectorAll('.undo').forEach(function (e) { if (li.contains(e) || (live && live.contains(e)) || document.getElementById('hist')) e.remove(); }); var h = document.getElementById('hist'); if (h) { var hi = h.querySelector('[data-for="' + n + '"]'); if (hi) hi.remove(); }
+    document.querySelectorAll('.undo').forEach(function (e) { if (li.contains(e) || (live && live.contains(e)) || document.getElementById('hist') || document.getElementById('bar')) e.remove(); }); var h = document.getElementById('hist'); if (h) { var hi = h.querySelector('[data-for="' + n + '"]'); if (hi) hi.remove(); }
     li.classList.remove('archived'); li.style.display = ''; var a = li.querySelector('.arch'); if (!a) { a = mkArchive(n); li.appendChild(a); }
     a.focus();
   }

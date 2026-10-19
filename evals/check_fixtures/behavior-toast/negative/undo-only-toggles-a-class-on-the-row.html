@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Roster</title><style>li .undo{display:none} li.archived .undo{display:inline} li.archived .arch{display:none}</style></head><body>
+<h1>Roster</h1>
+<div id="live" role="status"></div>
+<ul>
+<li data-n="Alice"><span>Alice</span> <button type="button" class="arch">Archive</button><button type="button" class="undo">Undo</button></li>
+<li data-n="Bob"><span>Bob</span> <button type="button" class="arch">Archive</button><button type="button" class="undo">Undo</button></li>
+</ul>
+<script>
+var live = document.getElementById('live');
+document.querySelectorAll('li').forEach(function (li) {
+  li.querySelector('.arch').addEventListener('click', function () { li.classList.add('archived'); live.textContent = 'Archived ' + li.getAttribute('data-n') + '.'; });
+  li.querySelector('.undo').addEventListener('click', function () { li.classList.remove('archived'); li.querySelector('.arch').focus(); });
+});
+</script>
+</body></html>

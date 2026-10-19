@@ -114,14 +114,16 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       }
     }
     if (!u2.found) { skip(["focus-lost-after-undo", "undo-not-keyboard-operable"], "no Undo control to use"); return; }
+    let muts0 = 0;
     try {
       await locatorFor(page, "undo").focus({ timeout: 3000 });
+      muts0 = await page.evaluate(() => window.__ev.muts);
       await page.keyboard.press("Enter");
     } catch { skip(["focus-lost-after-undo", "undo-not-keyboard-operable"], "the Undo control could not be focused"); return; }
     await sleep(300);
-    // An Undo that is still there, unchanged, after Enter did nothing for the keyboard.
-    const stillThere = await page.evaluate(() => { const u = document.querySelector('[data-eval-mark="undo"]'); return !!u && u.isConnected && u.checkVisibility({ checkVisibilityCSS: true, visibilityProperty: true }); });
-    if (stillThere) { add("undo-not-keyboard-operable", "fail", "pressing Enter on the focused Undo did nothing"); add("focus-lost-after-undo", "inconclusive", "Undo did not run, so there is no focus move to judge"); return; }
+    // An Enter that changed nothing on the page did nothing for the keyboard.
+    const changed = (await page.evaluate(() => window.__ev.muts)) > muts0;
+    if (!changed) { add("undo-not-keyboard-operable", "fail", "pressing Enter on the focused Undo did nothing"); add("focus-lost-after-undo", "inconclusive", "Undo did not run, so there is no focus move to judge"); return; }
     add("undo-not-keyboard-operable", "pass", "Enter on the focused Undo ran it");
     const f2 = await describeFocus(page);
     add("focus-lost-after-undo", f2.none ? "fail" : "pass", f2.none ? "focus fell back to the page body after Undo" : `focus is on <${f2.tag}>`);

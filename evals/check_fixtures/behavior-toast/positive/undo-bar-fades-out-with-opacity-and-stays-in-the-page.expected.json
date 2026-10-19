@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "undo-vanishes-on-timer"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

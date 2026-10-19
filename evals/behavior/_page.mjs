@@ -25,7 +25,7 @@ export const LIVE_SEL = '[role="status"],[role="log"],[role="alert"],[aria-live]
 // It records every change inside a live region (or a live region that was inserted), with the region's text at that time.
 function recorder() {
   const LIVE = '[role="status"],[role="log"],[role="alert"],[aria-live]:not([aria-live="off"])';
-  window.__ev = { live: [] };
+  window.__ev = { live: [], muts: 0 };
   const regionOf = (n) => (n && (n.nodeType === 1 ? n : n.parentElement) ? (n.nodeType === 1 ? n : n.parentElement).closest(LIVE) : null);
   const note = (r) => {
     if (r) window.__ev.live.push({ t: performance.now(), tag: r.tagName.toLowerCase(), id: r.id || null, role: r.getAttribute("role"), text: (r.textContent || "").replace(/\s+/g, " ").trim().slice(0, 300) });
@@ -43,6 +43,8 @@ function recorder() {
     }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["role", "aria-live"] });
   };
   start();
+  // any change at all to the page, so a check can tell that an action did something
+  new MutationObserver((ms) => { window.__ev.muts += ms.length; }).observe(document, { subtree: true, childList: true, characterData: true, attributes: true });
 }
 
 export const markNow = (page) => page.evaluate(() => performance.now());
@@ -86,7 +88,8 @@ export const findControl = (page, source, flags, mark) =>
       const by = el.getAttribute("aria-labelledby");
       return (el.getAttribute("aria-label") || (by ? by.split(/\s+/).map((id) => (document.getElementById(id) || { textContent: "" }).textContent).join(" ") : "") || text(el) || el.value || el.getAttribute("title") || "").replace(/\s+/g, " ").trim();
     };
-    const visible = (el) => el.checkVisibility({ checkVisibilityCSS: true, visibilityProperty: true }) && !el.closest("[hidden],[inert]");
+    // A control counts only if a sighted user can see it, so opacity counts here (it does not for exposure to assistive technology).
+    const visible = (el) => el.checkVisibility({ checkVisibilityCSS: true, visibilityProperty: true, checkOpacity: true, opacityProperty: true }) && !el.closest("[hidden],[inert]");
     const pick = (css, native) => {
       const el = [...document.querySelectorAll(css)].filter(visible).find((e) => re.test(nameOf(e)));
       return el ? { el, native } : null;
