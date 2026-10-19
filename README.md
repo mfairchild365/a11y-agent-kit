@@ -73,6 +73,65 @@ This installs the skill into the right directory for each agent it detects. Most
 
 If you install this in a tool marked "no", please open an issue saying whether it worked.
 
+## Using it
+
+### Ask your agent
+
+| You want | Say something like | What happens |
+|---|---|---|
+| UI built accessibly | "Build a contact form for the support page" | The skill loads on its own and the agent follows its checklist and the matching component guide. |
+| A review | "Review the checkout form for accessibility" (in Claude Code you can also pick `accessibility-reviewer` from `/agents`) | The agent audits the page in a real browser, then returns a short digest and writes `report.md` and `report.html`. It never edits your files. |
+| A re-check | "Audit the checkout again. Last time's report is `report.md`" | A new report with a "Since the last audit" section: resolved, still open and new issues. |
+| A fix from a ticket or report | "Fix the accessibility issues in `report.md`" | The agent writes a plan first and **waits for your approval** before editing. Then it writes a test for each automatable Guard, fixes, and checks the result with `verify-fix.mjs`. |
+| A spec | "Write the accessibility section of the spec for the new filter panel" | The contract goes into your spec's own format. No code is written. |
+
+### Run the checks yourself
+
+The scripts need no model. They run in a real browser and print **candidates, not verdicts**: confirm each one before you report it. Browser scripts need [Playwright](https://playwright.dev). Run them from a folder that has it installed, or point `NODE_PATH` at its `node_modules`. Set `PW_CHANNEL=msedge` (or `chrome`) to use a browser you already have installed. The commands below are written from the root of this repo. If you installed the plugin, the same scripts are in the skill's `scripts/` folder.
+
+```bash
+S=skills/building-accessible-ui/scripts
+URL=http://localhost:3000/checkout        # or a local .html file
+
+node $S/tree-pass.mjs $URL                 # accessibility tree: unnamed controls, repeated names, landmarks, headings
+node $S/keyboard-walk.mjs $URL             # Tab through the page: unnamed focus stops, unreachable controls, traps
+node $S/shift-tab-walk.mjs $URL            # Tab walk against the Shift+Tab walk
+node $S/arrow-walk.mjs $URL                # arrow keys in tab lists, menus, listboxes, trees, radio groups, grids
+node $S/escape-return.mjs $URL             # open each dialog or menu, press Escape, check focus goes back
+node $S/escape-return.mjs $URL --trigger "#filters-button"   # add a trigger it can't find on its own
+node $S/focus-contrast.mjs $URL --min 3    # contrast of each control's focus indicator
+node $S/live-region-probe.mjs $URL --click "#archive-1" --wait 2000   # what a status message really does
+```
+
+Add `--json` for machine-readable output. Every script ends with a `stopReason`: `complete` means it covered the whole page, anything else (`stop-cap`, `time-cap`, `load-timeout`, ...) means it stopped early and says why. Don't treat a clean run as a pass.
+
+Work on the reports:
+
+```bash
+node $S/render-report.mjs report.md                    # report.html next to it (add --open to show it)
+node $S/compare-reports.mjs last-time/report.md report.md   # resolved, still open, new
+```
+
+### Fix an issue and check the result
+
+```bash
+# 1. What accessibility tests does this project already have? (reads files only)
+node $S/detect-a11y-tests.mjs .
+
+# 2. Save what the scripts find now, then make the change, then save it again
+node $S/snapshot.mjs $URL --out before.snapshot.json
+#    ... edit, rebuild ...
+node $S/snapshot.mjs $URL --out after.snapshot.json
+
+# 3. Audit again (ask the reviewer), then check the fix against the approved plan
+git diff --name-only > changed-files.txt
+node $S/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md \
+  --before-snapshot before.snapshot.json --after-snapshot after.snapshot.json \
+  --changed-files changed-files.txt --format pr
+```
+
+`verify-fix.mjs` prints one verdict (`regressed`, `fixed`, `partial` or `unchanged`) and says whether each Guard became a test, was waived with a reason, or was left uncovered. `--format pr` prints a summary for a pull request. A new issue is a regression *candidate*: confirm it. Details and the plan template are in [`references/fixing.md`](skills/building-accessible-ui/references/fixing.md).
+
 ## List this plugin in your marketplace
 
 The plugin root is the repo root, and the plugin's own manifests are the source of truth. A marketplace entry only needs to point at a tagged release:
