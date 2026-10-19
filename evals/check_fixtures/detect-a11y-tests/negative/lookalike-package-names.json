@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"devDependencies\":{\"jest-axes\":\"^1.0.0\",\"not-jest-axe\":\"^1.0.0\",\"axe-core-fake\":\"^1.0.0\",\"my-pa11y\":\"^1.0.0\",\"@axe-core/playwright-extra\":\"^1.0.0\",\"jest-axe2\":\"^1.0.0\",\"Jest-Axe\":\"^1.0.0\",\"pa11y-ci-extras\":\"^1.0.0\",\"vitest-axe-lite\":\"^1.0.0\",\"cypress-axe-plus\":\"^1.0.0\"}}"}}

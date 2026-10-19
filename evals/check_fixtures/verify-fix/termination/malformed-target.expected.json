@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "invalid-targets@input"
+  ],
+  "stopReason": "invalid-input",
+  "fields": {
+    "verdict": "invalid-targets"
+  }
+}

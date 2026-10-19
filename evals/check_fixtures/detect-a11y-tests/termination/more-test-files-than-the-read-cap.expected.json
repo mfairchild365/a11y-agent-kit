@@ -1,0 +1,7 @@
+{
+  "findings": [],
+  "stopReason": "read-cap",
+  "fields": {
+    "setup": "test-framework-only"
+  }
+}

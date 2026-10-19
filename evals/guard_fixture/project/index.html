@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Roster</title>
+<style>
+  body { font-family: sans-serif; }
+  .badge { background: #2b7de9; color: #9cc4ff; padding: 2px 8px; }
+  .notice { padding: 8px; margin: 8px 0; border: 1px solid #ccc; }
+  .notice.info { background: #e8f1ff; }
+  .notice.error { background: #ffe8e8; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Roster</h1>
+  <p><span class="badge" id="badge">New</span></p>
+  <button id="close" type="button"><svg aria-hidden="true" width="12" height="12"><path d="M1 1L11 11M11 1L1 11" stroke="#000" fill="none"/></svg></button>
+  <div class="notice info" id="notice-info"><p>Your changes were saved.</p></div>
+  <div class="notice error" id="notice-error"><p>Your changes could not be saved.</p></div>
+</main>
+</body>
+</html>

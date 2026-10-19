@@ -1,0 +1,10 @@
+{
+  "findings": [
+    "framework@@storybook/addon-a11y",
+    "runner@storybook-test-runner"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "dev-time-only"
+  }
+}

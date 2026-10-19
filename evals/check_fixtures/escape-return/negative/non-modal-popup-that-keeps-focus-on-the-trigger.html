@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="t" aria-haspopup="menu" aria-expanded="false">Info</button><div id="m" role="menu" hidden><div role="menuitem">Help text</div></div><script>(function(){var T=document.getElementById("t"),M=document.getElementById("m");T.addEventListener("click",function(){M.hidden=false;T.setAttribute("aria-expanded","true")});T.addEventListener("keydown",function(e){if(e.key==="Escape"){M.hidden=true;T.setAttribute("aria-expanded","false")}})})()</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "tabindex-positive@#a"
+  ],
+  "stopReason": "complete"
+}

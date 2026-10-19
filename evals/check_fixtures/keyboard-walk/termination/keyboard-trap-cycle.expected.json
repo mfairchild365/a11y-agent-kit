@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "focus-cycle-candidate@#b"
+  ],
+  "stopReason": "cycle"
+}

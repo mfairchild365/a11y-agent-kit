@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "modal-focus-escapes@#t"
+  ],
+  "stopReason": "complete"
+}

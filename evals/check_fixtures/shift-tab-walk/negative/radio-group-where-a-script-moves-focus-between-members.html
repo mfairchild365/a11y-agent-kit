@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="a">A</button><fieldset><legend>Size</legend><label><input type="radio" name="s" id="r1"> S</label><label><input type="radio" name="s" id="r2"> M</label><label><input type="radio" name="s" id="r3"> L</label></fieldset><button id="z">Z</button>
+</main>
+<script>document.addEventListener("keydown",function(e){if(e.key==="Tab"&&!e.shiftKey&&document.activeElement.id==="r1"){e.preventDefault();document.getElementById("r2").focus()}})</script>
+</body>
+</html>

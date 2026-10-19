@@ -118,7 +118,9 @@
       "name": "existing-page-save-feature",
       "prompt": "Here's our account settings page (evals/files/account-settings.html). Add a Save button at the bottom of the form that, when clicked, shows a \"Settings saved\" confirmation message on the page (no page reload, no alert() popup).",
       "expected_output": "The Save button is a native button, the confirmation appears in a live region that already exists in the DOM before being updated, the pre-existing accessibility issues in the page are called out (not silently fixed or left uncommented), and markup outside the new feature is left substantially unchanged.",
-      "files": ["evals/files/account-settings.html"],
+      "files": [
+        "evals/files/account-settings.html"
+      ],
       "expectations": [
         "The Save control is a native <button> (not a div/span with a click handler) with an accessible name of 'Save' or similar",
         "The confirmation message appears inside an element with role=\"status\"/role=\"alert\" or aria-live, and that element exists in the DOM (even if empty) before the click, rather than being inserted fresh on click",
@@ -157,6 +159,60 @@
         "The Undo control is not inside the live region: it is inline on the affected row or in a persistent history list, and it is a native button reachable by keyboard",
         "The user can recover the message or the action after any timeout: a history list or an inline state, not only a timed toast",
         "Focus is not moved to the message, and after Undo it lands on a logical control, not <body>",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "tooltip-toggletip",
+      "prompt": "Build an integration settings page with an \"API key\" text field. Put an info button beside the field that explains where to find the key; the explanation includes a link to a help page. Also put an icon-only \"Copy\" button beside the field that shows a tooltip with its name when it is hovered or focused. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page where the info button is a toggletip (a native button with aria-expanded, whose panel is its next sibling, closed by Escape with focus returned to the button, and not wired in with aria-describedby), and the Copy button's tooltip is a role=tooltip element referenced by aria-describedby that shows on hover and keyboard focus, closes with Escape and stays while the pointer is over it, with no title attribute used as a tooltip.",
+      "files": [],
+      "expectations": [
+        "The info button is a native button whose panel is its next sibling in the DOM; it opens and closes on activation with aria-expanded kept in sync",
+        "Pressing Escape closes the open toggletip and returns focus to its button",
+        "The toggletip panel is not referenced through aria-describedby on its button",
+        "The tooltip on the icon-only button appears on keyboard focus as well as on hover, can be dismissed with Escape, and stays visible while the pointer is over it",
+        "The tooltip is a separate element with role=\"tooltip\" referenced by aria-describedby on its control, and no title attribute is used as a tooltip",
+        "The info button's accessible name identifies the topic (for example \"More info: API key\"), not just \"Info\" or \"i\"",
+        "The help link is inside the toggletip panel only; the hover/focus tooltip holds plain text with no interactive content",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "loading-status",
+      "prompt": "Build a page with a \"Load results\" button. When it is activated, the page fetches a list of results (simulate a network request that takes about two seconds) and shows them as a list. Show a spinner while it loads. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page with a live region in the DOM before the button is used, loading announced when the button is activated, a different message announced when the results arrive, focus never lost to the body, and a spinner graphic hidden from assistive technology.",
+      "files": [],
+      "expectations": [
+        "There is a live region (role=\"status\" or aria-live) in the DOM, not hidden, before the Load button is activated",
+        "Loading is announced: text enters a live region shortly after the button is activated",
+        "Completion is announced when the results arrive, with a message in a live region, not only by the spinner disappearing",
+        "Focus is never lost to <body> while loading or after the results arrive",
+        "The spinner graphic is hidden from assistive technology (aria-hidden) or exposes nothing of its own",
+        "Announcements go through one shared live region, not a new region per message",
+        "The results list is reachable and its arrival is conveyed (for example by the completion message naming the count), without moving focus unprompted",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "character-count",
+      "prompt": "Build a feedback form with a \"Comments\" textarea limited to 280 characters. Show the user a character count. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page where the textarea's aria-describedby points at text that states the limit, the visible live counter is aria-hidden and outside any live region, and the count is announced only at thresholds (near the limit and at the limit), not on every keystroke.",
+      "files": [],
+      "expectations": [
+        "The textarea's accessible description states the 280-character limit (aria-describedby points at text that contains it)",
+        "The count is not announced on every keystroke: typing does not repeatedly change a live region or the text that describes the textarea",
+        "The visible live counter is hidden from assistive technology (aria-hidden) and is not inside a live region",
+        "The page announces once, politely, when the user is near the limit, and once when the limit is reached, through a live region",
         "No WCAG (non-best-practice) axe violations in the delivered file",
         "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
         "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"

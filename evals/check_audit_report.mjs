@@ -6,9 +6,11 @@
 //               with the 3-instance tooltip merged into one issue, and without reporting decoys
 //   structure - does the report follow skills/building-accessible-ui/references/audit-report.template.md
 //
-// Usage: node check_audit_report.mjs <audit-output-dir> [--digest <file>] [--skip-axe] [--json]
+// Usage: node check_audit_report.mjs <audit-output-dir> [--digest <file>] [--previous <report.md>] [--skip-axe] [--json]
 //   <audit-output-dir> holds report.md, report.html and the screenshots.
 //   --digest <file> also checks the agent's final message (the digest the caller relays).
+//   --previous <report.md> marks the audit as a re-check: it needs a 'Since the last audit' section (and digest
+//   line) whose resolved, still open and new counts match scripts/compare-reports.mjs.
 // Exits 1 if any check fails, 2 on a usage error. Extra issues the key doesn't list are
 // printed as warnings and don't fail the run: the agent may find real defects we didn't seed.
 
@@ -21,11 +23,13 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const digestIdx = args.indexOf("--digest");
 const digestPath = digestIdx >= 0 ? args[digestIdx + 1] : null;
-const dir = args.find((a, i) => !a.startsWith("--") && !(digestIdx >= 0 && i === digestIdx + 1));
+const prevIdx = args.indexOf("--previous");
+const previousPath = prevIdx >= 0 ? args[prevIdx + 1] : null;
+const dir = args.find((a, i) => !a.startsWith("--") && !(digestIdx >= 0 && i === digestIdx + 1) && !(prevIdx >= 0 && i === prevIdx + 1));
 const skipAxe = args.includes("--skip-axe");
 const asJson = args.includes("--json");
 if (!dir) {
-  console.error("Usage: node check_audit_report.mjs <audit-output-dir> [--digest <file>] [--skip-axe] [--json]");
+  console.error("Usage: node check_audit_report.mjs <audit-output-dir> [--digest <file>] [--previous <report.md>] [--skip-axe] [--json]");
   process.exit(2);
 }
 const reportPath = path.join(dir, "report.md");
@@ -98,12 +102,12 @@ let fixItems = 0;
 if (fi >= 0) {
   const first = summary[fi].replace(/.*fix first:?\**:?/i, "").trim();
   if (first) fixItems += 1;
-  for (let k = fi + 1; k < summary.length && /^\s*(\d+\.|[-*])\s+\S/.test(summary[k]); k++) fixItems += 1;
+  for (let k = fi + 1; k < summary.length && /^\s*(\d+\.|[-*])\s+\S/.test(summary[k]) && !/^[-*]\s+\*\*/.test(summary[k]); k++) fixItems += 1;
 }
 check("Summary has a Fix first list of 1 to 3 items", fi >= 0 && fixItems >= 1 && fixItems <= 3, fi < 0 ? "missing" : `${fixItems} items`);
 check("Fix first appears once in the report, with no issue index table in the summary",
   (md.match(/fix first/gi) || []).length === 1 && !/\|\s*#\s*\|\s*Offending element/i.test(summaryText), `fix-first mentions: ${(md.match(/fix first/gi) || []).length}; index table in summary: ${/|s*#s*|s*Offending element/i.test(summaryText)}`);
-const ALLOWED = ["summary", "findings", "minor issues", "best practices", "needs verification", "passed / not an issue", "needs manual testing", "out of scope"];
+const ALLOWED = ["summary", "since the last audit", "findings", "minor issues", "best practices", "needs verification", "passed / not an issue", "needs manual testing", "out of scope"];
 const h2s = lines.filter((l) => /^## /.test(l)).map((l) => l.slice(3).trim());
 const extra = h2s.filter((h) => !ALLOWED.includes(h.toLowerCase()));
 check("Only the template's sections appear", extra.length === 0, extra.join("; "));
@@ -115,6 +119,8 @@ for (const name of ["Minor issues", "Best practices", "Needs verification"]) {
 check("No stray paragraphs inside the Minor, Best practices and Needs verification sections", stray.length === 0, stray.join("; "));
 check("Every finding headline matches the template", malformed.length === 0, malformed[0] || "");
 check("Report has at least one card", items.some((i) => i.kind === "card"));
+const testNotes = (h2("Out of scope") || []).filter((l) => /test|coverage/i.test(l));
+check("Out of scope mentions tests or coverage only when it cites an issue number (no generic test advice)", testNotes.every((l) => /#[0-9]+/.test(l)), testNotes.join("; "));
 
 const cards = items.filter((i) => i.kind === "card");
 const lenOf = (c, label) => ((c.body.find((l) => l.includes(`**${label}:**`)) || "").length);
@@ -125,6 +131,50 @@ const multi = cards.filter((c) => !oneSc(c.sc));
 check("Each card maps to exactly one WCAG SC", multi.length === 0, multi.map((c) => `#${c.id}: ${c.sc}`).join("; "));
 check("No Minor issue is written as a card", !cards.some((c) => c.severity === "Minor"), cards.filter((c) => c.severity === "Minor").map((c) => `#${c.id}`).join(", "));
 check("No Low-confidence finding is in the ranked list", !cards.some((c) => c.confidence === "Low"), cards.filter((c) => c.confidence === "Low").map((c) => `#${c.id}`).join(", "));
+
+// ---- triage and guards
+const BUCKETS = ["fix now", "ticket", "investigate"];
+const parseTriage = (line) => {
+  const out = { "fix now": [], ticket: [], investigate: [] };
+  for (const seg of line.replace(/^.*triage:(\*\*)?/i, "").split("·")) {
+    const m = seg.trim().match(/^(fix now|ticket|investigate)\s+(.*)$/i);
+    if (m) out[m[1].toLowerCase()].push(...[...m[2].matchAll(/#(\d+)/g)].map((x) => +x[1]));
+  }
+  return out;
+};
+const triageLine = (summary || []).find((l) => /triage:/i.test(l));
+check("Summary has a Triage line", !!triageLine, triageLine ? "" : "missing");
+const triage = triageLine ? parseTriage(triageLine) : { "fix now": [], ticket: [], investigate: [] };
+{
+  const all = BUCKETS.flatMap((b) => triage[b]);
+  const ids = items.map((i) => i.id);
+  const dup = all.filter((id, i) => all.indexOf(id) !== i);
+  const missing = ids.filter((id) => !all.includes(id));
+  const unknown = all.filter((id) => !ids.includes(id));
+  check("Triage gives every numbered issue exactly one of Fix now, Ticket, Investigate", !!triageLine && dup.length === 0 && missing.length === 0 && unknown.length === 0,
+    [dup.length && `twice: ${[...new Set(dup)].map((n) => "#" + n)}`, missing.length && `missing: ${missing.map((n) => "#" + n)}`, unknown.length && `not in the report: ${unknown.map((n) => "#" + n)}`].filter(Boolean).join("; "));
+  const verifyNotInvestigate = items.filter((i) => i.kind === "verify" && !triage.investigate.includes(i.id)).map((i) => "#" + i.id);
+  check("Every Needs verification issue is triaged as Investigate", verifyNotInvestigate.length === 0, verifyNotInvestigate.join(", "));
+}
+const guardOf = (c) => ((c.body.find((l) => /^- \*\*Guard:\*\*/.test(l)) || "").match(/\*\*Guard:\*\*\s*(automatable|manual)\b/i) || [])[1];
+const noGuard = cards.filter((c) => !guardOf(c));
+check("Every full card has a Guard that starts with 'automatable' or 'manual'", noGuard.length === 0, noGuard.map((c) => "#" + c.id).join(", "));
+const guardCounts = { automatable: cards.filter((c) => (guardOf(c) || "").toLowerCase() === "automatable").length, manual: cards.filter((c) => (guardOf(c) || "").toLowerCase() === "manual").length };
+
+// ---- a re-check
+let sinceCounts = null;
+if (previousPath) {
+  const cmp = spawnSync(process.execPath, [path.join(here, "..", "skills", "building-accessible-ui", "scripts", "compare-reports.mjs"), previousPath, reportPath, "--json"], { encoding: "utf8" });
+  let expectedCounts = null;
+  try { expectedCounts = JSON.parse(cmp.stdout).counts; } catch { /* reported below */ }
+  const since = h2("Since the last audit");
+  check("A re-check has a 'Since the last audit' section", !!since);
+  const m = (since || []).join(" ").match(/resolved\s+(\d+)\D+still open\s+(\d+)\D+new\s+(\d+)/i);
+  sinceCounts = m ? { resolved: +m[1], stillOpen: +m[2], new: +m[3] } : null;
+  check("Since the last audit gives the resolved, still open and new counts that compare-reports finds",
+    !!sinceCounts && !!expectedCounts && sinceCounts.resolved === expectedCounts.resolved && sinceCounts.stillOpen === expectedCounts.stillOpen && sinceCounts.new === expectedCounts.new,
+    !expectedCounts ? "compare-reports failed" : !sinceCounts ? "needs 'resolved N · still open N · new N'" : `report says ${JSON.stringify(sinceCounts)}; compare-reports says ${JSON.stringify(expectedCounts)}`);
+}
 
 const isBp = (sc) => /best practice/i.test(sc);
 const bpAsIssue = items.filter((i) => (i.kind === "card" || i.kind === "minor") && isBp(i.sc));
@@ -220,7 +270,9 @@ for (const it of items) if (!claimed.has(it)) warnings.push(`#${it.id} [${it.kin
 
 // ---- digest ------------------------------------------------------------------------------
 if (digestPath) {
-  const dg = fs.readFileSync(digestPath, "utf8").replace(/\r\n/g, "\n");
+  // The reviewer ends its message with a "Caller:" note addressed to whoever relays it (it mentions the Fix first list). That
+  // note is not part of the digest.
+  const dg = fs.readFileSync(digestPath, "utf8").replace(/\r\n/g, "\n").replace(/^\s*caller:[\s\S]*$/im, "");
   const dl = dg.split("\n");
   check("Digest is short (60 lines or fewer)", dl.length <= 60, `${dl.length} lines`);
   check("Digest has one Fix first list of 3 or fewer", (dg.match(/fix first/gi) || []).length === 1 && (() => {
@@ -228,12 +280,24 @@ if (digestPath) {
     for (let k = i + 1; k < dl.length && /^\s*\d+\.\s+\S/.test(dl[k]) && !/^\s*\d+\.\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/.test(dl[k]); k++) n++;
     return n >= 1 && n <= 3;
   })());
-  const issueLine = /^\s*#(\d+)\s+·\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/;
+  const issueLine = /^\s*(?:[-*]\s+)?#(\d+)\s+·\s+(Blocker|Critical|Moderate|Minor|Best practice|Needs verification)\b/;
   const listed = new Set(dl.map((l) => (l.match(issueLine) || [])[1]).filter(Boolean).map(Number));
   const missingIds = items.filter((i) => !listed.has(i.id)).map((i) => "#" + i.id);
   check("Digest has one line for every issue, starting with its report number (#N · Severity · ...)", missingIds.length === 0, "missing " + missingIds.join(", "));
   check("Digest links to the full report", /report\.html/i.test(dg) && /full report:/i.test(dg), "needs a 'Full report:' line with the path to report.html");
   check("Digest says whether the report was opened", /open it:/i.test(dg), "needs an 'Open it:' line");
+  const dTriage = dl.find((l) => /^\s*triage:/i.test(l));
+  const same = (a, b) => JSON.stringify([...a].sort((x, y) => x - y)) === JSON.stringify([...b].sort((x, y) => x - y));
+  const dt = dTriage ? parseTriage(dTriage) : null;
+  check("Digest has a Triage line that matches the report's", !!dt && BUCKETS.every((b) => same(dt[b], triage[b])), dTriage ? "the buckets differ from the report's Triage" : "missing");
+  if (previousPath) {
+    const ds = dl.find((l) => /^\s*since the last audit:/i.test(l)) || "";
+    const dm = ds.match(/resolved\s+(\d+)\D+still open\s+(\d+)\D+new\s+(\d+)/i);
+    check("Digest has a 'Since the last audit' line that matches the report's", !!dm && !!sinceCounts && +dm[1] === sinceCounts.resolved && +dm[2] === sinceCounts.stillOpen && +dm[3] === sinceCounts.new, ds ? "the counts differ from the report's" : "missing");
+  }
+  const dGuards = dl.find((l) => /^\s*guards:/i.test(l)) || "";
+  const gm = dGuards.match(/(\d+)\s+automatable,\s*(\d+)\s+manual/i);
+  check("Digest has a Guards line whose counts match the cards", !!gm && +gm[1] === guardCounts.automatable && +gm[2] === guardCounts.manual, gm ? `digest says ${gm[1]} automatable, ${gm[2]} manual; the cards have ${guardCounts.automatable} and ${guardCounts.manual}` : "needs 'Guards: N automatable, M manual'");
   check("Digest has no evidence and no images", !/\*\*(evidence|repro steps|observed|expected):?\*\*/i.test(dg) && !/!\[/.test(dg));
 }
 

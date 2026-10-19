@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "reached-only-by-shift-tab@#b"
+  ],
+  "stopReason": "complete"
+}

@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "live-region-hidden"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "live-region-not-empty"
+    ]
+  }
+}

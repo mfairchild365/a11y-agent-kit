@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="t" aria-haspopup="dialog" aria-expanded="false">Open t</button><div id="d" role="dialog" aria-modal="true" aria-label="d" hidden><p>Content</p><input aria-label="Name"><button class="close">Close</button><a href="#">Help</a></div><script>(function(){var T=document.getElementById("t"),D=document.getElementById("d");
+function f(){return [].slice.call(D.querySelectorAll('button,a[href],input,[tabindex]:not([tabindex="-1"])'))}
+function open(){D.hidden=false;T.setAttribute("aria-expanded","true");}
+function close(){D.hidden=true;T.setAttribute("aria-expanded","false");T.focus()}
+T.addEventListener("click",open);
+D.addEventListener("keydown",function(e){if(e.key==="Escape"&&true){close()}
+if(e.key==="Tab"&&true){var a=f();if(e.shiftKey&&document.activeElement===a[0]){e.preventDefault();a[a.length-1].focus()}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){e.preventDefault();a[0].focus()}}});
+var c=D.querySelector(".close");if(c)c.addEventListener("click",close)})();</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

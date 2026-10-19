@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"private\":true,\"workspaces\":[\"packages/*\"]}","packages/web/package.json":"{\"devDependencies\":{\"jest\":\"^1.0.0\",\"jest-axe\":\"^1.0.0\"}}","packages/api/package.json":"{\"devDependencies\":{\"mocha\":\"^1.0.0\"}}"}}

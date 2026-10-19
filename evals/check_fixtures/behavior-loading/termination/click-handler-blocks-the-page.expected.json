@@ -1,0 +1,12 @@
+{
+  "findings": [],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "completion-not-announced",
+      "focus-lost-on-load",
+      "loading-not-announced",
+      "spinner-not-hidden"
+    ]
+  }
+}

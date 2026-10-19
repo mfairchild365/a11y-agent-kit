@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "framework@jest-axe"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "tooltip-not-dismissible"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

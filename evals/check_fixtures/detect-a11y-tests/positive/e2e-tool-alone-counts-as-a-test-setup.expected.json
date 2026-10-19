@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "framework@cypress-axe"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "count-not-in-description"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

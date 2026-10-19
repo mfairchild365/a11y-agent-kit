@@ -1,0 +1,14 @@
+{
+  "script": "skills/building-accessible-ui/scripts/keyboard-walk.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-stops",
+    "60",
+    "--max-ms",
+    "2500",
+    "--load-timeout",
+    "2500"
+  ],
+  "timeoutMs": 60000
+}

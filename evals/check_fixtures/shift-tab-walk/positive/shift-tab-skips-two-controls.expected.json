@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "shift-tab-unreached@#b",
+    "shift-tab-unreached@#c"
+  ],
+  "stopReason": "complete"
+}

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button aria-haspopup="dialog" style="display:none">h1</button><button aria-haspopup="dialog" hidden>h2</button><div inert><button aria-haspopup="dialog">i1</button><button aria-haspopup="dialog">i2</button></div><div aria-hidden="true"><button aria-haspopup="dialog">a1</button></div><button id="real" aria-haspopup="dialog" aria-expanded="false">Open real</button><div id="dreal" role="dialog" aria-modal="true" aria-label="dreal" hidden><p>Content</p><input aria-label="Name"><a href="#">Help</a></div><script>(function(){var T=document.getElementById("real"),D=document.getElementById("dreal");
+function f(){return [].slice.call(D.querySelectorAll('button,a[href],input,[tabindex]:not([tabindex="-1"])'))}
+function open(){D.hidden=false;T.setAttribute("aria-expanded","true");f()[0].focus()}
+function close(){D.hidden=true;T.setAttribute("aria-expanded","false");T.focus()}
+T.addEventListener("click",open);
+D.addEventListener("keydown",function(e){if(e.key==="Escape"&&false){close()}
+if(e.key==="Tab"&&true){var a=f();if(e.shiftKey&&document.activeElement===a[0]){e.preventDefault();a[a.length-1].focus()}else if(!e.shiftKey&&document.activeElement===a[a.length-1]){e.preventDefault();a[0].focus()}}});
+var c=D.querySelector(".close");if(c)c.addEventListener("click",close)})();</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

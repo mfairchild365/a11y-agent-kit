@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "heading-level-skip@h3:skipped"
+  ],
+  "stopReason": "complete"
+}

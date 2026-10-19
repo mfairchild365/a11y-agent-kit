@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "label-not-in-name@#go"
+  ],
+  "stopReason": "complete"
+}

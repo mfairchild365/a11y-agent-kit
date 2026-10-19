@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "shift-tab-trap-candidate@#c"
+  ],
+  "stopReason": "cycle"
+}

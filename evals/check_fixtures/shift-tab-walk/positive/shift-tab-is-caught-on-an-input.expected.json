@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "shift-tab-trap-candidate@#s"
+  ],
+  "stopReason": "stuck"
+}

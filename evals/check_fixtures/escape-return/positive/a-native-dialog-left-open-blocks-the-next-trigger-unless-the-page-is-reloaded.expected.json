@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "escape-does-not-close@#a",
+    "escape-does-not-close@#b"
+  ],
+  "stopReason": "complete"
+}

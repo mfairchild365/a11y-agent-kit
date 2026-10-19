@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "focus-not-moved-into-dialog@#t"
+  ],
+  "stopReason": "complete"
+}

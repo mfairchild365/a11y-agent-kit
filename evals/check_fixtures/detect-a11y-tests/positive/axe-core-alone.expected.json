@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "framework@axe-core"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "dev-time-only"
+  }
+}

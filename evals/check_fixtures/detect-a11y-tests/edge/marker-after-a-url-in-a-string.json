@@ -1,0 +1,1 @@
+{"files":{"src/a.test.js":"const u = 'http://example.test'; await injectAxe(page);\n"}}

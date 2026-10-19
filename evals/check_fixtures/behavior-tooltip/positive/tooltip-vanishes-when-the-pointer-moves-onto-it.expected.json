@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "tooltip-not-hoverable"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

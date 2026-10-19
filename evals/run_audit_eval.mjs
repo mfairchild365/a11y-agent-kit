@@ -12,7 +12,10 @@
 //
 // Usage (from the repo root):
 //   node evals/run_audit_eval.mjs --model claude-sonnet-5-5 [--runs 3] [--via direct|subagent]
-//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe]
+//        [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck] [--budget USD]
+//   --budget USD caps what each run may spend (claude's --max-budget-usd); the cost of each run is printed
+//   --recheck gives the agent audit_fixture/sample/good/report.md as a previous report and also checks the
+//            'Since the last audit' section and digest line against scripts/compare-reports.mjs
 //
 // Runs are billed to your account and take several minutes each: start with --runs 1.
 // Run outside the Claude Code sandbox: Chromium can't launch inside it.
@@ -22,6 +25,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { budgetArgs, claudeCommand, costText, parseBudget } from "./lib/claude.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.dirname(here);
@@ -32,7 +36,7 @@ const opt = (name, dflt) => {
 };
 const model = opt("model");
 if (!model) {
-  console.error("Usage: node evals/run_audit_eval.mjs --model <model-id> [--runs N] [--via direct|subagent] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe]");
+  console.error("Usage: node evals/run_audit_eval.mjs --model <model-id> [--runs N] [--via direct|subagent] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--skip-axe] [--recheck] [--budget USD]");
   process.exit(2);
 }
 const runs = +opt("runs", "1");
@@ -41,10 +45,15 @@ const scratch = path.resolve(opt("scratch", path.join(os.tmpdir(), "audit-eval")
 const out = path.resolve(opt("out", path.join(here, "workspace", "audit")));
 const timeoutMs = +opt("timeout", "1800") * 1000;
 const skipAxe = argv.includes("--skip-axe");
+let budget = null;
+try { if (opt("budget")) budget = parseBudget(opt("budget")); } catch (e) { console.error(e.message); process.exit(2); }
+const recheck = argv.includes("--recheck");
+const previousReport = path.join(here, "audit_fixture", "sample", "good", "report.md");
 if (!["direct", "subagent"].includes(via)) { console.error("--via must be direct or subagent"); process.exit(2); }
 
-// --plugin-dir registers the agent under its file name (accessibility-reviewer.agent.md).
-const AGENT = "a11y-agent-kit:accessibility-reviewer.agent";
+// --plugin-dir registers the agent as <plugin>:<name>. (Older CLI versions registered it under its file name,
+// accessibility-reviewer.agent; if this name is not found, the CLI lists the available agents in its error.)
+const AGENT = "a11y-agent-kit:accessibility-reviewer";
 const nodeModules = path.join(here, "node_modules");
 
 function prompt() {
@@ -52,6 +61,7 @@ function prompt() {
     via === "direct"
       ? "Audit index.html in the current directory for accessibility."
       : `Use the accessibility-reviewer agent (${AGENT}) to audit index.html in the current directory for accessibility. Show me the agent's report.`,
+    ...(recheck ? ["A previous audit of this page is in previous-report.md. This is a re-check: audit the page again and say what has changed since then."] : []),
     "Write your report files (report.md, report.html and the screenshots folder) to ./audit-out instead of the system temp directory.",
   ];
   if (fs.existsSync(nodeModules)) {
@@ -81,13 +91,14 @@ for (let n = 1; n <= runs; n++) {
   fs.rmSync(cwd, { recursive: true, force: true });
   fs.mkdirSync(cwd, { recursive: true });
   fs.copyFileSync(path.join(here, "audit_fixture", "index.html"), path.join(cwd, "index.html"));
+  if (recheck) fs.copyFileSync(previousReport, path.join(cwd, "previous-report.md"));
   const runOut = path.join(out, `run-${n}`);
   fs.rmSync(runOut, { recursive: true, force: true });
   fs.mkdirSync(runOut, { recursive: true });
 
   const cmd = ["-p", "--model", model, "--no-session-persistence", "--setting-sources", "project", "--strict-mcp-config",
     "--plugin-dir", repo, "--permission-mode", "acceptEdits", "--allowedTools", "Read,Glob,Grep,Bash,Skill,Agent",
-    "--output-format", "stream-json", "--verbose"];
+    ...budgetArgs(budget), "--output-format", "stream-json", "--verbose"];
   if (via === "direct") cmd.push("--agent", AGENT);
   cmd.push(prompt());
 
@@ -95,12 +106,14 @@ for (let n = 1; n <= runs; n++) {
   const t0 = Date.now();
   const env = { ...process.env };
   if (fs.existsSync(nodeModules)) env.NODE_PATH = nodeModules;
-  const r = spawnSync("claude", cmd, { cwd, env, encoding: "utf8", timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
+  const launch = claudeCommand(cmd);
+  const r = spawnSync(launch.cmd, launch.args, { cwd, env, encoding: "utf8", timeout: timeoutMs, maxBuffer: 256 * 1024 * 1024 });
   fs.writeFileSync(path.join(runOut, "stream.jsonl"), r.stdout || "");
   fs.writeFileSync(path.join(runOut, "stderr.txt"), r.stderr || "");
   let finalText = "";
+  let cost = null;
   for (const l of (r.stdout || "").split("\n")) {
-    try { const ev = JSON.parse(l); if (ev.type === "result") finalText = ev.result || ""; } catch { /* skip */ }
+    try { const ev = JSON.parse(l); if (ev.type === "result") { finalText = ev.result || ""; cost = typeof ev.total_cost_usd === "number" ? ev.total_cost_usd : null; } } catch { /* skip */ }
   }
   fs.writeFileSync(path.join(runOut, "final-message.md"), finalText || "(no final message)");
 
@@ -109,18 +122,18 @@ for (let n = 1; n <= runs; n++) {
   const secs = Math.round((Date.now() - t0) / 1000);
   if (r.error || !fs.existsSync(path.join(runOut, "report.md"))) {
     const why = (r.stderr || finalText || "").trim().split("\n")[0];
-    console.log(`  no report.md produced after ${secs}s${r.error ? ` (${r.error.code || r.error.message})` : ""}${why ? `: ${why}` : ""}`);
+    console.log(`  no report.md produced after ${secs}s, cost ${costText(cost)}${r.error ? ` (${r.error.code || r.error.message})` : ""}${why ? `: ${why}` : ""}`);
     console.log(`  see ${runOut}`);
     continue;
   }
   completed += 1;
-  const chk = spawnSync(process.execPath, [path.join(here, "check_audit_report.mjs"), runOut, "--digest", path.join(runOut, "final-message.md"), "--json", ...(skipAxe ? ["--skip-axe"] : [])], { encoding: "utf8" });
+  const chk = spawnSync(process.execPath, [path.join(here, "check_audit_report.mjs"), runOut, "--digest", path.join(runOut, "final-message.md"), "--json", ...(skipAxe ? ["--skip-axe"] : []), ...(recheck ? ["--previous", previousReport] : [])], { encoding: "utf8" });
   let res;
   try { res = JSON.parse(chk.stdout); } catch { console.log(`  checker crashed: ${chk.stderr.trim().split("\n")[0]}`); continue; }
   fs.writeFileSync(path.join(runOut, "check.json"), JSON.stringify(res, null, 2));
   tally(res.results, perCheck);
   recalls.push(res.recall);
-  console.log(`  ${secs}s. Recall ${res.recall}. ${res.passed}/${res.passed + res.failed} checks passed.`);
+  console.log(`  ${secs}s, cost ${costText(cost)}. Recall ${res.recall}. ${res.passed}/${res.passed + res.failed} checks passed.`);
   for (const f of res.results.filter((x) => !x.ok)) console.log(`    FAIL ${f.name}${f.detail ? ` -> ${f.detail}` : ""}`);
   for (const w of res.warnings) console.log(`    WARN ${w}`);
 }

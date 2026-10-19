@@ -11,36 +11,57 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `files/account-settings.html` — seeded input page for eval 8 (deliberately contains a few
   out-of-scope accessibility issues, to check that the skill reports them rather than
   silently rewriting unrelated code).
-- `axe_check.mjs` + `grade_axe.py` — base grading layer: runs axe-core against each run's
+- `grade_behavior.mjs` + `behavior/` — the behavior grading layer: Playwright checks that drive each delivered page for the prompts that have one (toast, tooltip and toggletip, loading status, character count), merged into `grading.json` as `[behavior] ...` expectations (see [Grading has three layers](#grading-has-three-layers)).
+- `axe_check.mjs` + `grade_axe.mjs` — base grading layer: runs axe-core against each run's
   delivered HTML and merges one pass/fail expectation into its `grading.json`.
-- `fetch-upstream.sh` + `grade_upstream.py` — optional second grading layer (see below).
-- `run_cli_eval.py` — runs every eval headlessly through `claude -p`, pinned to an exact
+- `fetch-upstream.sh` + `grade_upstream.mjs` — optional second grading layer (see below).
+- `run_cli_eval.mjs` — runs every eval headlessly through `claude -p`, pinned to an exact
   model, with and without the skill installed (see [Running the loop](#running-the-loop)).
-- `strict_summary.py` — zero-defect scoring (a run passes only if every defect check passes),
+- `strict_summary.mjs` — zero-defect scoring (a run passes only if every defect check passes),
   matching the a11y-llm-eval report metric.
 - `build_review.py` — builds skill-creator's review viewer, escaping `</script>` in the
   embedded HTML outputs so the viewer doesn't break.
 - `audit_fixture/` + `check_audit_report.mjs` + `run_audit_eval.mjs` — a seeded sample page with an
   answer key, and a checker and runner for the `accessibility-reviewer` agent's reports (see
   [Audit agent check](#audit-agent-check)).
-- `trigger_eval.json` + `trigger_check.py` + `trigger_fixture/` — checks whether the skill's
+- `trigger_eval.json` + `trigger_check.mjs` + `trigger_fixture/` — checks whether the skill's
   description makes it fire on the right requests (see [Trigger checks](#trigger-checks)).
 - `run_trigger_eval.py` — runs skill-creator's own trigger eval inside the Claude Code sandbox.
+- `run_all_tests.mjs` — runs every test below and every fixture suite in one go (`--no-browser` skips the ones that need a browser).
+- `check_fixtures/` + `run_check_fixtures.mjs` + `test_check_runner.mjs` — the required test
+  suite for every deterministic check the kit ships: positive, negative, edge and termination
+  fixtures with answer keys (see [`check_fixtures/README.md`](check_fixtures/README.md)). It holds the suites for
+  `tree-pass.mjs`, `keyboard-walk.mjs`, `focus-contrast.mjs`, `shift-tab-walk.mjs`, `arrow-walk.mjs`, `escape-return.mjs`, `compare-reports.mjs`, `verify-fix.mjs` and `detect-a11y-tests.mjs`.
+- `guard_fixture/` + `check_guard_run.mjs` + `run_guard_eval.mjs` + `test_check_guard_run.mjs` — checks that an agent turns an
+  audit report's Guards into tests (see [Guard run check](#guard-run-check)).
+- `test_eval_tooling.mjs` + `fake_claude.mjs` — tests the grading and summary scripts, and runs `run_cli_eval.mjs` and `trigger_check.mjs` end to end against a fake `claude` CLI (set `CLAUDE_BIN` to use another executable). No browser or model needed.
+- `test_sync_plugin.mjs` — tests `../scripts/sync_plugin.mjs`.
+- `test_shift_tab.mjs`, `test_arrow.mjs`, `test_overlay.mjs` — unit tests for the pure logic behind `shift-tab-walk.mjs` (comparing two walks), `arrow-walk.mjs` (which keys a widget answers and how the trials are judged) and `escape-return.mjs` (how an Escape and the focus afterward are judged). No browser.
+- `test_contrast.mjs` — tests the pure contrast logic behind `focus-contrast.mjs` (ratios, alpha compositing, background stacks, every verdict). No browser.
+- `test_verify.mjs`, `test_verify_cli.mjs` — the pure rules behind `verify-fix.mjs` (verdict order, renames, Guard coverage, the plan's `a11y-plan` block, snapshot diffs) and the command with real files.
+- `test_detect.mjs` — the rules behind `detect-a11y-tests.mjs` and the folder walk, on real temporary projects.
+- `test_snapshot.mjs` — `snapshot.mjs`: a script that crashes, hangs, prints garbage or prints too much, flags passed only to the scripts that take them (stand-in scripts, no browser), and the real scripts on a before and after page (`--browser-only`).
+- `check_plan_run.mjs` + `run_plan_eval.mjs` + `test_check_plan_run.mjs` — grades the plan an agent writes before fixing (see [Plan and fix-and-verify checks](#plan-and-fix-and-verify-checks)).
+- `check_fix_verify.mjs` + `test_check_fix_verify.mjs` + `guard_fixture/plans/` — grades what `verify-fix.mjs` would say about an agent's fix, for `run_guard_eval.mjs --approved-plan`.
+- `test_compare_reports.mjs` — tests the parts of `../skills/building-accessible-ui/scripts/compare-reports.mjs` the fixtures can't see.
+- `test_check_audit_report.mjs` — tests `check_audit_report.mjs` itself: the good sample passes, the broken one fails, and one-at-a-time breakages fail exactly the right check.
+- `test_check_generic.mjs` — tests `../scripts/check_generic.mjs`, the gate that keeps company,
+  brand and product names out of published files.
 
-## Grading has two layers
+## Grading has three layers
 
-**Base layer** (`grade_axe.py`, always available): one generic axe-core check per run, plus
+**Base layer** (`grade_axe.mjs`, always available): one generic axe-core check per run, plus
 whatever the skill-creator grader subagent judges from `evals.json`'s scenario- and
 process-level expectations (fieldset/legend grouping, `aria-describedby` links, focus
 management, and so on — read from the markup and the run's transcript).
 
-**Upstream layer** (`fetch-upstream.sh` + `grade_upstream.py`, optional): the 7 scenarios
+**Upstream layer** (`fetch-upstream.sh` + `grade_upstream.mjs`, optional): the 7 scenarios
 adapted from upstream also have much more thorough, purpose-built Playwright behavioral
 checks in `microsoft/a11y-llm-eval` — real keyboard interaction (Escape closes a dialog,
 arrow keys move between radios, Space toggles a checkbox), focus trapping, and so on. Rather
 than re-implement or copy those, `fetch-upstream.sh` downloads a **pinned commit's** tarball
 of just `node_runner/` and `test_cases/` into `evals/.upstream/` (gitignored, not vendored),
-and `grade_upstream.py` runs them against each run's output, merging their results in as
+and `grade_upstream.mjs` runs them against each run's output, merging their results in as
 `"[upstream] ..."` expectations. A run with no HTML, or one where the runner crashes, gets a
 failing `[upstream]` expectation instead of being skipped, so it can't count as clean.
 
@@ -51,11 +72,26 @@ those checks are coupled to that repo's class-name conventions (`form-field`, `t
 elements; evals 8 and 9 are new scenarios with no upstream equivalent and are graded by the
 base layer only.
 
+**Behavior layer** (`grade_behavior.mjs`, always available, needs a browser): for the prompts that have a check in `behavior/` (`toast-archive-undo`, `tooltip-toggletip`, `loading-status`, `character-count`), it loads each run's delivered page, drives it the way a user would (click, type, press a key) and merges `[behavior] <expectation text>` entries into `grading.json`. The text is the same as the expectation in `evals.json`, so a decided behavior result **replaces** the LLM-graded expectation with that text in `strict_summary.mjs` instead of being counted twice. Rules that keep it honest:
+
+- A check decides only what it can read from behavior. A control it can't find (no Archive button, no textarea) leaves that result `inconclusive`, and the expectation stays with the LLM grader. It never guesses.
+- Controls are found by role and accessible name, not class names, because model-built pages differ.
+- A run with no HTML, or a check that crashes, times out or prints garbage, merges a **failing** expectation. It is never skipped, so strict scoring can't count a run it couldn't check as clean.
+- Every wait is bounded (`--max-ms`), and a page that blocks the main thread ends in `time-cap` or `load-timeout`.
+- Known limit: a control counts as visible to a sighted user unless it is `display: none`, `visibility: hidden`, `hidden`, `inert` or `opacity: 0`. A page that hides a control only by moving it off-screen (`left: -9999px`, a transform that pushes a fixed toast below the viewport), clipping it or giving it no size is still read as visible, so "the user can recover after the timer" can pass wrongly on such a page. Live regions are judged by exposure to assistive technology, where opacity does not hide them.
+- Each check has a fixture suite in `check_fixtures/behavior-<name>/` (positive, negative, edge and termination pages; the answer key also lists which results the check must decline to decide), and each was sabotaged one decision at a time.
+
+```bash
+PW_CHANNEL=msedge NODE_PATH=evals/node_modules node evals/grade_behavior.mjs evals/workspace/<iteration>
+```
+
+The three prompts after the first ten were added for guidance that had no prompt: tooltip and toggletip, loading and the live announcer, and character count. Adding them made the strict denominators 13, so earlier results for 10 prompts are not comparable.
+
 ### Running the upstream layer
 
 ```bash
 ./evals/fetch-upstream.sh          # idempotent; no-ops if already at the pinned commit
-python3 evals/grade_upstream.py evals/workspace/iteration-1
+node evals/grade_upstream.mjs evals/workspace/iteration-1
 ```
 
 Both `evals/` and `evals/.upstream/a11y-llm-eval/node_runner` need their own
@@ -74,7 +110,7 @@ upstream checks will fail to find elements they used to find by class name.
 ## Running the loop
 
 This follows the skill-creator loop (runs with and without the skill, grading, aggregating,
-review viewer), but uses `run_cli_eval.py` to produce the runs instead of subagents. The CLI
+review viewer), but uses `run_cli_eval.mjs` to produce the runs instead of subagents. The CLI
 pins an exact model ID and starts each run in an empty directory with no repo context,
 CLAUDE.md, or user plugins. From the repo root:
 
@@ -83,12 +119,12 @@ npm i --prefix evals                     # base-layer deps (once)
 ./evals/fetch-upstream.sh                # upstream layer (optional, once)
 
 # 10 evals × 2 configs × 4 runs = 80 runs
-python3 evals/run_cli_eval.py --model claude-sonnet-4-6 \
+node evals/run_cli_eval.mjs --model claude-sonnet-4-6 \
   --workspace evals/workspace/sonnet46 --scratch "$TMPDIR/s46" --runs 4
 
-python3 evals/grade_axe.py evals/workspace/sonnet46
-python3 evals/grade_upstream.py evals/workspace/sonnet46      # optional
-python3 evals/strict_summary.py evals/workspace/sonnet46 --write
+node evals/grade_axe.mjs evals/workspace/sonnet46
+node evals/grade_upstream.mjs evals/workspace/sonnet46      # optional
+node evals/strict_summary.mjs evals/workspace/sonnet46 --write
 ```
 
 Each run's `meta.json` records the model that answered, whether the Skill tool was invoked,
@@ -104,7 +140,7 @@ python3 -m scripts.aggregate_benchmark evals/workspace/sonnet46 --skill-name bui
 python3 evals/build_review.py evals/workspace/sonnet46          # writes review.html
 ```
 
-Without LLM grading, `strict_summary.py` reports only the programmatic view (axe +
+Without LLM grading, `strict_summary.mjs` reports only the programmatic view (axe +
 upstream) and says so in its table.
 
 ## Trigger checks
@@ -115,13 +151,13 @@ runs in a copy of `trigger_fixture/`, a small fake app, so requests that name fi
 to files that exist.
 
 ```bash
-python3 evals/trigger_check.py --model claude-sonnet-4-6 --desc current=- --runs 3 \
+node evals/trigger_check.mjs --model claude-sonnet-4-6 --desc current=- --runs 3 \
   --out evals/workspace/trigger
-python3 evals/trigger_check.py --model claude-sonnet-4-6 \
+node evals/trigger_check.mjs --model claude-sonnet-4-6 \
   --desc current=- --desc candidate=path/to/description.txt --runs 3 --out evals/workspace/trigger
 ```
 
-`trigger_check.py` installs the real skill (optionally with a different description) and
+`trigger_check.mjs` installs the real skill (optionally with a different description) and
 stops each run as soon as the model invokes the skill, starts writing files, makes 10 tool
 calls, or hits `--timeout`. It prints fire rates per group and lists every should-trigger
 miss. Use it rather than skill-creator's `run_eval.py`, which only counts the skill if it's
@@ -166,6 +202,10 @@ adjust a seed and its key entry, then update the sample reports by hand.
 `sample/good` and `sample/broken` are hand-built reports that test the checker itself (see
 `audit_fixture/sample/README.md`).
 
+- **Triage and Guards:** the Summary has a Triage line that gives every numbered issue exactly one of Fix now, Ticket or Investigate (Needs verification is always Investigate), every full card has a Guard that starts with `automatable` or `manual`, and the digest's Triage and Guards lines match the report.
+- **Re-check:** with `--previous <report.md>` (or `--recheck` on the runner), the report needs a "Since the last audit" section, and the digest a matching line, with the resolved, still open and new counts that `compare-reports.mjs` finds.
+- **No generic test advice:** Out of scope mentions tests or coverage only when it cites an issue number.
+
 `run_audit_eval.mjs` runs the agent headlessly against the fixture and scores it. It loads this
 repo as the plugin (`--plugin-dir`), pins the model, and starts each run in an empty directory:
 
@@ -183,6 +223,47 @@ list of checks that didn't pass in every run.
 If Playwright's own Chromium isn't installed, set `PW_CHANNEL=msedge` (or `chrome`) for
 `axe_check.mjs` and the checker. The runner passes the same hint to the agent.
 
+## Guard run check
+
+Each full card in an audit report has a **Guard**. `guard_fixture/project` is a small page with three seeded issues and its own `report.md`: two automatable Guards (axe `button-name` and `color-contrast`) and one manual one (the notices' color-only type cue). The project has a test folder, helpers and an `AGENTS.md` that says where accessibility tests go.
+
+`run_guard_eval.mjs` gives an agent that project and the prompt "Fix the accessibility issues in report.md", then `check_guard_run.mjs` grades the result with no LLM judge:
+
+- both defects are fixed (checked by oracle tests the agent never sees) and the page was edited, not rewritten;
+- new tests were added in the project's own place and style, they **fail on the original page and pass on the fixed one**, and the project's existing test still passes;
+- no test was written for the manual Guard, and the final message says it stayed manual and reports the before and after result;
+- with `--variant optout` (the project's `AGENTS.md` says it adds no automated tests): no test file is added or changed, and the message says why.
+
+```bash
+node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1                     # normal project
+node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1 --variant optout    # project that opted out
+```
+
+Runs are billed and need a browser; set `PW_CHANNEL=msedge` (or `chrome`) if Playwright's Chromium isn't installed. `test_check_guard_run.mjs` tests the grader and the runner against a fake `claude` (a correct run, a lazy one, tests that pass before the fix, a test for the manual Guard, tests added to an opted-out project, and more). It needs a browser but no model.
+
+## Plan and fix-and-verify checks
+
+The skill says to plan before fixing and to check the fix with `verify-fix.mjs` (`references/fixing.md`). Two checks cover that, both with deterministic graders and no LLM judge. **They are unit-tested against the fake CLI. On a real model they have had a smoke test only: one run per variant on `claude-haiku-5-5`, about a cent each. That shows the plumbing and the wording work, not how reliable the behaviour is.**
+
+`run_plan_eval.mjs` gives an agent the Guard fixture project and the prompt "Fix the accessibility issues in report.md", then `check_plan_run.mjs` grades the plan:
+
+- nothing but the plan is written (plan mode: nothing at all, and the plan comes from `ExitPlanMode`; `--mode planfile`: only `a11y-fix-plan.md`, and the agent stops to ask for approval);
+- the plan has one `a11y-plan` block that parses, whose targets are issues from the report, with both automatable issues among them and one Guard per target;
+- in the normal project each automatable Guard names a test in `tests/*.test.mjs` and none is waived; the manual issue keeps a manual Guard with no test; in the opted-out project (`--variant optout`) the Guards are waived with a stated reason and the plan says the project opted out;
+- there are Test coverage, What will not change and Risks sections, and no claim that the page is "fully accessible".
+
+`run_guard_eval.mjs --approved-plan` is the second step: it puts a canned approved plan (`guard_fixture/plans/`) in the project, asks the agent to follow it, and adds `check_fix_verify.mjs` to the Guard checks. With no auditor in the loop, the "after" report is the "before" report with the cards of the defects the page now passes removed; the real verify rules then give the verdict (fixed) and the coverage (each Guard covered by the planned test file, or waived).
+
+```bash
+node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --budget 1
+node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --mode planfile --variant optout --budget 1
+node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1 --approved-plan --budget 2
+```
+
+`--use-skill` (on both runners) puts "Use the building-accessible-ui skill." in the prompt. Without it the model has to decide to load the skill, which `trigger_check.mjs` covers; with a bare prompt the small model sometimes skipped it. In headless plan mode there is no `ExitPlanMode`, so the agent writes its plan to the CLI's own plans folder; the grader reads the plan from there and doesn't count it as a project write. A result with `is_error` (an expired login, say) is reported as "failed before the agent worked" and not graded.
+
+The plan eval needs no browser. Every eval runner takes `--budget USD` (claude's `--max-budget-usd`) and prints each run's cost.
+
 ## Live-region probe
 
 `skills/building-accessible-ui/scripts/live-region-probe.mjs` records status messages (4.1.3) in a real browser, including text added to a shared announcer and removed milliseconds later. `live_fixture/patterns.html` has ten patterns (a transient announcer, a region inserted with its text, a `display:none` region, a clear-and-refill, a plain paragraph, a persistent announcer, `role=alert`, a replaced message, and status regions inside an open and a closed shadow root). `test_live_probe.mjs` checks that the probe classes each one correctly:
@@ -195,11 +276,11 @@ The probe shows what the browser exposes. It can't show what a screen reader spe
 
 ## Environment notes
 
-- `run_trigger_eval.py` and `build_review.py` look for skill-creator in the Claude Code
+- `run_trigger_eval.py` and `build_review.py` are the only Python here (they run and patch skill-creator's own Python modules). They look for skill-creator in the Claude Code
   plugin cache (`~/.claude/plugins/cache/claude-plugins-official/skill-creator/`). Set
   `SKILL_CREATOR_DIR` to the skill-creator skill's directory to use another copy.
 - Scratch directories default to the system temp dir; pass `--scratch` to change them.
-- Inside the Claude Code sandbox, Chromium can't launch, so `grade_axe.py` and
-  `grade_upstream.py` fail every run. Run them outside the sandbox.
+- Inside the Claude Code sandbox, Chromium can't launch, so `grade_axe.mjs` and
+  `grade_upstream.mjs` fail every run. Run them outside the sandbox.
 - `claude -p` runs are billed to your account. A full 72-run pass takes a while; start
   with `--only` and `--runs 1`.

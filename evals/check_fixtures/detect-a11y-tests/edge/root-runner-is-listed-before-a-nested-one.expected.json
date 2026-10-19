@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "runner@jest",
+    "runner@vitest"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "test-framework-only",
+    "suggestion": "add a test with the vitest runner and vitest-axe"
+  }
+}

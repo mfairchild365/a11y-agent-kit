@@ -1,0 +1,10 @@
+{
+  "findings": [
+    "runner@node:test",
+    "test-script@test"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "test-framework-only"
+  }
+}

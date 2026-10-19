@@ -1,0 +1,14 @@
+{
+  "script": "skills/building-accessible-ui/scripts/focus-contrast.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-stops",
+    "60",
+    "--max-ms",
+    "6000",
+    "--load-timeout",
+    "2500"
+  ],
+  "timeoutMs": 90000
+}

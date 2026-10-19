@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "runner@vitest"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "test-framework-only"
+  }
+}

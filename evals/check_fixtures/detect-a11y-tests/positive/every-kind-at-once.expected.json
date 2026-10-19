@@ -1,0 +1,15 @@
+{
+  "findings": [
+    "framework@@axe-core/playwright",
+    "framework@jest-axe",
+    "framework@pa11y-ci",
+    "runner@jest",
+    "runner@playwright",
+    "test-script@test",
+    "test-script@test:e2e"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

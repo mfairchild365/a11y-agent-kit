@@ -1,0 +1,16 @@
+{
+  "script": "skills/building-accessible-ui/scripts/escape-return.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--trigger",
+    "#special",
+    "--max-triggers",
+    "4",
+    "--max-ms",
+    "6000",
+    "--load-timeout",
+    "2500"
+  ],
+  "timeoutMs": 120000
+}

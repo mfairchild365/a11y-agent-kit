@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "focus-indicator-low-contrast@#l1",
+    "focus-indicator-low-contrast@#l2"
+  ],
+  "stopReason": "complete"
+}

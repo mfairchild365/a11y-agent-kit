@@ -1,0 +1,12 @@
+{
+  "script": "skills/building-accessible-ui/scripts/tree-pass.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-nodes",
+    "1000",
+    "--load-timeout",
+    "2500"
+  ],
+  "timeoutMs": 40000
+}

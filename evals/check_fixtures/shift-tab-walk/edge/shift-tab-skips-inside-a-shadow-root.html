@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<div id="host"></div><button id="z">Z</button>
+</main>
+<script>var root=document.getElementById("host").attachShadow({mode:"open"});root.innerHTML='<button id="s1">One</button><button id="s2">Two</button><button id="s3">Three</button>';root.getElementById("s3").addEventListener("keydown",function(e){if(e.key==="Tab"&&e.shiftKey){e.preventDefault();root.getElementById("s1").focus()}})</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "announcer-missing"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

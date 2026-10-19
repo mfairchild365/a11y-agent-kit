@@ -1,0 +1,13 @@
+{
+  "findings": [],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "toggletip-described-by-panel",
+      "toggletip-does-not-close",
+      "toggletip-escape-fails",
+      "toggletip-no-aria-expanded",
+      "toggletip-not-next-sibling"
+    ]
+  }
+}

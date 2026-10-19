@@ -1,0 +1,1 @@
+{"files":{"src\\a.test.tsx":"import { axe, toHaveNoViolations } from 'jest-axe';\nit('has no violations', async () => { expect(await axe(container)).toHaveNoViolations(); });\n"}}

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<div role="tablist" id="ok" aria-label="ok"><button role="tab" id="ok-i0" tabindex="0">Item 1</button><button role="tab" id="ok-i1" tabindex="-1">Item 2</button><button role="tab" id="ok-i2" tabindex="-1">Item 3</button></div><script>(function(){var w=document.getElementById("ok");var items=[].slice.call(w.querySelectorAll("[role]")).filter(function(i){return !i.disabled});var N=["ArrowRight"],P=["ArrowLeft"];
+function go(t){items.forEach(function(i){i.tabIndex=-1});items[t].tabIndex=0;items[t].focus()}
+w.addEventListener("keydown",function(e){var i=items.indexOf(document.activeElement);if(i<0)return;
+var isN=N.indexOf(e.key)>=0,isP=P.indexOf(e.key)>=0;if(!isN&&!isP)return;e.preventDefault();
+if("good"==="skip"){go(Math.max(0,Math.min(items.length-1,i+(isN?2:-2))));return}
+if("good"==="leave"){document.getElementById("outside").focus();return}
+if("good"==="blur"){document.activeElement.blur();return}
+if(isN)go(i<items.length-1?i+1:i);else go(i>0?i-1:i)})})();</script>
+<div role="tablist" id="dead" aria-label="dead"><button role="tab" id="dead-i0" tabindex="0">Item 1</button><button role="tab" id="dead-i1" tabindex="-1">Item 2</button><button role="tab" id="dead-i2" tabindex="-1">Item 3</button></div><div role="toolbar" id="ok2" aria-label="ok2"><button role="button" id="ok2-i0" tabindex="0">Item 1</button><button role="button" id="ok2-i1" tabindex="-1">Item 2</button><button role="button" id="ok2-i2" tabindex="-1">Item 3</button></div><script>(function(){var w=document.getElementById("ok2");var items=[].slice.call(w.querySelectorAll("[role]")).filter(function(i){return !i.disabled});var N=["ArrowRight"],P=["ArrowLeft"];
+function go(t){items.forEach(function(i){i.tabIndex=-1});items[t].tabIndex=0;items[t].focus()}
+w.addEventListener("keydown",function(e){var i=items.indexOf(document.activeElement);if(i<0)return;
+var isN=N.indexOf(e.key)>=0,isP=P.indexOf(e.key)>=0;if(!isN&&!isP)return;e.preventDefault();
+if("good"==="skip"){go(Math.max(0,Math.min(items.length-1,i+(isN?2:-2))));return}
+if("good"==="leave"){document.getElementById("outside").focus();return}
+if("good"==="blur"){document.activeElement.blur();return}
+if(isN)go(i<items.length-1?i+1:i);else go(i>0?i-1:i)})})();</script>
+
+</main>
+</body>
+</html>

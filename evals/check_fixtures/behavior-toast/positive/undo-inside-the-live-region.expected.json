@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "undo-in-live-region"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

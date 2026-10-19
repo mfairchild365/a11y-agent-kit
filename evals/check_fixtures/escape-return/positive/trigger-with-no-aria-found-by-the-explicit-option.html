@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="special">Settings</button><div id="d" role="dialog" aria-modal="true" aria-label="Settings" hidden><button id="inner">Done</button></div><script>(function(){var T=document.getElementById("special"),D=document.getElementById("d");T.addEventListener("click",function(){D.hidden=false;document.getElementById("inner").focus()});D.addEventListener("keydown",function(e){if(e.key==="Tab"){e.preventDefault();document.getElementById("inner").focus()}})})()</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

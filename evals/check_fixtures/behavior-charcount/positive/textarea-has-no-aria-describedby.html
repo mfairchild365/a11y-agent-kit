@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Feedback</title><style>body{font-family:sans-serif;padding:1rem}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}</style></head><body>
+<h1>Feedback</h1>
+<form onsubmit="return false">
+<label for="c">Comments</label>
+<textarea id="c" rows="4" maxlength="280"></textarea>
+
+<p aria-hidden="true"><span id="n">0</span>/280</p>
+</form>
+<script>
+var c = document.getElementById('c');
+if (c) { c.addEventListener('input', function () {
+  var n = c.value.length;
+  var a = document.getElementById('n'); if (a) a.textContent = n;
+}); }
+</script>
+</body></html>

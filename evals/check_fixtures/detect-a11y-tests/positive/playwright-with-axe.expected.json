@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "a11y-test-file@e2e/home.spec.ts",
+    "framework@@axe-core/playwright",
+    "runner@playwright"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

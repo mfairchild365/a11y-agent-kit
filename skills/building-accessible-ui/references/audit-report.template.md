@@ -37,6 +37,9 @@ The full report is a file, not the chat message. The message the agent returns (
 
 Critical 3 · Moderate 3 · Minor 1 · Best practice 1 · Needs verification 1
 Checks: axe, keyboard, 320px, contrast run. No screen reader.
+Triage: fix now #1 #3 · ticket #2 · investigate #9
+Guards: 4 automatable, 2 manual. Ask me to fix these and add the tests.
+Since the last audit: resolved 2 · still open 4 · new 1   (only when a previous report was given)
 
 #1 · Critical · 2.1.1 · Tooltip bubbles — can't be reached by keyboard → make them focusable buttons
 #3 · Critical · 1.4.3 · "+5" button — hover state is 3.83:1 → use a darker fill
@@ -49,7 +52,9 @@ Full report: <absolute path to report.html>
 Open it: <what was done: shown in the app, opened in the default browser, or "not opened": the file:/// URL>
 ```
 
-One line per issue, most severe first. Start each line with the issue's number in the report (`#N`), so the digest, Fix first and the report agree even though the digest is sorted by severity and the report is grouped by element. Don't repeat Fix first anywhere else.
+The Triage line lists issue numbers only, and the Guards line counts the cards' Guard fields. Leave out the Since the last audit line unless a previous report was given.
+
+One line per issue, most severe first, including every Best practice and Needs verification item. Never group issues into a range or a combined line ("#14 to #19"): a digest of 20 issues is 20 lines, and still short. Start each line with the issue's number in the report (`#N`), so the digest, Fix first and the report agree even though the digest is sorted by severity and the report is grouped by element. Don't repeat Fix first anywhere else.
 
 ## Report
 
@@ -73,10 +78,15 @@ Put what matters first, and scale the detail to the severity. Every field still 
 - **Checks:** <one line, e.g. "axe, keyboard, 320px, forced colors and contrast run; no screen reader." Name any criterion you checked without a procedure in `audit-procedures.md`, so a gap is visible.>
 - **Fix first:** <at most 3 items, one line each, each naming its issue number>
   1. <the change that removes the most user impact (#N)>
+- **Triage:** <one line of issue numbers: `Fix now #1 #3 · Ticket #2 · Investigate #9`. Rules below.>
 
 <Only when a check did not run, add a table: method, the exact command or tool tried, its error, and what would unblock it. Cap the confidence of anything that depended on it at Medium.>
 
 Keep the whole summary to about 10 lines. Don't repeat in it what the findings say.
+
+## Since the last audit
+
+Only when the audit was given a previous report. Leave the section out otherwise. Run `scripts/compare-reports.mjs <previous report.md> <this report.md>` and copy its result: how many issues are resolved, still open and new, then one line per resolved, still-open and new issue with its element, SC and, for a still-open one, whether its severity changed. A resolved issue is one the previous report had that this audit no longer finds. Say what was re-checked and how, since an issue that can't be reproduced because the page moved is not resolved.
 
 ## Findings
 
@@ -94,6 +104,7 @@ One line: what this element is and how many instances the audit found.
 - **Why this severity:** <which users, which task, and whether a workaround exists>
 - **Screenshot:** <embedded right here, never collected elsewhere: `![Finding N: what it shows, element outlined](absolute/path/finding-NN-slug.png)`, with the offending element outlined, even when the problem isn't visible (a wrong accessible name, missing semantics, a keyboard-order fault): the outline shows the reader which element it is. Show the failing state, plus a second image of the expected or fixed state when you can. For a non-visual issue, also give the text evidence beside the image: the accessibility-tree line, the axe node, or the focus sequence. Write "No screenshot" only when the element can't be rendered (code-only finding, or the browser check couldn't run), and say why.>
 - **Suggested fix:** <concrete and minimal. A snippet when it helps.>
+- **Guard:** <`automatable` or `manual`, then the smallest check that fails now and passes after the fix. Automatable: the kind of check the project's own tooling can run, for example "axe `button-name` on this route" or "assert focus returns to the trigger after Escape". Manual: the check a person runs, and why it can't be automated, for example "2.4.4: link purpose depends on the surrounding text, so read each link in context". Never invent a brittle test for a manual one.>
 - **Evidence:**
   - **WCAG SC:** <number and name of the one criterion this issue fails, e.g. 1.4.13 Content on Hover or Focus. "Best practice" if none; such a finding goes in the Best practices table, not a card.>
   - **Status:** <new | pre-existing. Show it in the headline too when the audit is of a diff.>
@@ -163,6 +174,8 @@ Findings the agent suspects but couldn't confirm (confidence Low). They are not 
 - **Length caps.** Summary: about 10 lines. Why this severity: at most 2 sentences, and name the anchor rather than restating it. Observed: at most 3 lines, the decisive measurement and not every reading. Relevant elements: at most 4 references inline. Suggested fix: at most 3 lines. Best practice and Minor rows: one sentence each. Passed: at most 5 lines, with no list of measurements.
 - **Before labelling a gap Best practice,** check whether a criterion applies. A control name with an unrelated button's text spliced in is 2.5.3 or 4.1.2. A border around a control that has visible text, or a panel's edge, is not a 1.4.11 failure (see `audit-calibration.md`). If a criterion applies, rate it.
 - **Documentation and test-coverage gaps are not findings.** At most one "Maintainer notes" line under Out of scope.
+- **Guard goes on every full card** (Blocker, Critical, Moderate). Minor rows, Best practice rows and Needs verification rows have none. A Guard describes a check, it never adds a test: the reviewer is read-only. It is written so that whoever fixes the issue can write the test first, watch it fail, then fix.
+- **Triage.** Every numbered issue (cards, Minor rows, Best practice rows, Needs verification rows) gets exactly one. `Fix now`: the fix is one localized change with a clear answer; take Blocker and Critical first. `Ticket`: the fix needs design input, touches several components, or belongs in a shared component or library. `Investigate`: everything under Needs verification, plus any issue whose cause or fix is unclear. Ticket text is written on request, not in the report: `[A11Y] <title> in <element>`, then the SC, severity, element, expected behavior and the suggested fix.
 - **Headline first.** The one-line headline carries severity, SC, instance count and confidence, so a reader can scan the report without opening any evidence.
 - **Repro steps** must be runnable by someone who hasn't seen the code. If the issue is code-only and can't be reproduced in a browser, say so and give the code path to trace instead.
 - **Observed** and **Expected** are different things. Don't restate the fix as "expected".

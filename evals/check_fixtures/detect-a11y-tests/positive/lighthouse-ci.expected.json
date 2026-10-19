@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "framework@@lhci/cli"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "setup": "existing-a11y-tests"
+  }
+}

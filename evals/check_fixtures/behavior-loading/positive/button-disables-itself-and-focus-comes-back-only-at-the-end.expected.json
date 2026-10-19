@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "focus-lost-on-load"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

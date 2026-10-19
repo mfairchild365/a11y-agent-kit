@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "unreachable-by-tab@#skipme"
+  ],
+  "stopReason": "complete"
+}

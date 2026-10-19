@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "new@4.1.2|close button",
+    "resolved@2.1.1|tooltip on the student bubble"
+  ],
+  "stopReason": "complete"
+}

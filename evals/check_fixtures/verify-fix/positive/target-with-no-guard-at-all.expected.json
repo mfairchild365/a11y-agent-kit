@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "no-guard@1.4.3|badge"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "fixed"
+  }
+}

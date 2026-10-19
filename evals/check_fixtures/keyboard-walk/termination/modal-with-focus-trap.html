@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="first">First</button>
+<div role="dialog" aria-modal="true" aria-label="Dialog"><button id="a">A</button><button id="b">B</button></div>
+</main>
+<script>document.getElementById("b").addEventListener("keydown",function(e){if(e.key==="Tab"&&!e.shiftKey){e.preventDefault();document.getElementById("a").focus()}})</script>
+</body>
+</html>

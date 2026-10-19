@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="t" aria-expanded="false" aria-controls="r">Details</button><div id="r" hidden>More text</div><script>document.getElementById("t").addEventListener("click",function(){var r=document.getElementById("r");r.hidden=!r.hidden;this.setAttribute("aria-expanded",String(!r.hidden))})</script><button id="behind">Behind</button><button id="other">Other</button>
+</main>
+</body>
+</html>

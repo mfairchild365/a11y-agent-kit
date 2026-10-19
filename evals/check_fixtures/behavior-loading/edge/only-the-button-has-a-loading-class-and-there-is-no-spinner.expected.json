@@ -1,0 +1,9 @@
+{
+  "findings": [],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "spinner-not-hidden"
+    ]
+  }
+}

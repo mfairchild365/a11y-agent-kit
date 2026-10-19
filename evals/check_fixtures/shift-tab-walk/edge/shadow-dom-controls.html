@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<button id="a">A</button><div id="host"></div><button id="z">Z</button>
+</main>
+<script>document.getElementById("host").attachShadow({mode:"open"}).innerHTML='<button id="s1">One</button><button id="s2">Two</button>'</script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"files":{"src/a.test.js":"import { axe, toHaveNoViolations } from 'jest-axe';\nit('has no violations', async () => { expect(await axe(container)).toHaveNoViolations(); });\n"}}

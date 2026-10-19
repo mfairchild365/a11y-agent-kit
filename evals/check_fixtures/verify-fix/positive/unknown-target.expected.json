@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "target-unknown@2.1.1|nowhere"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "invalid-targets"
+  }
+}

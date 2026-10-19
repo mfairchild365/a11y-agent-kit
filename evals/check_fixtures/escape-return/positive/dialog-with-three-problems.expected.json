@@ -1,0 +1,8 @@
+{
+  "findings": [
+    "modal-focus-escapes@#t",
+    "focus-not-moved-into-dialog@#t",
+    "focus-not-returned@#t"
+  ],
+  "stopReason": "complete"
+}

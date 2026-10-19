@@ -1,0 +1,13 @@
+{
+  "findings": [
+    "live-region-missing",
+    "message-not-in-region"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "live-region-hidden",
+      "live-region-not-empty"
+    ]
+  }
+}

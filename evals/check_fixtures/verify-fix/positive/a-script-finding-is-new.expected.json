@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "regression@tree-pass:interactive-no-name@#new"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}

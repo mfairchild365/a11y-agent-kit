@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "duplicate-landmark-name@navigation:site"
+  ],
+  "stopReason": "complete"
+}

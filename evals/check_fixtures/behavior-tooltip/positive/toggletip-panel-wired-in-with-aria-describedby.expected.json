@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "toggletip-described-by-panel"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

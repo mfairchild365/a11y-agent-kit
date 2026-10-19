@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Fixture</title></head>
+<body>
+<main>
+<h1>Fixture</h1>
+<div role="listbox" id="w" aria-label="w" tabindex="0" aria-activedescendant="w-o0"><div role="option" id="w-o0">One</div><div role="option" id="w-o1">Two</div><div role="option" id="w-o2">Three</div></div><script>(function(){var w=document.getElementById("w");var o=[].slice.call(w.querySelectorAll("[role=option]"));var k=["ArrowDown","ArrowUp"];w.addEventListener("keydown",function(e){var i=o.indexOf(document.getElementById(w.getAttribute("aria-activedescendant")));if(e.key===k[0]){e.preventDefault();w.setAttribute("aria-activedescendant",o[Math.min(i+1,o.length-1)].id)}if(e.key===k[1]){e.preventDefault();w.setAttribute("aria-activedescendant",o[Math.max(i-1,0)].id)}})})();</script>
+</main>
+</body>
+</html>

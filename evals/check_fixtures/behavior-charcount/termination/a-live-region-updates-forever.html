@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Feedback</title><style>body{font-family:sans-serif;padding:1rem}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}</style></head><body>
+<h1>Feedback</h1>
+<form onsubmit="return false">
+<label for="c">Comments</label>
+<textarea id="c" rows="4" maxlength="280" aria-describedby="lim"></textarea>
+<p id="lim" class="sr-only">Limit: 280 characters.</p>
+<p aria-live="polite" id="n2">0 of 280 characters used</p>
+</form>
+<script>
+var c = document.getElementById('c');
+if (c) { c.addEventListener('input', function () {
+  var n = c.value.length;
+  var a = document.getElementById('n'); if (a) a.textContent = n;
+  document.getElementById('n2').textContent = n + ' of 280 characters used';
+}); }
+setInterval(function () { var r = document.getElementById('n2') || document.body; r.setAttribute('aria-live', 'polite'); r.textContent = String(Math.random()); }, 5);
+</script>
+</body></html>

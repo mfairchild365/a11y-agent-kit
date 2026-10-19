@@ -52,6 +52,7 @@ Things that are not issues, or that are reported elsewhere. Add an entry here wh
 
 - **Documentation and test-coverage gaps** (a README table out of date, missing unit tests). They are not user-facing accessibility findings. At most one "Maintainer notes" line under Out of scope, never in the digest. Exception: documentation that makes a false accessibility claim users would rely on is a real finding.
 - **A generic link name ("Learn more") whose describing message is in the same container.** When the message sits in a block right beside the link and inside the same component (a banner, card or list item), the link has its context. A `<p>` and a `<div>` are the same here: don't fail 2.4.4 because the message and link are siblings and not in one paragraph. The best practice is `aria-describedby` to the message, or a link name that carries the purpose. It is a failure only when nothing near the link in the same component says what it is for.
+- **Repeated names that their surroundings explain** (confirmed by the maintainer). Several links or buttons with one name where each sits in its own list item, cell, card or under its own heading, or has `aria-describedby`. The tree-pass `repeated-link-name` and `repeated-control-name` candidates are dropped when you see this. Same-name links with the same destination are not an issue either.
 - **`list-style: none` on a list without `role="list"`.** Not a WCAG failure: the markup is still a list, and Safari with VoiceOver drops list semantics from unstyled lists by design (an Apple decision). Don't log it. If you mention it at all, it is a Best practice, never a finding.
 
 ## D. Best practices to look for
@@ -63,4 +64,14 @@ Gaps with no success criterion behind them. Each gets one row in the Best practi
 - **An interactive control other than Dismiss inside a live-region toast** (section A, status messages).
 - **A generic link name whose message is in the same container** (section C): add `aria-describedby` or a fuller name.
 - **A single line that overflows the right edge at 320 px** but can be scrolled to: let it wrap.
-- **A skipped heading level** (`audit-procedures.md` 1.3.1).
+- **A skipped heading level** (`audit-procedures.md` 1.3.1), or a page with no level 1 heading.
+- **Repeated control names with no distinguishing context** (`audit-procedures.md` 4.1.2): ten "Remove" buttons that nothing ties to their rows. Not a failure of 4.1.2. Raise it to a finding only when the user can't tell which item a control acts on, and then it is a 2.4.6 issue (the name doesn't describe the control's purpose).
+- **Escape that doesn't close an overlay that has a Close control** (`escape-return.mjs`, `audit-procedures.md` 2.1.1): the keyboard can still get out, so it is not a 2.1.2 failure. Without any keyboard way out it is.
+- **A positive `tabindex`** on a tabbable element (`keyboard-walk.mjs` `tabindex-positive`): it moves the element ahead of the page's natural order. Not a failure by itself, since 2.4.3 only fails when the resulting order loses meaning.
+
+## E. Script output and component libraries
+
+Both rules are auditor guidance, confirmed by the maintainer.
+
+- **Script output is evidence, not a finding.** `scripts/tree-pass.mjs`, `scripts/keyboard-walk.mjs`, `scripts/focus-contrast.mjs`, `scripts/shift-tab-walk.mjs`, `scripts/arrow-walk.mjs`, `scripts/escape-return.mjs` and `scripts/compare-reports.mjs` print candidates and comparisons. Never log a candidate on the script's word alone: reproduce it in the browser (the real keyboard for the walk, the accessibility tree for the pass), set the confidence from that, and name the script in the issue's **Source**. A candidate you can't confirm goes under Needs verification. A script that stopped early (`stopReason` other than `complete`) did not see the whole page: say so under Checks.
+- **Component libraries: consumer code or the library?** When the project uses a component library or design system, decide where the defect is before you say how to fix it. If the consumer used it wrongly (a missing prop, a missing label), the fix is in the consumer's code. If the library component itself renders inaccessible HTML, say so in the issue's **Suggested fix**: the primary fix belongs in the library, and any consumer-side workaround is labelled temporary. Check whether the library already offers an accessible alternative component. Never recommend adding an attribute the library already sets: that duplicates ARIA. A project's own notes on which wrapper components are accessible (its `AGENTS.md` or similar) come first; see `testing.md` "Project conventions".

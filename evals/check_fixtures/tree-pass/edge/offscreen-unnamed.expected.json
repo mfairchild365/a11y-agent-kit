@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "interactive-no-name@#off"
+  ],
+  "stopReason": "complete"
+}

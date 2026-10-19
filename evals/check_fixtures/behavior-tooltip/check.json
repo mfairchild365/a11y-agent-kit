@@ -1,0 +1,10 @@
+{
+  "script": "evals/behavior/tooltip.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-ms",
+    "20000"
+  ],
+  "timeoutMs": 60000
+}

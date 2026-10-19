@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "composite-not-focusable@#w"
+  ],
+  "stopReason": "complete"
+}

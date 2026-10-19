@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "tooltip-not-associated"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

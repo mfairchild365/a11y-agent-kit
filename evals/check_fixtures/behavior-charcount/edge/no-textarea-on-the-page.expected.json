@@ -1,0 +1,10 @@
+{
+  "findings": [],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "count-announced-every-keystroke",
+      "count-not-in-description"
+    ]
+  }
+}

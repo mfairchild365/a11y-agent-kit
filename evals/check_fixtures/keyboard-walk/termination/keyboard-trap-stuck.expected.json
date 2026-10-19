@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "focus-stuck-candidate@#s"
+  ],
+  "stopReason": "stuck"
+}

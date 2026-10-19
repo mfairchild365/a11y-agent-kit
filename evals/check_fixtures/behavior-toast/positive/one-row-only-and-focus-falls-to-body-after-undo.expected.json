@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "focus-lost-after-undo"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

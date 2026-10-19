@@ -1,0 +1,6 @@
+{
+  "findings": [
+    "no-h1@document"
+  ],
+  "stopReason": "complete"
+}

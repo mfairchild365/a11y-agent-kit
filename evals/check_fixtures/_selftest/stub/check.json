@@ -1,0 +1,1 @@
+{ "script": "evals/check_fixtures/_selftest/stub_check.mjs", "args": ["{fixture}"], "timeoutMs": 5000 }

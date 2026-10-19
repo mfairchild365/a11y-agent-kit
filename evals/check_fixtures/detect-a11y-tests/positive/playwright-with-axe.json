@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"devDependencies\":{\"@playwright/test\":\"^1.0.0\",\"@axe-core/playwright\":\"^1.0.0\"}}","e2e/home.spec.ts":"import AxeBuilder from '@axe-core/playwright';\ntest('home', async ({ page }) => { const r = await new AxeBuilder({ page }).analyze(); });\n"}}

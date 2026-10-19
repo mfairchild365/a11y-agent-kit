@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "regression@4.1.2|submit button"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "undo-not-keyboard-operable"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "focus-lost-after-undo"
+    ]
+  }
+}

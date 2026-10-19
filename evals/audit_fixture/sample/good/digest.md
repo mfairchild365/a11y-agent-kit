@@ -5,6 +5,8 @@
 
 Critical 6 · Moderate 6 · Minor 1 · Best practice 6 · Needs verification 1
 Checks: axe, keyboard, hover, 320px reflow and contrast run. No screen reader.
+Triage: fix now #1 #3 #4 #5 #6 #8 #10 #11 #14 #17 #19 #20 · ticket #2 #7 #9 #12 #13 #15 #18 · investigate #16
+Guards: 11 automatable, 1 manual. Ask me to fix these and add the tests.
 
 #1 · Critical · 2.1.1 · Tooltip bubbles (3) — can't be reached by keyboard → make them focusable, named buttons
 #3 · Critical · 1.4.3 · "+5" button — hover and open state is 3.83:1 → use a darker fill or text

@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "toggletip-escape-fails"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

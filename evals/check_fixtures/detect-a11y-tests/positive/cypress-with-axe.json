@@ -1,0 +1,1 @@
+{"files":{"package.json":"{\"devDependencies\":{\"cypress\":\"^1.0.0\",\"cypress-axe\":\"^1.0.0\"}}","cypress/e2e/a.cy.js":"it('a11y', () => { cy.injectAxe(); cy.checkA11y(); });\n"}}

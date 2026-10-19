@@ -1,0 +1,7 @@
+{
+  "findings": [
+    "focus-no-name@#a",
+    "tabindex-positive@#a"
+  ],
+  "stopReason": "complete"
+}

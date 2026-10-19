@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "regression@2.1.1|menu",
+    "target-open@4.1.2|close button",
+    "worsened@1.4.1|notices"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "verdict": "regressed"
+  }
+}
