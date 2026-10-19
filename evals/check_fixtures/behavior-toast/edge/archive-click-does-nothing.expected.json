@@ -1,0 +1,16 @@
+{
+  "findings": [
+    "message-not-in-region",
+    "undo-missing"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "focus-lost-after-undo",
+      "undo-in-live-region",
+      "undo-not-keyboard-operable",
+      "undo-not-native-button",
+      "undo-vanishes-on-timer"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "toggletip-no-aria-expanded"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

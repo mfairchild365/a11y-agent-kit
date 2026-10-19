@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "announcer-missing",
+    "completion-not-announced",
+    "loading-not-announced"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

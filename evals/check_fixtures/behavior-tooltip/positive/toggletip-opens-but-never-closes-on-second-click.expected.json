@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "toggletip-does-not-close"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

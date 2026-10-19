@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Roster</title></head><body>
+<h1>Roster</h1>
+<div id="live" aria-live="off"></div>
+<ul id="list">
+    <li data-n="Alice"><span class="nm">Alice</span> <button type="button" class="arch">Archive</button></li>
+    <li data-n="Bob"><span class="nm">Bob</span> <button type="button" class="arch">Archive</button></li>
+</ul>
+
+
+<script>
+var live = document.getElementById('live');
+var undoLabel = "text";
+function mkArchive(n) { var b = document.createElement('button'); b.type = 'button'; b.className = 'arch'; if (undoLabel === 'aria') { b.setAttribute('aria-label', 'Archive ' + n); b.innerHTML = '&#10005;'; } else { b.textContent = 'Archive'; } b.addEventListener('click', function () { archive(b); }); return b; }
+function mkUndo(n, onUndo) {
+  var u;
+  u = document.createElement('button'); u.type = 'button'; if (undoLabel === 'aria') { u.setAttribute('aria-label', 'Undo archive of ' + n); u.innerHTML = '&#8630;'; } else { u.textContent = 'Undo'; }
+  u.className = 'undo';
+  u.addEventListener('click', function (e) { e.preventDefault(); onUndo(); }); u.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); onUndo(); } });
+  return u;
+}
+function say(msg, undoEl) {
+
+
+
+
+  live.textContent = msg; if (undoEl) live.appendChild(undoEl);
+}
+function archive(btn) {
+  var li = btn.closest('li'), n = li.getAttribute('data-n');
+  function restore() {
+    document.querySelectorAll('.undo').forEach(function (e) { if (li.contains(e) || (live && live.contains(e)) || document.getElementById('hist')) e.remove(); }); var h = document.getElementById('hist'); if (h) { var hi = h.querySelector('[data-for="' + n + '"]'); if (hi) hi.remove(); }
+    li.classList.remove('archived'); li.style.display = ''; var a = li.querySelector('.arch'); if (!a) { a = mkArchive(n); li.appendChild(a); }
+    a.focus();
+  }
+  btn.remove();
+  li.classList.add('archived');
+  var u = mkUndo(n, restore); li.appendChild(document.createTextNode(' (archived) ')); li.appendChild(u);
+  say('Archived ' + n + '.');
+}
+document.querySelectorAll('.arch').forEach(function (b) { b.addEventListener('click', function () { archive(b); }); });
+</script>
+</body></html>

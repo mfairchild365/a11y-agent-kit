@@ -29,14 +29,22 @@ const PROCESS_PREFIXES = [
 const AXE_PREFIX = "No WCAG (non-best-practice) axe violations";
 
 export const isProcess = (text) => PROCESS_PREFIXES.some((p) => text.startsWith(p));
-export const isProgrammatic = (text) => text.startsWith(AXE_PREFIX) || text.startsWith("[upstream] ");
+export const BEHAVIOR_PREFIX = "[behavior] ";
+export const isProgrammatic = (text) => text.startsWith(AXE_PREFIX) || text.startsWith("[upstream] ") || text.startsWith(BEHAVIOR_PREFIX);
+
+// The expectations that count as defect checks for one run: everything except the process assertions, and except an
+// LLM-graded expectation that a behavior check already decided (it has a "[behavior] <same text>" entry), so one thing is not scored twice.
+export function defectChecks(expectations) {
+  const decided = new Set(expectations.filter((e) => e.text.startsWith(BEHAVIOR_PREFIX)).map((e) => e.text.slice(BEHAVIOR_PREFIX.length)));
+  return expectations.filter((e) => !isProcess(e.text) && !decided.has(e.text));
+}
 
 export function summarize(ws) {
   const rows = [];
   for (const { dir, evalName, config } of runDirs(ws)) {
     const grading = path.join(dir, "grading.json");
     if (!fs.existsSync(grading)) continue;
-    const defects = readJson(grading).expectations.filter((e) => !isProcess(e.text));
+    const defects = defectChecks(readJson(grading).expectations);
     const prog = defects.filter((e) => isProgrammatic(e.text));
     rows.push({
       eval: evalName,

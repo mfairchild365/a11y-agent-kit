@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Integration settings</title><style>body{font-family:sans-serif;padding:1rem} .panel{border:1px solid #444;padding:.5rem;margin:.5rem 0;max-width:24rem} #tip{background:#222;color:#fff;padding:.25rem .5rem;margin-left:.5rem;border-radius:3px}</style></head><body>
+<h1>Integration settings</h1>
+<p>Used by the <abbr title="Application programming interface">API</abbr> client.</p>
+<p>The <abbr title="Single sign-on">SSO</abbr> settings are below.</p>
+<form onsubmit="return false">
+<label for="key">API key</label>
+<input id="key" type="text" autocomplete="off">
+<button type="button" class="tt" aria-expanded="false" aria-label="More info: API key">i</button><div class="panel" hidden><p>Your key is in the dashboard under Settings.</p><p><a href="#help">Where to find it</a></p></div><button type="button" id="copy" aria-label="Copy API key" aria-describedby="tip">&#10697;</button><span id="tip" role="tooltip" hidden>Copy API key</span>
+</form>
+<script>
+var btn = document.querySelector('.tt');
+if (btn) { var P = btn.nextElementSibling; var link = P.querySelector('a'); function set(o) { btn.setAttribute('aria-expanded', String(o)); P.hidden = !o; } btn.addEventListener('click', function () { set(btn.getAttribute('aria-expanded') !== 'true'); }); document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !P.hidden) { set(false); btn.focus(); } }); }
+var c = document.getElementById('copy'), tp = document.getElementById('tip'), timer = null;
+function show() { clearTimeout(timer); tp.hidden = false; }
+function hide() { clearTimeout(timer); tp.hidden = true; }
+c.addEventListener('mouseenter', show);
+c.addEventListener('mouseleave', function () { timer = setTimeout(hide, 300); }); tp.addEventListener('mouseenter', function () { clearTimeout(timer); }); tp.addEventListener('mouseleave', hide);
+c.addEventListener('focus', show); c.addEventListener('blur', hide);
+document.addEventListener('keydown', function (e) { if (e.key === 'Escape') hide(); });
+
+</script>
+</body></html>

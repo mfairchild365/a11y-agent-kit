@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "live-region-not-empty"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

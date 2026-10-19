@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "focus-moved-to-message"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

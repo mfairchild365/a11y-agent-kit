@@ -1,0 +1,12 @@
+{
+  "script": "evals/behavior/toast.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-ms",
+    "20000",
+    "--timer-wait",
+    "1500"
+  ],
+  "timeoutMs": 60000
+}

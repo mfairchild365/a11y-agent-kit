@@ -1,0 +1,12 @@
+{
+  "script": "evals/behavior/loading.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-ms",
+    "20000",
+    "--timer-wait",
+    "4000"
+  ],
+  "timeoutMs": 60000
+}

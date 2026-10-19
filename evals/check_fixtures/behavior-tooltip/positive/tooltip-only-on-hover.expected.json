@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "tooltip-not-on-focus"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "tooltip-not-dismissible"
+    ]
+  }
+}

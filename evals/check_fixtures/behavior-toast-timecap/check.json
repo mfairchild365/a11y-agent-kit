@@ -1,0 +1,17 @@
+{
+  "script": "evals/behavior/toast.mjs",
+  "args": [
+    "{fixture}",
+    "--json",
+    "--max-ms",
+    "2500",
+    "--timer-wait",
+    "1500"
+  ],
+  "timeoutMs": 60000,
+  "skipKinds": {
+    "positive": "this suite tests only the time cap; the failing pages are in behavior-toast",
+    "negative": "this suite tests only the time cap; the correct pages are in behavior-toast",
+    "edge": "this suite tests only the time cap; the edge pages are in behavior-toast"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "findings": [
+    "tooltip-not-on-hover"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "tooltip-not-hoverable"
+    ]
+  }
+}

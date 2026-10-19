@@ -1,0 +1,12 @@
+{
+  "findings": [
+    "toggletip-not-next-sibling"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "toggletip-does-not-close",
+      "toggletip-escape-fails"
+    ]
+  }
+}

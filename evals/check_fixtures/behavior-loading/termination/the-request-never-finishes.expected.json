@@ -1,0 +1,9 @@
+{
+  "findings": [
+    "completion-not-announced"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": []
+  }
+}

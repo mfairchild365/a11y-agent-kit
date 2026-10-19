@@ -1,0 +1,15 @@
+{
+  "findings": [
+    "title-attribute-tooltip",
+    "tooltip-not-associated",
+    "tooltip-not-on-focus",
+    "tooltip-not-on-hover"
+  ],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "tooltip-not-dismissible",
+      "tooltip-not-hoverable"
+    ]
+  }
+}

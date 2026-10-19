@@ -1,0 +1,19 @@
+{
+  "findings": [],
+  "stopReason": "complete",
+  "fields": {
+    "inconclusive": [
+      "title-attribute-tooltip",
+      "toggletip-described-by-panel",
+      "toggletip-does-not-close",
+      "toggletip-escape-fails",
+      "toggletip-no-aria-expanded",
+      "toggletip-not-next-sibling",
+      "tooltip-not-associated",
+      "tooltip-not-dismissible",
+      "tooltip-not-hoverable",
+      "tooltip-not-on-focus",
+      "tooltip-not-on-hover"
+    ]
+  }
+}

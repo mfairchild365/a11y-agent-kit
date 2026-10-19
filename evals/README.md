@@ -11,6 +11,7 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `files/account-settings.html` — seeded input page for eval 8 (deliberately contains a few
   out-of-scope accessibility issues, to check that the skill reports them rather than
   silently rewriting unrelated code).
+- `grade_behavior.mjs` + `behavior/` — the behavior grading layer: Playwright checks that drive each delivered page for the prompts that have one (toast, tooltip and toggletip, loading status, character count), merged into `grading.json` as `[behavior] ...` expectations (see [Grading has three layers](#grading-has-three-layers)).
 - `axe_check.mjs` + `grade_axe.mjs` — base grading layer: runs axe-core against each run's
   delivered HTML and merges one pass/fail expectation into its `grading.json`.
 - `fetch-upstream.sh` + `grade_upstream.mjs` — optional second grading layer (see below).
@@ -47,7 +48,7 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `test_check_generic.mjs` — tests `../scripts/check_generic.mjs`, the gate that keeps company,
   brand and product names out of published files.
 
-## Grading has two layers
+## Grading has three layers
 
 **Base layer** (`grade_axe.mjs`, always available): one generic axe-core check per run, plus
 whatever the skill-creator grader subagent judges from `evals.json`'s scenario- and
@@ -70,6 +71,20 @@ those checks are coupled to that repo's class-name conventions (`form-field`, `t
 `evals.json` keep those class-name requirements so the upstream checks can find the right
 elements; evals 8 and 9 are new scenarios with no upstream equivalent and are graded by the
 base layer only.
+
+**Behavior layer** (`grade_behavior.mjs`, always available, needs a browser): for the prompts that have a check in `behavior/` (`toast-archive-undo`, `tooltip-toggletip`, `loading-status`, `character-count`), it loads each run's delivered page, drives it the way a user would (click, type, press a key) and merges `[behavior] <expectation text>` entries into `grading.json`. The text is the same as the expectation in `evals.json`, so a decided behavior result **replaces** the LLM-graded expectation with that text in `strict_summary.mjs` instead of being counted twice. Rules that keep it honest:
+
+- A check decides only what it can read from behavior. A control it can't find (no Archive button, no textarea) leaves that result `inconclusive`, and the expectation stays with the LLM grader. It never guesses.
+- Controls are found by role and accessible name, not class names, because model-built pages differ.
+- A run with no HTML, or a check that crashes, times out or prints garbage, merges a **failing** expectation. It is never skipped, so strict scoring can't count a run it couldn't check as clean.
+- Every wait is bounded (`--max-ms`), and a page that blocks the main thread ends in `time-cap` or `load-timeout`.
+- Each check has a fixture suite in `check_fixtures/behavior-<name>/` (positive, negative, edge and termination pages; the answer key also lists which results the check must decline to decide), and each was sabotaged one decision at a time.
+
+```bash
+PW_CHANNEL=msedge NODE_PATH=evals/node_modules node evals/grade_behavior.mjs evals/workspace/<iteration>
+```
+
+The three prompts after the first ten were added for guidance that had no prompt: tooltip and toggletip, loading and the live announcer, and character count. Adding them made the strict denominators 13, so earlier results for 10 prompts are not comparable.
 
 ### Running the upstream layer
 

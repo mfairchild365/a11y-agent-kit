@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Results</title><style>body{font-family:sans-serif;padding:1rem} .spinner{display:inline-block;width:20px;height:20px;border:3px solid #999;border-top-color:#333;border-radius:50%;animation:s 1s linear infinite} svg.spinner{border:0;animation:s 1s linear infinite} @keyframes s{to{transform:rotate(360deg)}} [hidden]{display:none!important}</style></head><body>
+<h1>Results</h1>
+<div id="live" aria-live="polite"></div>
+<button type="button" id="go">Load results</button> <svg id="spin" class="spinner" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" hidden><circle cx="12" cy="12" r="9" fill="none" stroke="#333" stroke-width="3" stroke-dasharray="30 20"/></svg>
+<ul id="results"></ul>
+
+<script>
+var live = document.getElementById('live');
+function say(m) { live.textContent = m; }
+var btn = document.getElementById('go'), list = document.getElementById('results'), spin = document.getElementById('spin');
+btn.addEventListener('click', function () {
+  if (spin) spin.removeAttribute('hidden');
+  say('Loading results');
+  setTimeout(function () {
+    list.innerHTML = '<li>Result one</li><li>Result two</li><li>Result three</li>';
+    if (spin) spin.setAttribute('hidden', '');
+    say('3 results loaded');
+  }, 1500);
+});
+</script>
+</body></html>
