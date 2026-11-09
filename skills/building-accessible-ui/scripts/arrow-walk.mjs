@@ -25,16 +25,17 @@
 //   stopReason: complete, widget-cap (only the first --max-widgets were tried), time-cap or load-timeout.
 //   Same-origin frames and open shadow roots are covered. PW_CHANNEL=msedge (or chrome) uses an installed browser.
 
-import { launch, toUrl } from "./_browser.mjs";
+// --storage-state <file> runs the page signed in, with a Playwright storage state the project already has (see contextOptions in _browser.mjs).
+import { contextOptions, launch, toUrl } from "./_browser.mjs";
 import { judgeWidget, keysFor } from "./_arrow.mjs";
 import { makeSelector } from "./_tab-walk.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
-const VALUE_FLAGS = ["--max-widgets", "--max-ms", "--load-timeout", "--wait"];
+const VALUE_FLAGS = ["--max-widgets", "--max-ms", "--load-timeout", "--wait", "--storage-state"];
 const target = argv.find((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(argv[i - 1]));
 if (!target) {
-  console.error("Usage: node arrow-walk.mjs <url or html file> [--json] [--max-widgets 30] [--max-ms 20000] [--load-timeout 15000] [--wait 300]");
+  console.error("Usage: node arrow-walk.mjs <url or html file> [--json] [--max-widgets 30] [--max-ms 20000] [--load-timeout 15000] [--wait 300] [--storage-state state.json]");
   process.exit(2);
 }
 const maxWidgets = Number(opt("--max-widgets", 30));
@@ -111,12 +112,13 @@ function readState(makeSelector, index, mode) {
 
 const inPage = (fn, ...args) => `(${fn.toString()})(${makeSelector.toString()}${args.map((a) => ", " + JSON.stringify(a)).join("")})`;
 
+const contextOpts = contextOptions(argv);
 const browser = await launch();
 const findings = [];
 const widgets = [];
 let stopReason = "complete";
 try {
-  const context = await browser.newContext();
+  const context = await browser.newContext(contextOpts);
   const page = await context.newPage();
   try { await page.goto(toUrl(target), { waitUntil: "load", timeout: loadTimeout }); }
   catch (e) { if (/timeout/i.test(`${e.name} ${e.message}`)) stopReason = "load-timeout"; else throw e; }

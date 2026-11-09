@@ -14,6 +14,7 @@
 //        [--max-stops 200] [--max-ms 20000] [--load-timeout 15000] [--script-timeout 180000]
 //   --max-stops, --max-ms and --load-timeout are passed to the scripts that take them.
 //   --script-timeout is the most one script may run, in milliseconds, before it is stopped.
+//   --storage-state <file> runs every script signed in, with the project's own Playwright storage state (never read into the snapshot).
 //   --scripts-dir <dir> runs the scripts from another folder (for tests with stand-in scripts).
 // Exit: 0 when every script produced a result, 1 when any script failed or timed out (the snapshot is still
 // written), 2 on a usage error.
@@ -22,14 +23,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { contextOptions } from "./_browser.mjs";
 
 export const SCRIPTS = {
-  "tree-pass": ["--load-timeout"],
-  "keyboard-walk": ["--max-stops", "--max-ms", "--load-timeout"],
-  "shift-tab-walk": ["--max-stops", "--max-ms", "--load-timeout"],
-  "arrow-walk": ["--max-ms", "--load-timeout"],
-  "escape-return": ["--max-ms", "--load-timeout"],
-  "focus-contrast": ["--max-stops", "--max-ms", "--load-timeout"],
+  "tree-pass": ["--storage-state", "--load-timeout"],
+  "keyboard-walk": ["--storage-state", "--max-stops", "--max-ms", "--load-timeout"],
+  "shift-tab-walk": ["--storage-state", "--max-stops", "--max-ms", "--load-timeout"],
+  "arrow-walk": ["--storage-state", "--max-ms", "--load-timeout"],
+  "escape-return": ["--storage-state", "--max-ms", "--load-timeout"],
+  "focus-contrast": ["--storage-state", "--max-stops", "--max-ms", "--load-timeout"],
 };
 const MAX_OUTPUT = 20 * 1024 * 1024;
 
@@ -72,18 +74,20 @@ function runScript(file, args, timeoutMs) {
 
 async function main() {
   const argv = process.argv.slice(2);
-  const VALUE_FLAGS = ["--out", "--only", "--max-stops", "--max-ms", "--load-timeout", "--script-timeout", "--scripts-dir"];
+  const VALUE_FLAGS = ["--out", "--only", "--max-stops", "--max-ms", "--load-timeout", "--script-timeout", "--scripts-dir", "--storage-state"];
   const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
   const target = argv.find((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(argv[i - 1]));
   const usage = (msg) => {
     if (msg) console.error(msg);
-    console.error("Usage: node snapshot.mjs <url or html file> --out snapshot.json [--only a,b] [--max-stops 200] [--max-ms 20000] [--load-timeout 15000] [--script-timeout 180000]");
+    console.error("Usage: node snapshot.mjs <url or html file> --out snapshot.json [--only a,b] [--max-stops 200] [--max-ms 20000] [--load-timeout 15000] [--script-timeout 180000] [--storage-state state.json]");
     process.exit(2);
   };
   const out = opt("--out");
   if (!target || !out) usage();
   for (const f of VALUE_FLAGS) if (argv.includes(f) && (argv[argv.indexOf(f) + 1] === undefined || argv[argv.indexOf(f) + 1].startsWith("--"))) usage(`${f} needs a value`);
   const numeric = {};
+  // The project's own signed-in state, checked here (exit 2 if wrong) and passed to every script as an absolute path. Its contents are never read into the snapshot.
+  if (argv.includes("--storage-state")) numeric["--storage-state"] = contextOptions(argv).storageState;
   for (const f of ["--max-stops", "--max-ms", "--load-timeout"]) {
     if (!argv.includes(f)) continue;
     const n = Number(opt(f));
@@ -102,6 +106,8 @@ async function main() {
   }
 
   const snapshot = { version: 1, target, scripts: {} };
+  // Only that the scripts ran signed in (verify-fix --record uses it to keep account data out of version control), never the file or its path.
+  if (numeric["--storage-state"]) snapshot.signedIn = true;
   for (const name of names) {
     const file = path.join(dir, `${name}.mjs`);
     const args = [target, "--json"];

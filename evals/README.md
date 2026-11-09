@@ -39,9 +39,12 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `test_shift_tab.mjs`, `test_arrow.mjs`, `test_overlay.mjs` — unit tests for the pure logic behind `shift-tab-walk.mjs` (comparing two walks), `arrow-walk.mjs` (which keys a widget answers and how the trials are judged) and `escape-return.mjs` (how an Escape and the focus afterward are judged). No browser.
 - `test_contrast.mjs` — tests the pure contrast logic behind `focus-contrast.mjs` (ratios, alpha compositing, background stacks, every verdict). No browser.
 - `test_verify.mjs`, `test_verify_cli.mjs` — the pure rules behind `verify-fix.mjs` (verdict order, renames, Guard coverage, the plan's `a11y-plan` block, snapshot diffs) and the command with real files.
+- `test_record.mjs` — `verify-fix.mjs --record` and `_record.mjs`: the layout and numbering of a record, ids that can't become paths, runs that are never overwritten, a failed write that leaves nothing behind, nothing recorded for a run that verified nothing, and a real git repository to prove a signed-in record is ignored.
 - `test_detect.mjs` — the rules behind `detect-a11y-tests.mjs` and the folder walk, on real temporary projects.
+- `test_storage_state.mjs` — `--storage-state <file>` on the browser scripts and `snapshot.mjs`: a local server shows a page only to a request with a session cookie, each script is run with and without a Playwright storage state, the flag may come before the page, a missing or wrong file is a usage error, and nothing from inside the file is ever printed.
 - `test_snapshot.mjs` — `snapshot.mjs`: a script that crashes, hangs, prints garbage or prints too much, flags passed only to the scripts that take them (stand-in scripts, no browser), and the real scripts on a before and after page (`--browser-only`).
 - `check_plan_run.mjs` + `run_plan_eval.mjs` + `test_check_plan_run.mjs` — grades the plan an agent writes before fixing (see [Plan and fix-and-verify checks](#plan-and-fix-and-verify-checks)).
+- `check_swap_plan.mjs` + `test_check_swap_plan.mjs` + `swap_fixture/` — grades a plan for a fix that swaps an element type (`run_plan_eval.mjs --fixture swap`).
 - `check_fix_verify.mjs` + `test_check_fix_verify.mjs` + `guard_fixture/plans/` — grades what `verify-fix.mjs` would say about an agent's fix, for `run_guard_eval.mjs --approved-plan`.
 - `test_compare_reports.mjs` — tests the parts of `../skills/building-accessible-ui/scripts/compare-reports.mjs` the fixtures can't see.
 - `test_check_audit_report.mjs` — tests `check_audit_report.mjs` itself: the good sample passes, the broken one fails, and one-at-a-time breakages fail exactly the right check.
@@ -254,8 +257,11 @@ The skill says to plan before fixing and to check the fix with `verify-fix.mjs` 
 
 `run_guard_eval.mjs --approved-plan` is the second step: it puts a canned approved plan (`guard_fixture/plans/`) in the project, asks the agent to follow it, and adds `check_fix_verify.mjs` to the Guard checks. With no auditor in the loop, the "after" report is the "before" report with the cards of the defects the page now passes removed; the real verify rules then give the verdict (fixed) and the coverage (each Guard covered by the planned test file, or waived).
 
+**Element swaps.** `run_plan_eval.mjs --fixture swap` uses `swap_fixture/project`, where a dialog's close control is a `<div>` with a click handler, so the fix is a `<button>`. A style file and a script depend on it being a `div` (`div.close`, `.dialog div.close:hover`, `document.querySelector('div.close')`), and two structural rules (`:first-child`, `:last-child`) look at risk but are not affected. `check_swap_plan.mjs` grades the plan: nothing written; a valid `a11y-plan` block with a manual Guard and no test (the project has none); the plan makes the control a button; it has an element-change analysis that names the script and the style rules together with their selectors, plans to update them, lists at least two of the button's browser defaults, gives a risk level (any of low, medium or high; the level is a judgment, so it isn't graded for being "right"), tells the reader to look at the rendered result, and doesn't claim the structural rules break. `swap_fixture/sample_plans/` holds five real plans (Haiku and Sonnet) that the grader must keep passing. Plan mode and the normal variant only.
+
 ```bash
 node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --budget 1
+node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --fixture swap --budget 1
 node evals/run_plan_eval.mjs --model claude-sonnet-5-5 --runs 1 --mode planfile --variant optout --budget 1
 node evals/run_guard_eval.mjs --model claude-sonnet-5-5 --runs 1 --approved-plan --budget 2
 ```

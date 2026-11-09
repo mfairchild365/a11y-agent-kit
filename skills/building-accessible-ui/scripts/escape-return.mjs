@@ -23,17 +23,18 @@
 //   stopReason: complete, trigger-cap, time-cap or load-timeout.
 //   PW_CHANNEL=msedge (or chrome) uses an installed browser instead of Playwright's Chromium.
 
-import { launch, toUrl } from "./_browser.mjs";
+// --storage-state <file> runs the page signed in, with a Playwright storage state the project already has (see contextOptions in _browser.mjs).
+import { contextOptions, launch, toUrl } from "./_browser.mjs";
 import { judgeOverlay } from "./_overlay.mjs";
 import { makeSelector } from "./_tab-walk.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
 const explicit = argv.flatMap((a, i) => (a === "--trigger" ? [argv[i + 1]] : []));
-const VALUE_FLAGS = ["--trigger", "--max-triggers", "--max-ms", "--load-timeout", "--wait"];
+const VALUE_FLAGS = ["--trigger", "--max-triggers", "--max-ms", "--load-timeout", "--wait", "--storage-state"];
 const target = argv.find((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(argv[i - 1]));
 if (!target) {
-  console.error("Usage: node escape-return.mjs <url or html file> [--json] [--trigger <css>]... [--max-triggers 12] [--max-ms 40000] [--load-timeout 15000] [--wait 300]");
+  console.error("Usage: node escape-return.mjs <url or html file> [--json] [--trigger <css>]... [--max-triggers 12] [--max-ms 40000] [--load-timeout 15000] [--wait 300] [--storage-state state.json]");
   process.exit(2);
 }
 const maxTriggers = Number(opt("--max-triggers", 12));
@@ -177,12 +178,13 @@ async function afterEscape(makeSelector, overlays) {
 
 const inPage = (fn, ...args) => `(${fn.toString()})(${makeSelector.toString()}${args.map((a) => ", " + JSON.stringify(a)).join("")})`;
 
+const contextOpts = contextOptions(argv);
 const browser = await launch();
 const findings = [];
 const triggers = [];
 let stopReason = "complete";
 try {
-  const context = await browser.newContext();
+  const context = await browser.newContext(contextOpts);
   const page = await context.newPage();
   const open = async () => {
     try { await page.goto(toUrl(target), { waitUntil: "load", timeout: loadTimeout }); }

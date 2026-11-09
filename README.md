@@ -103,6 +103,15 @@ node $S/focus-contrast.mjs $URL --min 3    # contrast of each control's focus in
 node $S/live-region-probe.mjs $URL --click "#archive-1" --wait 2000   # what a status message really does
 ```
 
+**A page behind a sign-in.** If your project's tests already save a [Playwright storage state](https://playwright.dev/docs/auth) (the cookies and local storage from their sign-in step), pass that file and every script above loads the page signed in. `snapshot.mjs` takes it too.
+
+```bash
+node $S/keyboard-walk.mjs $URL --storage-state playwright/.auth/user.json
+node $S/snapshot.mjs $URL --out before.snapshot.json --storage-state playwright/.auth/user.json
+```
+
+Use your project's own file. Don't create one for this by putting credentials in a file, and keep it out of version control (it holds working session cookies). The scripts only hand it to the browser: it is never printed, copied or written to a report or snapshot. A report from a signed-in page can show account data, so treat it as sensitive. A storage state gets a script past the sign-in; a state that takes clicks (an open menu, a validation error) is better checked in your project's own tests, which can reach it and run axe there.
+
 Add `--json` for machine-readable output. Every script ends with a `stopReason`: `complete` means it covered the whole page, anything else (`stop-cap`, `time-cap`, `load-timeout`, ...) means it stopped early and says why. Don't treat a clean run as a pass.
 
 Work on the reports:
@@ -131,6 +140,13 @@ node $S/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md 
 ```
 
 `verify-fix.mjs` prints one verdict (`regressed`, `fixed`, `partial` or `unchanged`) and says whether each Guard became a test, was waived with a reason, or was left uncovered. `--format pr` prints a summary for a pull request. A new issue is a regression *candidate*: confirm it. Details and the plan template are in [`references/fixing.md`](skills/building-accessible-ui/references/fixing.md).
+
+**Keep a record (optional).** If your team wants fixes on file, add `--record <folder> --id <ticket>` to that command. It writes a small text record to `<folder>/<ticket>/run-001/` (the plan, both reports, `verify.json` and the PR summary), then `run-002` on the next run, and never overwrites one. Commit it: it is text, it is small, and the next audit uses the latest run's `after.report.md` as the previous report. Report HTML and screenshots are not kept. A run from a signed-in page (snapshots made with `--storage-state`, or `--signed-in`) gets a `.gitignore` and a warning, because its reports can show account data. Nothing is written unless you ask for it, or your project's notes say where records go.
+
+```bash
+node $S/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md \
+  --record docs/a11y-records --id IP-123
+```
 
 ## List this plugin in your marketplace
 

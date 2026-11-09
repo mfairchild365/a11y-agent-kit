@@ -59,7 +59,7 @@ It reports the accessibility tooling it finds (jest-axe, vitest-axe, `@axe-core/
 <out-of-scope issues you saw, listed for the user, not touched>
 
 ## Risks
-<what could break, and who would notice>
+<what could break, and who would notice. If the change swaps an element type (`div` to `button`, `div` to `header`, `span` to `a`), add an "Element change" line: the selectors that depend on the old element (`div.x`, `div > y`, `:first-of-type`, `querySelector('div.x')`, a test that finds it by tag), the browser defaults the new element brings (padding, border, margin, display), and a risk level: low (class selectors only), medium (some element selectors, manageable), high (the CSS or the script needs changing first)>
 
 ## Test coverage
 - **Strategy:** <existing a11y tests | the project's test framework | a rendered-browser check>, and why this one. Prefer a component-level test with axe over an end-to-end test when both exist; say so. Don't propose a test that would be slow or flaky.
@@ -87,6 +87,7 @@ Rules for the `a11y-plan` block (the verify script reads it, so keep it valid JS
 - Guards first (`testing.md`, "Turning a reported issue into a fix with a test"): write each automatable Guard as a test, watch it fail for the reason the report gives, fix, watch it pass.
 - Stay inside the approved plan. If you find you need another file or another issue, stop and amend the plan with the user.
 - Respect existing code (`SKILL.md`, "Respect existing code"). Never remove an existing affordance without an equal or better replacement.
+- **Before you change an element's type**, read the styles that apply to it and the scripts and tests that find it, and list what depends on the old element. A fix that makes the markup correct can still lose its styling, or break a script, without any error. If the risk is high, sort the CSS or script out first, as its own step in the plan. After the change, look at the rendered result: reading selectors catches the common cases, not all of them (a global stylesheet, an ancestor rule, a utility class, CSS-in-JS or a library's own styles can reach the element from elsewhere), and a low risk level means you found nothing, not that nothing will break.
 
 ## 5. Verify
 
@@ -122,6 +123,22 @@ node <skill folder>/scripts/verify-fix.mjs before-report.md after-report.md --pl
 A script that stopped early, crashed or timed out on either side is **not comparable** and is reported that way. It is never read as "all resolved".
 
 Put the `--format pr` output in the pull request description. Report what the verdict does not say: which Guards stayed manual and what to check by hand, which tests were added (paths), which waivers were given and why.
+
+## 6. Keep a record (optional)
+
+A record lets the next audit find this one, and lets a reviewer see the plan, the verdict and what was waived without reading the chat. **Only keep one when the user, or the project's own notes, say where records go.** Never create the folder on your own: a record nobody asked for is clutter that goes stale.
+
+```bash
+node <skill folder>/scripts/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md \
+  --record <records folder> --id <ticket id or a short name>
+```
+
+It writes `<records folder>/<id>/run-001/` (then `run-002`, and so on; a run is never overwritten) with `plan.md`, `before.report.md`, `after.report.md`, `verify.json` (versioned, with the date and the commit) and `summary.md` (the pull request summary). It does not keep the report's HTML or screenshots: they are large, change on every run, and are where account data is likeliest to end up. A run that verified nothing (invalid targets, reports it can't read) is not recorded.
+
+- **Commit it.** The files are text and small, and the point is that reviewers and the next audit can see them. The exception is below.
+- **A signed-in page** (the scripts were run with `--storage-state`, or you pass `--signed-in`): the reports can show account data. The run gets a `.gitignore` that ignores everything in it, a note at the top of its summary, and a warning when it is written. Review the reports before you remove the `.gitignore`.
+- **A re-check.** When a record exists for the scope, the previous report is the latest run's `after.report.md` (the highest `run-NNN`). Say which record you used. A record is a snapshot: if the page has changed since its date and commit, say so rather than treating it as current.
+- **Don't** put credentials, a storage state file, tokens or screenshots in it, and don't edit a run by hand.
 
 ## What this loop does not do
 
