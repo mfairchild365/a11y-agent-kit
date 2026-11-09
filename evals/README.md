@@ -40,6 +40,7 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `test_contrast.mjs` — tests the pure contrast logic behind `focus-contrast.mjs` (ratios, alpha compositing, background stacks, every verdict). No browser.
 - `test_verify.mjs`, `test_verify_cli.mjs` — the pure rules behind `verify-fix.mjs` (verdict order, renames, Guard coverage, the plan's `a11y-plan` block, snapshot diffs) and the command with real files.
 - `test_detect.mjs` — the rules behind `detect-a11y-tests.mjs` and the folder walk, on real temporary projects.
+- `test_storage_state.mjs` — `--storage-state <file>` on the browser scripts and `snapshot.mjs`: a local server shows a page only to a request with a session cookie, each script is run with and without a Playwright storage state, the flag may come before the page, a missing or wrong file is a usage error, and nothing from inside the file is ever printed.
 - `test_snapshot.mjs` — `snapshot.mjs`: a script that crashes, hangs, prints garbage or prints too much, flags passed only to the scripts that take them (stand-in scripts, no browser), and the real scripts on a before and after page (`--browser-only`).
 - `check_plan_run.mjs` + `run_plan_eval.mjs` + `test_check_plan_run.mjs` — grades the plan an agent writes before fixing (see [Plan and fix-and-verify checks](#plan-and-fix-and-verify-checks)).
 - `check_swap_plan.mjs` + `test_check_swap_plan.mjs` + `swap_fixture/` — grades a plan for a fix that swaps an element type (`run_plan_eval.mjs --fixture swap`).

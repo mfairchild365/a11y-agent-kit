@@ -108,7 +108,7 @@ How to read the output:
 
 A review of a page behind a sign-in, a setup step or a particular state needs that state first. In order:
 
-1. **Use the project's own way in.** Its test fixtures, saved sign-in state, seed or mock server, Storybook story, or the Playwright setup its tests already use. Don't build a second one.
+1. **Use the project's own way in.** Its test fixtures, saved sign-in state, seed or mock server, Storybook story, or the Playwright setup its tests already use. Don't build a second one. If the project saves a Playwright storage state (cookies and local storage, usually written by its own sign-in step), pass that file to the scripts with `--storage-state <file>` and they load the page signed in. Use the project's file as it is: don't make one by putting credentials in a file for this, never print or copy it into a report, and keep it out of version control. A report from a signed-in page can show account data, so treat it as sensitive. A storage state gets you past sign-in, not into a state that takes clicks, which the next step covers.
 2. **Drive the page to the state** (open the dialog, trigger the error, expand the menu) with the real keyboard and clicks, then run the scripts and axe there. A script that loads a URL sees only what loads by itself, so for a state you reach by interaction, check it by hand or script the interaction first.
 3. **If there is no way in, ask the user** how to reach it. Never guess a password, never write credentials, tokens or a saved sign-in file into a report, a scratch file you leave behind, or the project.
 4. **Frames.** The scripts cover same-origin frames and open shadow roots. Content in a cross-origin frame is opened at its own URL as a separate pass, and the report says so.

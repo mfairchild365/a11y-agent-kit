@@ -45,6 +45,7 @@ const SUITES = [
   { name: "detect-a11y-tests fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "detect-a11y-tests"] },
   { name: "snapshot tests (real scripts, before and after page)", args: [path.join(here, "test_snapshot.mjs"), "--browser-only"], browser: true },
   { name: "behavior grading layer tests (real pages)", args: [path.join(here, "test_grade_behavior.mjs")], browser: true },
+  { name: "storage-state option (a page behind a sign-in)", args: [path.join(here, "test_storage_state.mjs")], browser: true },
   { name: "behavior-toast fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "behavior-toast"], browser: true },
   { name: "behavior-toast time-cap fixture", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "behavior-toast-timecap"], browser: true },
   { name: "behavior-tooltip fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "behavior-tooltip"], browser: true },

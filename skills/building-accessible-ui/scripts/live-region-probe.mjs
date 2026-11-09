@@ -12,7 +12,7 @@
 //   transient          the text was removed or replaced before the end of the wait
 //   present            an existing, exposed live region got the text and it stayed
 //
-// Usage: node live-region-probe.mjs <url or html file> [--click <selector> | --press <key>]... [--wait 1500] [--ax] [--json]
+// Usage: node live-region-probe.mjs <url or html file> [--click <selector> | --press <key>]... [--wait 1500] [--ax] [--json] [--storage-state state.json]
 //   Steps run in order through Playwright's real click and keyboard, so focus behaves as it does for a user.
 //   Run it on a page it loads itself: the observer has to be installed before the page's scripts.
 //   PW_CHANNEL=msedge (or chrome) uses an installed browser instead of Playwright's Chromium.
@@ -22,6 +22,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
+import { contextOptions } from "./_browser.mjs";
 
 const argv = process.argv.slice(2);
 const steps = [];
@@ -33,10 +34,11 @@ for (let i = 0; i < argv.length; i++) {
   else if (a === "--wait") wait = +argv[++i];
   else if (a === "--json") json = true;
   else if (a === "--ax") ax = true;
+  else if (a === "--storage-state") i++;   // read by contextOptions (see _browser.mjs): the project's own signed-in state
   else if (!a.startsWith("--") && !target) target = a;
 }
 if (!target || steps.some((s) => !(s.click || s.press))) {
-  console.error("Usage: node live-region-probe.mjs <url or html file> [--click <selector> | --press <key>]... [--wait 1500] [--ax] [--json]");
+  console.error("Usage: node live-region-probe.mjs <url or html file> [--click <selector> | --press <key>]... [--wait 1500] [--ax] [--json] [--storage-state state.json]");
   process.exit(2);
 }
 const url = /^[a-z]+:\/\//i.test(target) ? target : pathToFileURL(path.resolve(target)).href;
@@ -122,11 +124,13 @@ function installObserver() {
   lp.baseline = () => { lp.events.length = 0; for (const root of [document, ...lp.roots]) root.querySelectorAll("*").forEach((x) => { lp.seen.add(x); lp.born.set(x, "before"); }); };
 }
 
+const contextOpts = contextOptions(argv);
 const { chromium } = loadPlaywright();
 const browser = await chromium.launch(process.env.PW_CHANNEL ? { channel: process.env.PW_CHANNEL } : {});
 let result;
 try {
-  const page = await browser.newPage();
+  const context = await browser.newContext(contextOpts);
+  const page = await context.newPage();
   await page.addInitScript(installObserver);
   await page.goto(url, { waitUntil: "load" });
   for (const f of page.frames()) await f.evaluate(() => window.__lp && window.__lp.baseline()).catch(() => {});

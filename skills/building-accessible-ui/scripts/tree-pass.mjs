@@ -24,13 +24,14 @@
 //   Same-origin frames and open shadow roots are covered. Out-of-process frames are listed as skipped.
 //   PW_CHANNEL=msedge (or chrome) uses an installed browser instead of Playwright's Chromium.
 
-import { launch, toUrl } from "./_browser.mjs";
+// --storage-state <file> runs the page signed in, with a Playwright storage state the project already has (see contextOptions in _browser.mjs).
+import { contextOptions, launch, toUrl } from "./_browser.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
-const target = argv.find((a, i) => !a.startsWith("--") && !["--max-nodes", "--load-timeout", "--wait"].includes(argv[i - 1]));
+const target = argv.find((a, i) => !a.startsWith("--") && !["--max-nodes", "--load-timeout", "--wait", "--storage-state"].includes(argv[i - 1]));
 if (!target) {
-  console.error("Usage: node tree-pass.mjs <url or html file> [--json] [--max-nodes 5000] [--load-timeout 15000] [--wait 300]");
+  console.error("Usage: node tree-pass.mjs <url or html file> [--json] [--max-nodes 5000] [--load-timeout 15000] [--wait 300] [--storage-state state.json]");
   process.exit(2);
 }
 const maxNodes = Number(opt("--max-nodes", 5000));
@@ -111,6 +112,7 @@ function ariaHiddenFocusableInFrame() {
   return [...new Set(out)];
 }
 
+const contextOpts = contextOptions(argv);
 const browser = await launch();
 const findings = [];
 const add = (check, criterion, cls, key, extra) => findings.push({ id: `${check}@${key}`, check, criterion, class: cls, ...extra });
@@ -118,7 +120,7 @@ let stopReason = "complete";
 const skippedFrames = [];
 let axTotal = 0;
 try {
-  const context = await browser.newContext();
+  const context = await browser.newContext(contextOpts);
   const page = await context.newPage();
   try { await page.goto(toUrl(target), { waitUntil: "load", timeout: loadTimeout }); }
   catch (e) { if (/timeout/i.test(`${e.name} ${e.message}`)) stopReason = "load-timeout"; else throw e; }

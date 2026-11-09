@@ -20,16 +20,17 @@
 //   time-cap), or load-timeout. --max-ms applies to each walk.
 //   Same-origin frames and open shadow roots are walked. PW_CHANNEL=msedge (or chrome) uses an installed browser.
 
-import { launch, toUrl } from "./_browser.mjs";
+// --storage-state <file> runs the page signed in, with a Playwright storage state the project already has (see contextOptions in _browser.mjs).
+import { contextOptions, launch, toUrl } from "./_browser.mjs";
 import { compareWalks } from "./_shift-tab.mjs";
 import { installTabCapture, walkTab } from "./_tab-walk.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
-const VALUE_FLAGS = ["--max-stops", "--max-ms", "--load-timeout", "--wait"];
+const VALUE_FLAGS = ["--max-stops", "--max-ms", "--load-timeout", "--wait", "--storage-state"];
 const target = argv.find((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(argv[i - 1]));
 if (!target) {
-  console.error("Usage: node shift-tab-walk.mjs <url or html file> [--json] [--max-stops 200] [--max-ms 20000] [--load-timeout 15000] [--wait 300]");
+  console.error("Usage: node shift-tab-walk.mjs <url or html file> [--json] [--max-stops 200] [--max-ms 20000] [--load-timeout 15000] [--wait 300] [--storage-state state.json]");
   process.exit(2);
 }
 const maxStops = Number(opt("--max-stops", 200));
@@ -37,11 +38,12 @@ const maxMs = Number(opt("--max-ms", 20000));
 const loadTimeout = Number(opt("--load-timeout", 15000));
 const settleMs = Number(opt("--wait", 300));
 
+const contextOpts = contextOptions(argv);
 const browser = await launch();
 let loadTimedOut = false;
 let forward, backward;
 try {
-  const context = await browser.newContext();
+  const context = await browser.newContext(contextOpts);
   const walkOnce = async (isBackward) => {
     const page = await context.newPage();
     await installTabCapture(page);
