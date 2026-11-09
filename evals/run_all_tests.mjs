@@ -34,6 +34,7 @@ const SUITES = [
   { name: "audit report checker tests", args: [path.join(here, "test_check_audit_report.mjs")] },
   { name: "compare-reports fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "compare-reports"] },
   { name: "verify logic tests", args: [path.join(here, "test_verify.mjs")] },
+  { name: "record tests (verify-fix --record)", args: [path.join(here, "test_record.mjs")] },
   { name: "verify-fix command tests", args: [path.join(here, "test_verify_cli.mjs")] },
   { name: "test-setup detector tests", args: [path.join(here, "test_detect.mjs")] },
   { name: "plan grader and plan-eval runner tests", args: [path.join(here, "test_check_plan_run.mjs")] },

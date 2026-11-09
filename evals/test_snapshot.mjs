@@ -101,6 +101,9 @@ if (!browserOnly) {
   r = cli("--storage-state", ssFile, "http://x/", "--out", out, "--scripts-dir", fakes);
   check("--storage-state goes to every script, as an absolute path", r.status === 0 && Object.keys(all).every((n) => ids(n).includes("--storage-state") && ids(n).includes(path.resolve(ssFile))));
   check("--storage-state may come before the page: its value is not taken for the page", readJson(out).target === "http://x/" && Object.keys(all).every((n) => ids(n).includes("http://x/")));
+  check("a snapshot made with a storage state says it ran signed in, with no other new field", Object.keys(readJson(out)).sort().join() === "scripts,signedIn,target,version" && readJson(out).signedIn === true);
+  cli("http://x/", "--out", out, "--scripts-dir", fakes);
+  check("a snapshot made without one has no signedIn field", !("signedIn" in readJson(out)));
   r = cli("http://x/", "--out", out, "--scripts-dir", fakes, "--storage-state", path.join(tmp, "missing.json"));
   check("a missing --storage-state file is a usage error before any script runs", r.status === 2 && /cannot read/.test(r.stderr));
 

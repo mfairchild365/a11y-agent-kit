@@ -141,6 +141,13 @@ node $S/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md 
 
 `verify-fix.mjs` prints one verdict (`regressed`, `fixed`, `partial` or `unchanged`) and says whether each Guard became a test, was waived with a reason, or was left uncovered. `--format pr` prints a summary for a pull request. A new issue is a regression *candidate*: confirm it. Details and the plan template are in [`references/fixing.md`](skills/building-accessible-ui/references/fixing.md).
 
+**Keep a record (optional).** If your team wants fixes on file, add `--record <folder> --id <ticket>` to that command. It writes a small text record to `<folder>/<ticket>/run-001/` (the plan, both reports, `verify.json` and the PR summary), then `run-002` on the next run, and never overwrites one. Commit it: it is text, it is small, and the next audit uses the latest run's `after.report.md` as the previous report. Report HTML and screenshots are not kept. A run from a signed-in page (snapshots made with `--storage-state`, or `--signed-in`) gets a `.gitignore` and a warning, because its reports can show account data. Nothing is written unless you ask for it, or your project's notes say where records go.
+
+```bash
+node $S/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md \
+  --record docs/a11y-records --id IP-123
+```
+
 ## List this plugin in your marketplace
 
 The plugin root is the repo root, and the plugin's own manifests are the source of truth. A marketplace entry only needs to point at a tagged release:

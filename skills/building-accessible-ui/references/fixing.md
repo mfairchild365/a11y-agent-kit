@@ -124,6 +124,22 @@ A script that stopped early, crashed or timed out on either side is **not compar
 
 Put the `--format pr` output in the pull request description. Report what the verdict does not say: which Guards stayed manual and what to check by hand, which tests were added (paths), which waivers were given and why.
 
+## 6. Keep a record (optional)
+
+A record lets the next audit find this one, and lets a reviewer see the plan, the verdict and what was waived without reading the chat. **Only keep one when the user, or the project's own notes, say where records go.** Never create the folder on your own: a record nobody asked for is clutter that goes stale.
+
+```bash
+node <skill folder>/scripts/verify-fix.mjs before-report.md after-report.md --plan a11y-fix-plan.md \
+  --record <records folder> --id <ticket id or a short name>
+```
+
+It writes `<records folder>/<id>/run-001/` (then `run-002`, and so on; a run is never overwritten) with `plan.md`, `before.report.md`, `after.report.md`, `verify.json` (versioned, with the date and the commit) and `summary.md` (the pull request summary). It does not keep the report's HTML or screenshots: they are large, change on every run, and are where account data is likeliest to end up. A run that verified nothing (invalid targets, reports it can't read) is not recorded.
+
+- **Commit it.** The files are text and small, and the point is that reviewers and the next audit can see them. The exception is below.
+- **A signed-in page** (the scripts were run with `--storage-state`, or you pass `--signed-in`): the reports can show account data. The run gets a `.gitignore` that ignores everything in it, a note at the top of its summary, and a warning when it is written. Review the reports before you remove the `.gitignore`.
+- **A re-check.** When a record exists for the scope, the previous report is the latest run's `after.report.md` (the highest `run-NNN`). Say which record you used. A record is a snapshot: if the page has changed since its date and commit, say so rather than treating it as current.
+- **Don't** put credentials, a storage state file, tokens or screenshots in it, and don't edit a run by hand.
+
 ## What this loop does not do
 
 It does not block a merge, add CI jobs, or keep a record across tickets. It does not prove the page is accessible: it shows that the issues the plan named are gone and that the scan found nothing new. A clean verdict is not a pass.

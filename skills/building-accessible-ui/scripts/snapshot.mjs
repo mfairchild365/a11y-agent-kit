@@ -106,6 +106,8 @@ async function main() {
   }
 
   const snapshot = { version: 1, target, scripts: {} };
+  // Only that the scripts ran signed in (verify-fix --record uses it to keep account data out of version control), never the file or its path.
+  if (numeric["--storage-state"]) snapshot.signedIn = true;
   for (const name of names) {
     const file = path.join(dir, `${name}.mjs`);
     const args = [target, "--json"];
