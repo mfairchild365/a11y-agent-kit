@@ -37,6 +37,7 @@ const SUITES = [
   { name: "verify-fix command tests", args: [path.join(here, "test_verify_cli.mjs")] },
   { name: "test-setup detector tests", args: [path.join(here, "test_detect.mjs")] },
   { name: "plan grader and plan-eval runner tests", args: [path.join(here, "test_check_plan_run.mjs")] },
+  { name: "element-swap plan grader and runner tests", args: [path.join(here, "test_check_swap_plan.mjs")] },
   { name: "fix-and-verify grader tests", args: [path.join(here, "test_check_fix_verify.mjs")] },
   { name: "behavior grading layer tests (no browser)", args: [path.join(here, "test_grade_behavior.mjs"), "--no-browser"] },
   { name: "snapshot tests (stand-in scripts)", args: [path.join(here, "test_snapshot.mjs"), "--no-browser"] },

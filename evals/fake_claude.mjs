@@ -8,6 +8,8 @@
 //   plan, plan-optout, plan-bad, plan-edit, planfile   stand in for an agent asked to fix evals/guard_fixture/project's report
 //           (run_plan_eval.mjs): a good plan through ExitPlanMode, the same for an opted-out project, a plan with no a11y-plan
 //           block, a plan after editing the page, and a plan written to a11y-fix-plan.md
+//   plan-swap, plan-swap-thin, plan-swap-edit   the same for evals/swap_fixture/project (run_plan_eval.mjs --fixture swap): a good plan
+//           with the element-change analysis, a plan that skips it, and a plan after editing the page
 // FAKE_CLAUDE_ARGS_FILE=<path> writes the arguments it was called with, as JSON, to that file.
 // Result events report total_cost_usd 0.0123.
 import fs from "node:fs";
@@ -53,7 +55,33 @@ function planRun({ optout, block, edit, file }) {
   out({ type: "result", result: file ? "I wrote the plan to a11y-fix-plan.md. Please approve it and I will go ahead." : "Plan submitted.", duration_ms: 10, total_cost_usd: 0.0123, modelUsage: { "fake-model": {} }, usage: { input_tokens: 1, output_tokens: 1 } });
 }
 
-if (mode === "autherror") out({ type: "result", subtype: "success", is_error: true, result: "Failed to authenticate: OAuth session expired", total_cost_usd: 0, terminal_reason: "api_error" });
+// The plan-swap* modes stand in for an agent planning the swap fixture's fix (a div that has to become a button).
+function swapPlanText({ thin = false } = {}) {
+  const F = "```";
+  const json = { targets: ["2.1.1|Close control"], renames: [], guards: [{ target: "2.1.1|Close control", kind: "manual", test: null, waiver: "the project has no automated tests" }] };
+  const analysis = thin
+    ? "The close control becomes a button. Check it looks right afterwards."
+    : [
+      "Element change: div to button, risk level medium.",
+      "- Selectors that depend on the old element: `div.close` and `.dialog div.close:hover` in `styles.css` (lines 4 and 5), and `document.querySelector('div.close')` in `app.js` (line 2). All three are updated in this change to use `.close`.",
+      "- `.dialog > div:first-child` and `.dialog > div:last-child` are unaffected: the close control sits between the title and the body.",
+      "- Browser defaults the button brings: padding, border, font and background. The styles reset them.",
+      "- After the change, look at the rendered result in a browser: the round shape and position should be unchanged.",
+    ].join("\n");
+  return ["# Fix plan: close control", "## Targets", F + "a11y-plan\n" + JSON.stringify(json, null, 2) + "\n" + F, "## Files and changes", "`index.html`: make the close control a `button` with an accessible name.", "## What will not change", "Nothing else.", "## Risks", analysis, "## Test coverage", "The project has no automated tests, so none are added; the Guard is checked by hand."].join("\n\n");
+}
+function swapRun({ thin, edit }) {
+  out({ type: "system", subtype: "init", skills: [], plugins: [] });
+  tool("Read", { file_path: "report.md" });
+  if (edit) { fs.writeFileSync("index.html", fs.readFileSync("index.html", "utf8") + "\n"); tool("Edit", { file_path: "index.html" }); }
+  tool("ExitPlanMode", { plan: swapPlanText({ thin }) });
+  out({ type: "result", result: "Plan submitted.", duration_ms: 10, total_cost_usd: 0.0123, modelUsage: { "fake-model": {} }, usage: { input_tokens: 1, output_tokens: 1 } });
+}
+
+if (mode === "plan-swap") swapRun({});
+else if (mode === "plan-swap-thin") swapRun({ thin: true });
+else if (mode === "plan-swap-edit") swapRun({ edit: true });
+else if (mode === "autherror") out({ type: "result", subtype: "success", is_error: true, result: "Failed to authenticate: OAuth session expired", total_cost_usd: 0, terminal_reason: "api_error" });
 else if (mode === "plan") planRun({});
 else if (mode === "plan-optout") planRun({ optout: true });
 else if (mode === "plan-bad") planRun({ block: false });

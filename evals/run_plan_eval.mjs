@@ -13,8 +13,11 @@
 //   --variant normal|optout   as in run_guard_eval.mjs
 //
 // Usage (from the repo root):
-//   node evals/run_plan_eval.mjs --model claude-sonnet-5-5 [--mode planmode|planfile] [--variant normal|optout]
+//   node evals/run_plan_eval.mjs --model claude-sonnet-5-5 [--fixture guard|swap] [--mode planmode|planfile] [--variant normal|optout]
 //        [--runs 1] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD] [--use-skill]
+//   --fixture guard (default) is the Guard fixture, graded by check_plan_run.mjs. --fixture swap is swap_fixture, whose close control is a
+//   div that has to become a button; check_swap_plan.mjs grades whether the plan lists what depends on the old element, the button's
+//   browser defaults and a risk level (plan mode and the normal variant only).
 //   --budget USD caps what each run may spend (claude's --max-budget-usd); the cost of each run is printed.
 //
 // Runs are billed to your account: start with --runs 1. No browser is needed. CLAUDE_BIN overrides the `claude`
@@ -26,6 +29,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { changedFiles, gradePlan, planOf, toolUsesOf } from "./check_plan_run.mjs";
+import { gradeSwapPlan } from "./check_swap_plan.mjs";
 import { budgetArgs, claudeCommand, costText, parseBudget } from "./lib/claude.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -38,8 +42,10 @@ const opt = (name, dflt) => {
 const model = opt("model");
 const variant = opt("variant", "normal");
 const mode = opt("mode", "planmode");
-if (!model || !["normal", "optout"].includes(variant) || !["planmode", "planfile"].includes(mode)) {
-  console.error("Usage: node evals/run_plan_eval.mjs --model <model-id> [--mode planmode|planfile] [--variant normal|optout] [--runs N] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD]");
+const fixture = opt("fixture", "guard");
+const swap = fixture === "swap";
+if (!model || !["normal", "optout"].includes(variant) || !["planmode", "planfile"].includes(mode) || !["guard", "swap"].includes(fixture) || (swap && (variant !== "normal" || mode !== "planmode"))) {
+  console.error("Usage: node evals/run_plan_eval.mjs --model <model-id> [--fixture guard|swap] [--mode planmode|planfile] [--variant normal|optout] [--runs N] [--scratch DIR] [--out DIR] [--timeout SECONDS] [--budget USD] [--use-skill]\n  --fixture swap needs --mode planmode and --variant normal");
   process.exit(2);
 }
 const runs = +opt("runs", "1");
@@ -49,7 +55,7 @@ try { if (opt("budget")) budget = parseBudget(opt("budget")); } catch (e) { cons
 const scratch = path.resolve(opt("scratch", path.join(os.tmpdir(), "plan-eval")));
 const out = path.resolve(opt("out", path.join(here, "workspace", "plan")));
 const timeoutMs = +opt("timeout", "600") * 1000;
-const project = path.join(here, "guard_fixture", "project");
+const project = path.join(here, swap ? "swap_fixture" : "guard_fixture", "project");
 
 const prompt = [
   useSkill ? "Use the building-accessible-ui skill. Fix the accessibility issues in report.md." : "Fix the accessibility issues in report.md.",
@@ -60,12 +66,12 @@ fs.mkdirSync(out, { recursive: true });
 const perCheck = new Map();
 let completed = 0;
 for (let n = 1; n <= runs; n++) {
-  const name = `${mode}-${variant}-run-${n}`;
+  const name = `${swap ? "swap-" : ""}${mode}-${variant}-run-${n}`;
   const cwd = path.join(scratch, name);
   fs.rmSync(cwd, { recursive: true, force: true });
   fs.cpSync(project, cwd, { recursive: true });
   if (variant === "optout") fs.copyFileSync(path.join(cwd, "AGENTS.optout.md"), path.join(cwd, "AGENTS.md"));
-  fs.rmSync(path.join(cwd, "AGENTS.optout.md"));
+  fs.rmSync(path.join(cwd, "AGENTS.optout.md"), { force: true });
   const runOut = path.join(out, name);
   fs.rmSync(runOut, { recursive: true, force: true });
   fs.mkdirSync(runOut, { recursive: true });
@@ -95,7 +101,8 @@ for (let n = 1; n <= runs; n++) {
   const toolUses = toolUsesOf(r.stdout);
   const planText = planOf({ toolUses, agentDir: cwd, finalText });
   fs.writeFileSync(path.join(runOut, "plan.md"), planText || "(no plan)");
-  const result = gradePlan({ planText, variant, mode, changed: changedFiles(cwd, baseline), toolUses, message: finalText });
+  const changed = changedFiles(cwd, baseline);
+  const result = swap ? gradeSwapPlan({ planText, changed, toolUses }) : gradePlan({ planText, variant, mode, changed, toolUses, message: finalText });
   completed += 1;
   fs.writeFileSync(path.join(runOut, "check.json"), JSON.stringify(result, null, 2));
   for (const c of result.results) {

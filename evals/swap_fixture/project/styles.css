@@ -1,0 +1,6 @@
+body { font-family: sans-serif; margin: 2rem; }
+.dialog { position: relative; border: 1px solid #444; border-radius: 6px; padding: 1rem; max-width: 24rem; }
+.dialog > div:first-child { font-weight: bold; margin-bottom: .5rem; }
+div.close { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; background: #eee; cursor: pointer; }
+.dialog div.close:hover { background: #ddd; }
+.dialog > div:last-child { color: #333; }
