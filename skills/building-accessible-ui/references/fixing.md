@@ -59,7 +59,7 @@ It reports the accessibility tooling it finds (jest-axe, vitest-axe, `@axe-core/
 <out-of-scope issues you saw, listed for the user, not touched>
 
 ## Risks
-<what could break, and who would notice>
+<what could break, and who would notice. If the change swaps an element type (`div` to `button`, `div` to `header`, `span` to `a`), add an "Element change" line: the selectors that depend on the old element (`div.x`, `div > y`, `:first-of-type`, `querySelector('div.x')`, a test that finds it by tag), the browser defaults the new element brings (padding, border, margin, display), and a risk level: low (class selectors only), medium (some element selectors, manageable), high (the CSS or the script needs changing first)>
 
 ## Test coverage
 - **Strategy:** <existing a11y tests | the project's test framework | a rendered-browser check>, and why this one. Prefer a component-level test with axe over an end-to-end test when both exist; say so. Don't propose a test that would be slow or flaky.
@@ -87,6 +87,7 @@ Rules for the `a11y-plan` block (the verify script reads it, so keep it valid JS
 - Guards first (`testing.md`, "Turning a reported issue into a fix with a test"): write each automatable Guard as a test, watch it fail for the reason the report gives, fix, watch it pass.
 - Stay inside the approved plan. If you find you need another file or another issue, stop and amend the plan with the user.
 - Respect existing code (`SKILL.md`, "Respect existing code"). Never remove an existing affordance without an equal or better replacement.
+- **Before you change an element's type**, read the styles that apply to it and the scripts and tests that find it, and list what depends on the old element. A fix that makes the markup correct can still lose its styling, or break a script, without any error. If the risk is high, sort the CSS or script out first, as its own step in the plan. After the change, look at the rendered result: reading selectors catches the common cases, not all of them (a global stylesheet, an ancestor rule, a utility class, CSS-in-JS or a library's own styles can reach the element from elsewhere), and a low risk level means you found nothing, not that nothing will break.
 
 ## 5. Verify
 
