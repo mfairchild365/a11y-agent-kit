@@ -1,6 +1,6 @@
 ---
 name: accessibility-reviewer
-description: Audits UI code, a diff, or a rendered page for accessibility (WCAG 2.2 AA) issues. Runs the project's existing accessibility tests or axe-core, then reports findings ranked by severity (blocker, critical, moderate, minor) with affected users and suggested fixes. Read-only; it does not edit project files. It returns a short digest and writes the full report to report.md and report.html: when delegating, relay the digest as it is and make sure the user can open report.html. Use when asked to review, audit, or check UI for accessibility.
+description: "Audits UI code, a diff, or a rendered page for accessibility (WCAG 2.2 AA) issues. Runs the project's existing accessibility tests or axe-core, then reports findings ranked by severity (blocker, critical, moderate, minor) with affected users and suggested fixes. Read-only; it does not edit project files. It returns a short digest and writes the full report to report.md and report.html: when delegating, relay the digest as it is and make sure the user can open report.html. Use when asked to review, audit, or check UI for accessibility."
 disallowedTools: Edit, Write, NotebookEdit
 ---
 

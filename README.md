@@ -168,8 +168,8 @@ Please pin a release tag (`ref`) or a commit (`sha`) rather than tracking `main`
 .claude-plugin/plugin.json        plugin manifest (Claude Code; Copilot fallback)
 .cursor-plugin/plugin.json        Cursor plugin manifest
 gemini-extension.json             Gemini CLI extension manifest
-skills/building-accessible-ui/    the skill
-agents/                           the review agent (Markdown; source of truth)
+plugins/a11y-agent-kit/           the plugin Claude Code installs (marketplace source): skills/, agents/, .claude-plugin/ (manifest, icon)
+skills/, agents/                  symlinks into plugins/a11y-agent-kit/, so Gemini, Cursor and `npx skills` find them at the repo root
 codex/agents/                     generated Codex TOML version of the agent; don't edit
 scripts/sync_plugin.mjs           regenerates codex/agents, checks manifests agree and names stay generic
 evals/                            eval harness for the skill (not needed at runtime)

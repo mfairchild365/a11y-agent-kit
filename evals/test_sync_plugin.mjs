@@ -18,7 +18,7 @@ function tree(edit = () => {}) {
   const root = path.join(tmp, `t${++n}`);
   const put = (rel, text) => { fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true }); fs.writeFileSync(path.join(root, rel), text); };
   put(".claude-plugin/marketplace.json", JSON.stringify({ name: "kit", plugins: [{ name: "kit" }] }));
-  for (const rel of [".claude-plugin/plugin.json", ".cursor-plugin/plugin.json", "gemini-extension.json"]) put(rel, JSON.stringify({ name: "kit", version: "1.0.0" }));
+  for (const rel of [".claude-plugin/plugin.json", "plugins/a11y-agent-kit/.claude-plugin/plugin.json", ".cursor-plugin/plugin.json", "gemini-extension.json"]) put(rel, JSON.stringify({ name: "kit", version: "1.0.0" }));
   put("skills/demo/SKILL.md", "---\nname: demo\ndescription: d\n---\n# Demo\n");
   put("agents/rev.agent.md", "---\nname: rev\ndescription: Reviews: things, with a colon and an accent: café\n---\n\nBody line.\n");
   put("scripts/brand_terms.sha256", hashTerm("Examplecorp") + "\n");
@@ -29,6 +29,7 @@ function tree(edit = () => {}) {
 }
 const run = (root, ...flags) => { const err = []; const out = []; const code = main([...flags, "--root", root], { out: (s) => out.push(s), err: (s) => err.push(s) }); return { code, err: err.join("\n"), out: out.join("\n") }; };
 
+check("a double-quoted description is unquoted and unescaped", (() => { const root = tree(({ put }) => put("agents/q.agent.md", "---\nname: q\ndescription: \"Use when: a \\\"b\\\" \\\\ c\"\n---\nBody\n")); return splitFrontmatter(path.join(root, "agents/q.agent.md")).meta.description === "Use when: a \"b\" \\ c"; })());
 check("frontmatter keeps colons inside values", (() => { const { meta, body } = splitFrontmatter(path.join(tree(), "agents/rev.agent.md")); return meta.description.startsWith("Reviews: things") && body === "Body line.\n"; })());
 check("a valid tree passes --check", run(tree(), "--check").code === 0);
 check("the TOML escapes non-ASCII and keeps the body in a literal string", (() => { const t = fs.readFileSync(path.join(tree(), "codex/agents/rev.toml"), "utf8"); return t.includes("caf\\u00e9") && t.includes("developer_instructions = '''\nBody line.\n'''"); })());
