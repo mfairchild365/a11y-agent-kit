@@ -61,6 +61,7 @@ export function scan(root, terms) {
     if (SKIP_FILES.has(rel) || SKIP_EXT.has(path.extname(rel).toLowerCase())) continue;
     const full = path.join(root, rel);
     if (!fs.existsSync(full)) continue; // tracked but deleted in the working tree
+    if (!fs.statSync(full).isFile()) continue; // a symlink to a directory; its files are scanned where they live
     const lines = fs.readFileSync(full, "utf8").split("\n");
     lines.forEach((line, i) => {
       const words = line.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);

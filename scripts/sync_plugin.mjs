@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 import { loadTerms, scan } from "./check_generic.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const MANIFESTS = [".claude-plugin/plugin.json", ".cursor-plugin/plugin.json", "gemini-extension.json"];
+const MANIFESTS = [".claude-plugin/plugin.json", "plugins/a11y-agent-kit/.claude-plugin/plugin.json", ".cursor-plugin/plugin.json", "gemini-extension.json"];
 
 const readText = (p) => fs.readFileSync(p, "utf8").replace(/\r\n/g, "\n");
 const jsonAscii = (s) => JSON.stringify(s).replace(/[\u0080-￿]/g, (c) => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
@@ -33,7 +33,9 @@ export function splitFrontmatter(file) {
   for (const line of text.slice(4, end).split("\n")) {
     const i = line.indexOf(":");
     const key = i < 0 ? line : line.slice(0, i);
-    meta[key.trim()] = i < 0 ? "" : line.slice(i + 1).trim();
+    let v = i < 0 ? "" : line.slice(i + 1).trim();
+    if (v.length >= 2 && v.startsWith("\"") && v.endsWith("\"")) v = v.slice(1, -1).replace(/\\([\\"])/g, "$1");
+    meta[key.trim()] = v;
   }
   return { meta, body: text.slice(end + 5).trim() + "\n" };
 }

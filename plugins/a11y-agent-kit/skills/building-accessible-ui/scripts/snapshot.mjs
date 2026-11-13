@@ -123,4 +123,4 @@ async function main() {
   process.exit(Object.values(snapshot.scripts).some((s) => s.stopReason === "error" || s.stopReason === "timeout") ? 1 : 0);
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();
+if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) await main();

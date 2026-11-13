@@ -1,6 +1,6 @@
 ---
 name: building-accessible-ui
-description: MUST BE USED for UI work: creating or changing anything users see or operate (pages, forms, dialogs, menus, tables, color and style changes), reviewing UI code, and writing specs, plans, or acceptance criteria for UI features. Invoke this skill first, before writing code or planning the work. It encodes the accessibility (WCAG 2.2 AA) requirements every UI change must satisfy. Do not use for backend, data, build/CI, non-UI tests, or frontend logic that doesn't change what users see or operate.
+description: "MUST BE USED for UI work: creating or changing anything users see or operate (pages, forms, dialogs, menus, tables, color and style changes), reviewing UI code, and writing specs, plans, or acceptance criteria for UI features. Invoke this skill first, before writing code or planning the work. It encodes the accessibility (WCAG 2.2 AA) requirements every UI change must satisfy. Do not use for backend, data, build/CI, non-UI tests, or frontend logic that doesn't change what users see or operate."
 ---
 
 # building-accessible-ui
