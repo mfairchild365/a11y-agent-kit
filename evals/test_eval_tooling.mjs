@@ -9,7 +9,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { findOutputHtml, interpretAxe, mergeExpectation } from "./grade_axe.mjs";
+import { findOutputHtml, interpretAxe, interpretRedundant, mergeExpectation } from "./grade_axe.mjs";
 import { mergeUpstreamExpectations, toExpectations } from "./grade_upstream.mjs";
 import { budgetArgs, costText, parseBudget } from "./lib/claude.mjs";
 import { buildPrompt, parseStream } from "./run_cli_eval.mjs";
@@ -49,6 +49,10 @@ put("ws/eval-c/with_skill/run-1/outputs/x", "a run with no grading.json is skipp
 // ---- grade_axe
 check("grade_axe: no violations passes, and best-practice items are noted but not counted", (() => { const r = interpretAxe(0, JSON.stringify({ wcag: [], bp: [{ id: "region" }] }), ""); return r.passed && r.evidence.includes("region"); })());
 check("grade_axe: violations fail with ids and impact", (() => { const r = interpretAxe(1, JSON.stringify({ wcag: [{ id: "label", impact: "critical" }] }), ""); return !r.passed && r.evidence.includes("label (critical)"); })());
+check("grade_axe: a run with a redundant role fails the redundant-ARIA expectation and names the finding", (() => { const r = interpretRedundant(0, JSON.stringify({ findings: [{ id: "redundant-role@#save", check: "redundant-role" }] }), ""); return !r.passed && r.evidence.includes("redundant-role@#save"); })());
+check("grade_axe: a clean run, and findings from other checks, pass the redundant-ARIA expectation", interpretRedundant(0, JSON.stringify({ findings: [] }), "").passed && interpretRedundant(0, JSON.stringify({ findings: [{ id: "no-h1@document", check: "no-h1" }] }), "").passed);
+check("grade_axe: every redundant check id fails the redundant-ARIA expectation", ["redundant-role", "redundant-aria-attr", "redundant-name", "description-repeats-name", "named-region-with-heading"].every((c) => !interpretRedundant(0, JSON.stringify({ findings: [{ id: `${c}@x`, check: c }] }), "").passed));
+check("grade_axe: a crashed tree-pass is never read as no redundant ARIA", !interpretRedundant(2, "", "Cannot find Playwright").passed && !interpretRedundant(0, "not json", "").passed);
 check("grade_axe: a crashed check fails, it is never read as clean", !interpretAxe(2, "", "boom").passed && !interpretAxe(0, "not json", "").passed);
 put("run1/outputs/b.html", "<p>b</p>"); put("run1/outputs/a.html", "<p>a</p>");
 put("run2/outputs/index.html", "<p>i</p>"); put("run2/outputs/a.html", "<p>a</p>");

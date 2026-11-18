@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Base-layer programmatic grading: run axe_check.mjs against every run's
-// delivered HTML file and merge a single expectation into that run's
+// Base-layer programmatic grading: run axe_check.mjs and the redundant-ARIA checks of tree-pass.mjs (needs a
+// browser) against every run's delivered HTML file and merge one expectation for each into that run's
 // grading.json. Safe to run before or after the LLM grader: both merge into
 // the same file, keyed by expectation text, and each recomputes the summary.
 //
@@ -18,8 +18,11 @@ import { fileURLToPath } from "node:url";
 import { readJson, runDirs, writeJson } from "./lib/runs.mjs";
 
 export const AXE_EXPECTATION_TEXT = "No WCAG (non-best-practice) axe violations in the delivered file";
+export const REDUNDANT_EXPECTATION_TEXT = "No redundant ARIA in the delivered markup (no role equal to the element's own, no aria-* that copies a native attribute, no aria-label or description that repeats the visible text or name)";
+const REDUNDANT_CHECKS = new Set(["redundant-role", "redundant-aria-attr", "redundant-name", "description-repeats-name", "named-region-with-heading"]);
 const here = path.dirname(fileURLToPath(import.meta.url));
 const AXE_CHECK = path.join(here, "axe_check.mjs");
+const TREE_PASS = path.join(here, "..", "skills", "building-accessible-ui", "scripts", "tree-pass.mjs");
 
 export function findOutputHtml(runDir) {
   const outputs = path.join(runDir, "outputs");
@@ -42,6 +45,23 @@ export function interpretAxe(code, stdout, stderr) {
     return { passed: true, evidence };
   }
   return { passed: false, evidence: `${wcag.length} WCAG violation(s): ${wcag.map((v) => `${v.id} (${v.impact})`).join(", ")}` };
+}
+
+// tree-pass.mjs --json, read for its redundant-ARIA findings only. A crash or output that isn't JSON fails, so a
+// missing browser is never read as a clean page.
+export function interpretRedundant(code, stdout, stderr) {
+  if (code !== 0) return { passed: false, evidence: `tree-pass.mjs errored (exit ${code}): ${stderr.trim().slice(0, 500)}` };
+  let data;
+  try { data = JSON.parse(stdout); }
+  catch { return { passed: false, evidence: `tree-pass.mjs produced non-JSON output: ${stdout.trim().slice(0, 500)} ${stderr.trim().slice(0, 500)}` }; }
+  const found = (data.findings || []).filter((f) => REDUNDANT_CHECKS.has(f.check));
+  if (!found.length) return { passed: true, evidence: "tree-pass.mjs found no redundant ARIA." };
+  return { passed: false, evidence: `${found.length} redundant ARIA finding(s): ${found.map((f) => f.id).join(", ")}` };
+}
+
+function runRedundant(htmlPath) {
+  const r = spawnSync(process.execPath, [TREE_PASS, path.resolve(htmlPath), "--json"], { encoding: "utf8", cwd: here, timeout: 60000 });
+  return interpretRedundant(r.status, r.stdout || "", r.stderr || "");
 }
 
 function runAxe(htmlPath) {
@@ -72,12 +92,15 @@ function main(argv) {
     const grading = path.join(runDir, "grading.json");
     if (!html) {
       mergeExpectation(grading, AXE_EXPECTATION_TEXT, false, "No outputs/*.html file found for this run.");
+      mergeExpectation(grading, REDUNDANT_EXPECTATION_TEXT, false, "No outputs/*.html file found for this run.");
       console.log(`[skip: no html] ${runDir}`);
       continue;
     }
     const result = runAxe(html);
     mergeExpectation(grading, AXE_EXPECTATION_TEXT, result.passed, result.evidence);
-    console.log(`[${result.passed ? "PASS" : "FAIL"}] ${runDir}`);
+    const redundant = runRedundant(html);
+    mergeExpectation(grading, REDUNDANT_EXPECTATION_TEXT, redundant.passed, redundant.evidence);
+    console.log(`[${result.passed ? "PASS" : "FAIL"}] ${runDir}${redundant.passed ? "" : " (redundant ARIA)"}`);
     checked++;
   }
   console.log(`\nChecked ${checked}/${runs.length} runs.`);

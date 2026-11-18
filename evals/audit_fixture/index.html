@@ -29,6 +29,7 @@
 
   .dropdown { width: 26rem; border: 0; box-shadow: 0 1px 6px rgba(0,0,0,.25); background: #fff; padding: .75rem; margin-top: .5rem; }
   .dropdown[hidden] { display: none; }
+  .legend { list-style: none; padding: 0; margin: 1rem 0 0; }
   .dropdown ul { list-style: none; padding: 0; margin: 0 0 .5rem; }
   .dropdown li { white-space: nowrap; }
   .dropdown .top { display: flex; justify-content: space-between; align-items: center; }
@@ -112,6 +113,12 @@
   <button type="button" class="add" id="save">Save roster</button>
 
   <button type="button" class="add" id="mute">Mute alerts</button>
+
+  <button type="button" class="add" id="print" role="button">Print roster</button>
+
+  <button type="button" class="add" id="share" aria-label="Share roster">Share roster</button>
+
+  <ul class="legend" role="list"><li>Present: 18</li><li>Absent: 2</li></ul>
 </main>
 
 <script>
