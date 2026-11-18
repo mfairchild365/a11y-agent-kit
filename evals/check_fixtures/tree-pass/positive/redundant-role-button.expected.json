@@ -1,0 +1,4 @@
+{
+  "findings": ["redundant-role@#save"],
+  "stopReason": "complete"
+}
