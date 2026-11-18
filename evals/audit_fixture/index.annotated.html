@@ -38,6 +38,7 @@
   /* DECOY (1.4.11): the panel's edge is a soft shadow only. A panel edge isn't required to contrast. */
   .dropdown { width: 26rem; border: 0; box-shadow: 0 1px 6px rgba(0,0,0,.25); background: #fff; padding: .75rem; margin-top: .5rem; }
   .dropdown[hidden] { display: none; }
+  .legend { list-style: none; padding: 0; margin: 1rem 0 0; }
   .dropdown ul { list-style: none; padding: 0; margin: 0 0 .5rem; }   /* DECOY: list-style:none without role="list" isn't a WCAG failure (Safari drops list semantics by design). Don't log. */
   .dropdown li { white-space: nowrap; }
   .dropdown .top { display: flex; justify-content: space-between; align-items: center; }
@@ -150,6 +151,15 @@
 
   <!-- SEED (best practice): the focused button's inner text changes to show its new state ("Mute alerts" to "Unmute alerts"). Some screen readers don't announce it. Better: aria-pressed. -->
   <button type="button" class="add" id="mute">Mute alerts</button>
+
+  <!-- SEED (best practice): the button has role="button" and is already a <button>. Redundant role. -->
+  <button type="button" class="add" id="print" role="button">Print roster</button>
+
+  <!-- SEED (best practice): aria-label "Share roster" repeats the visible text "Share roster". Redundant name. -->
+  <button type="button" class="add" id="share" aria-label="Share roster">Share roster</button>
+
+  <!-- DECOY: role="list" on a list-style: none list is deliberate (Safari with VoiceOver drops list semantics from unstyled lists). Not redundant. Must not be reported. -->
+  <ul class="legend" role="list"><li>Present: 18</li><li>Absent: 2</li></ul>
 </main>
 
 <script>

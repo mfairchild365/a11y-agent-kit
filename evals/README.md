@@ -12,8 +12,8 @@ skill, not part of the skill itself — nothing here ships when the skill is use
   out-of-scope accessibility issues, to check that the skill reports them rather than
   silently rewriting unrelated code).
 - `grade_behavior.mjs` + `behavior/` — the behavior grading layer: Playwright checks that drive each delivered page for the prompts that have one (toast, tooltip and toggletip, loading status, character count), merged into `grading.json` as `[behavior] ...` expectations (see [Grading has three layers](#grading-has-three-layers)).
-- `axe_check.mjs` + `grade_axe.mjs` — base grading layer: runs axe-core against each run's
-  delivered HTML and merges one pass/fail expectation into its `grading.json`.
+- `axe_check.mjs` + `grade_axe.mjs` — base grading layer: runs axe-core and the redundant-ARIA checks of `tree-pass.mjs` (needs a browser) against each run's
+  delivered HTML and merges one pass/fail expectation for each into its `grading.json`.
 - `fetch-upstream.sh` + `grade_upstream.mjs` — optional second grading layer (see below).
 - `run_cli_eval.mjs` — runs every eval headlessly through `claude -p`, pinned to an exact
   model, with and without the skill installed (see [Running the loop](#running-the-loop)).
@@ -38,6 +38,7 @@ skill, not part of the skill itself — nothing here ships when the skill is use
 - `test_sync_plugin.mjs` — tests `../scripts/sync_plugin.mjs`.
 - `test_shift_tab.mjs`, `test_arrow.mjs`, `test_overlay.mjs` — unit tests for the pure logic behind `shift-tab-walk.mjs` (comparing two walks), `arrow-walk.mjs` (which keys a widget answers and how the trials are judged) and `escape-return.mjs` (how an Escape and the focus afterward are judged). No browser.
 - `test_contrast.mjs` — tests the pure contrast logic behind `focus-contrast.mjs` (ratios, alpha compositing, background stacks, every verdict). No browser.
+- `test_redundant.mjs` — tests `_redundant.mjs`, the pure logic behind the redundant-ARIA checks in `tree-pass.mjs` (implicit roles, what is and isn't redundant, the `role="list"` exception). No browser.
 - `test_verify.mjs`, `test_verify_cli.mjs` — the pure rules behind `verify-fix.mjs` (verdict order, renames, Guard coverage, the plan's `a11y-plan` block, snapshot diffs) and the command with real files.
 - `test_record.mjs` — `verify-fix.mjs --record` and `_record.mjs`: the layout and numbering of a record, ids that can't become paths, runs that are never overwritten, a failed write that leaves nothing behind, nothing recorded for a run that verified nothing, and a real git repository to prove a signed-in record is ignored.
 - `test_detect.mjs` — the rules behind `detect-a11y-tests.mjs` and the folder walk, on real temporary projects.
