@@ -14,6 +14,11 @@
 //   duplicate-landmark-name      1.3.1   two landmarks of one role with the same name (or both unnamed)
 //   multiple-main / no-main      1.3.1   not exactly one main landmark (top document only)
 //   heading-level-skip, no-h1    best practice   the heading outline jumps a level, or has no level 1
+//   redundant-role, redundant-aria-attr, redundant-name, description-repeats-name, named-region-with-heading
+//                                best practice   ARIA that repeats what the markup or the visible text already says
+//                                (_redundant.mjs): a role equal to the element's own, an aria-* that copies a native
+//                                attribute, a label equal to the text, a description equal to the name, a name on a
+//                                region that already has a heading
 //
 // It does not check reading order, contrast or anything visual. A candidate needs a person (or the
 // reviewing agent) to confirm it in the browser before it becomes a finding.
@@ -26,6 +31,8 @@
 
 // --storage-state <file> runs the page signed in, with a Playwright storage state the project already has (see contextOptions in _browser.mjs).
 import { contextOptions, launch, toUrl } from "./_browser.mjs";
+import { collectDescriptions, descriptionRepeatsName, judgeElement } from "./_redundant.mjs";
+import { makeSelector } from "./_tab-walk.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (name, fallback) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : fallback);
@@ -205,6 +212,14 @@ try {
     if (mains > 1) add("multiple-main", "1.3.1", "candidate", `frame-${frameIndex}`, { count: mains });
     if (isTop && mains === 0 && live.length > 2) add("no-main", "1.3.1", "candidate", "document", {});
 
+    // 7: a description that repeats the name
+    for (const n of live.filter((n) => n.description && n.description.value && nameOf(n))) {
+      if (descriptionRepeatsName(nameOf(n), n.description.value)) {
+        const d = await describe(n.backendDOMNodeId);
+        add("description-repeats-name", "best practice", "best-practice-candidate", d ? d.selector : `${roleOf(n)}#${n.nodeId}`, { role: roleOf(n), name: nameOf(n) });
+      }
+    }
+
     // 6: headings
     const levelOf = (n) => { const p = (n.properties || []).find((x) => x.name === "level"); return p ? Number(p.value.value) : 0; };
     const headings = live.filter((n) => roleOf(n) === "heading" && levelOf(n) > 0);
@@ -222,6 +237,16 @@ try {
     try { selectors = await frame.evaluate(ariaHiddenFocusableInFrame); } catch { if (i > 0) skippedFrames.push(frame.url()); }
     for (const s of selectors) add("aria-hidden-focusable", "4.1.2", "candidate", s, { element: s });
   }
+
+  // 8: redundant ARIA read from the DOM (open shadow roots and same-origin frames)
+  try {
+    const { items: described, capped } = await page.evaluate(`(${collectDescriptions.toString()})(${makeSelector.toString()}, ${Math.max(maxNodes, 0)})`);
+    if (capped) stopReason = "node-cap";
+    for (const d of described) for (const f of judgeElement(d)) {
+      const { check, key, ...extra } = f;
+      add(check, "best practice", "best-practice-candidate", key, { element: d.selector, ...extra });
+    }
+  } catch { /* a page that blocks evaluation: the other checks stand */ }
 } finally {
   await browser.close();
 }
