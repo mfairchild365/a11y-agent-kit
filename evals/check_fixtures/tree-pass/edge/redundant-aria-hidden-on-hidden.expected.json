@@ -1,0 +1,4 @@
+{
+  "findings": ["redundant-aria-attr@#h[aria-hidden]"],
+  "stopReason": "complete"
+}

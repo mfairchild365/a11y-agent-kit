@@ -3,9 +3,9 @@
 2. Fix the "+5" hover and open contrast (#3)
 3. Darken the filter input's border to 3:1 (#4)
 
-Critical 6 · Moderate 6 · Minor 1 · Best practice 6 · Needs verification 1
+Critical 6 · Moderate 6 · Minor 1 · Best practice 8 · Needs verification 1
 Checks: axe, keyboard, hover, 320px reflow and contrast run. No screen reader.
-Triage: fix now #1 #3 #4 #5 #6 #8 #10 #11 #14 #17 #19 #20 · ticket #2 #7 #9 #12 #13 #15 #18 · investigate #16
+Triage: fix now #1 #3 #4 #5 #6 #8 #10 #11 #14 #17 #19 #20 #21 #22 · ticket #2 #7 #9 #12 #13 #15 #18 · investigate #16
 Guards: 11 automatable, 1 manual. Ask me to fix these and add the tests.
 
 #1 · Critical · 2.1.1 · Tooltip bubbles (3) — can't be reached by keyboard → make them focusable, named buttons
@@ -26,6 +26,8 @@ Guards: 11 automatable, 1 manual. Ask me to fix these and add the tests.
 #13 · Best practice · Snackbar Undo button — inside the live region, its role isn't announced → move Undo next to the row or into a history
 #14 · Best practice · More students dropdown — named section with a visible heading → remove aria-labelledby
 #15 · Best practice · "Mute alerts" button — inner text change isn't announced by some screen readers → keep the text, use aria-pressed
+#21 · Best practice · "Print roster" button — role="button" on a button → remove the role
+#22 · Best practice · "Share roster" button — aria-label repeats the visible text → remove the aria-label
 #20 · Best practice · "Learn more" link — generic name, context is in the same container → add aria-describedby
 #16 · Needs verification · 4.1.3 · "Add student" announcer — message removed after about 110ms (probe: transient) → test with NVDA and VoiceOver
 

@@ -142,6 +142,26 @@
       "found_by": "static review: the section has aria-labelledby and a visible h3"
     },
     {
+      "id": "redundant-role",
+      "element": ["print roster", "print", "role=\"button\""],
+      "match": ["redundant role", "role=\"button\"", "role button", "already a button", "already has the button role", "print roster"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "found_by": "tree-pass.mjs redundant-role"
+    },
+    {
+      "id": "redundant-name",
+      "element": ["share roster", "share"],
+      "match": ["redundant label", "aria-label repeats", "repeats the visible", "duplicates the visible", "same as the visible", "share roster"],
+      "sc": "best practice",
+      "severity": null,
+      "tier": "best-practice",
+      "instances": 1,
+      "found_by": "tree-pass.mjs redundant-name"
+    },
+    {
       "id": "button-text-state-change",
       "element": ["mute", "alerts", "button"],
       "match": ["inner text", "button text", "mute alerts", "unmute", "text change", "label change", "changes its text"],
@@ -209,6 +229,11 @@
       "match": ["list-style", "role=\"list\"", "list semantics", "lists lose"],
       "correction": "C-013",
       "why": "list-style: none without role=\"list\" isn't a WCAG failure. Safari with VoiceOver drops list semantics from unstyled lists by design. Don't log it."
+    },
+    {
+      "id": "legend-role-list",
+      "match": ["legend", "present: 18", "absent: 2"],
+      "why": "role=\"list\" on a list-style: none list is deliberate (Safari with VoiceOver). It is not redundant. Don't log it."
     },
     {
       "id": "banner-link-context",

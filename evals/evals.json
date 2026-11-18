@@ -217,6 +217,22 @@
         "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
         "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
       ]
+    },
+    {
+      "id": 14,
+      "name": "redundant-aria-temptation",
+      "prompt": "Build a page header with a main navigation (Home, Courses, Reports) and, below it, a toolbar with Save, Print and Share buttons. Make sure screen readers know these are buttons and navigation, and label everything so it is clear to assistive technology. Deliver a single self-contained HTML file (inline CSS/JS, no external resources).",
+      "expected_output": "A single-file HTML page that uses a native <nav> and native <button> elements and adds no ARIA that repeats them: no role=\"navigation\" on the nav, no role=\"button\" on a button, and no aria-label that only repeats a button's visible text. The page may name the nav (it is the page's only navigation, so it needs no name) and may use an aria-label that adds context.",
+      "files": [],
+      "expectations": [
+        "The navigation is a native <nav> element, and the toolbar controls are native <button> elements",
+        "No element has a role attribute equal to its native role (no role=\"navigation\" on <nav>, no role=\"button\" on <button>, no role=\"banner\" on a page-level <header>)",
+        "No button or link has an aria-label (or aria-labelledby) that only repeats its visible text",
+        "No element has an aria-* attribute that copies a native attribute (aria-disabled with disabled, aria-required with required)",
+        "No WCAG (non-best-practice) axe violations in the delivered file",
+        "The response reports having run an automated accessibility check (e.g. axe) against the final delivered file, with a result",
+        "The response does not claim the output is 'fully accessible'; it states what was addressed and any known limitations"
+      ]
     }
   ]
 }

@@ -4,13 +4,13 @@
 
 - **Scope:** `index.html`, its dropdown and its snackbars. Out of scope: nothing else.
 - **Verdict:** No Blockers. Keyboard users can't reach the student bubbles, and a contrast failure and an unnamed button make the overflow dropdown hard to use.
-- **Findings:** Blocker 0, Critical 6, Moderate 6, Minor 1. 6 best practices. 1 more needs verification.
+- **Findings:** Blocker 0, Critical 6, Moderate 6, Minor 1. 8 best practices. 1 more needs verification.
 - **Checks:** axe, keyboard, hover, 320px reflow and contrast run; no screen reader.
 - **Fix first:**
   1. Make the initials bubbles keyboard-reachable and named (#1)
   2. Fix the "+5" hover and open contrast (#3)
   3. Name the close button (#5)
-- **Triage:** Fix now #1 #3 #4 #5 #6 #8 #10 #11 #14 #17 #19 #20 · Ticket #2 #7 #9 #12 #13 #15 #18 · Investigate #16
+- **Triage:** Fix now #1 #3 #4 #5 #6 #8 #10 #11 #14 #17 #19 #20 #21 #22 · Ticket #2 #7 #9 #12 #13 #15 #18 · Investigate #16
 
 ## Findings
 
@@ -304,6 +304,8 @@ The one clickable initials bubble. 1 instance.
 | 13 | Snackbar after "Archive Priya" | An Undo button inside the live region: its role isn't announced and users may not reach it before the timer ends (the timer itself is #7) | Show Undo next to the archived row or in a history list, and keep the toast text-only. | Medium |
 | 14 | More students dropdown | Named section that already has a heading: the panel has `aria-labelledby` and a visible `h3`, so the name is announced twice | Remove `aria-labelledby` and keep the heading. | Medium |
 | 15 | "Mute alerts" button | Its inner text changes to "Unmute alerts" to show state; some screen readers don't announce a text change on a focused button | Keep the text fixed and use `aria-pressed`. | Medium |
+| 21 | "Print roster" button | Redundant role: `role="button"` on a `<button>`, which already has that role | Remove the `role` attribute. | High |
+| 22 | "Share roster" button | `aria-label="Share roster"` repeats the visible text, and will go stale when the copy is edited | Remove the `aria-label` and let the text name the button. | High |
 | 20 | "Learn more" link in the error notice | The message sits in a sibling `<p>` in the same container, so it has context; the name is still generic in a links list | Add `aria-describedby` pointing to the message, or a fuller name. | Medium |
 
 ## Needs verification

@@ -1,0 +1,4 @@
+{
+  "findings": ["named-region-with-heading@#p"],
+  "stopReason": "complete"
+}

@@ -30,6 +30,7 @@ const SUITES = [
   { name: "contrast logic tests", args: [path.join(here, "test_contrast.mjs")] },
   { name: "shift-tab comparison tests", args: [path.join(here, "test_shift_tab.mjs")] },
   { name: "arrow-key logic tests", args: [path.join(here, "test_arrow.mjs")] },
+  { name: "redundant-ARIA logic tests", args: [path.join(here, "test_redundant.mjs")] },
   { name: "overlay logic tests", args: [path.join(here, "test_overlay.mjs")] },
   { name: "audit report checker tests", args: [path.join(here, "test_check_audit_report.mjs")] },
   { name: "compare-reports fixtures", args: [path.join(here, "run_check_fixtures.mjs"), "--check", "compare-reports"] },
