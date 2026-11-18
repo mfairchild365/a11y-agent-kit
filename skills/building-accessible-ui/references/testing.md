@@ -77,7 +77,7 @@ Six scripts in the skill's `scripts/` folder give a review repeatable evidence f
 
 | Script | What it reads | What it reports |
 |---|---|---|
-| `tree-pass.mjs` | The browser's accessibility tree, which every screen reader reads | `interactive-no-name`, `label-not-in-name`, `repeated-link-name`, `repeated-control-name`, `aria-hidden-focusable`, `duplicate-landmark-name`, `multiple-main`, `no-main`, `heading-level-skip`, `no-h1` |
+| `tree-pass.mjs` | The browser's accessibility tree, which every screen reader reads | `interactive-no-name`, `label-not-in-name`, `repeated-link-name`, `repeated-control-name`, `aria-hidden-focusable`, `duplicate-landmark-name`, `multiple-main`, `no-main`, `heading-level-skip`, `no-h1`, and the Best practice candidates `redundant-role`, `redundant-aria-attr`, `redundant-name`, `description-repeats-name`, `named-region-with-heading` |
 | `keyboard-walk.mjs` | Where focus lands as it presses Tab | `focus-no-name`, `unreachable-by-tab`, `focus-cycle-candidate`, `focus-stuck-candidate`, `tabindex-positive` |
 | `focus-contrast.mjs` | What changes on each control on keyboard focus (computed styles), and the background behind it | `focus-indicator-low-contrast`, `focus-indicator-unmeasured`, `focus-indicator-none`, plus the unrounded ratio of every control |
 | `shift-tab-walk.mjs` | The Tab walk, then the Shift+Tab walk on a fresh load, compared | `shift-tab-unreached`, `reached-only-by-shift-tab`, `shift-tab-order-differs`, `shift-tab-trap-candidate` |
